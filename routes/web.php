@@ -1,0 +1,146 @@
+<?php
+
+use App\Http\Controllers\ProfileController;
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\BonCommandeController;
+use App\Http\Controllers\FournisseurController;
+use App\Http\Controllers\BonReceptionController;
+use App\Http\Controllers\EntreeStockController;
+use App\Http\Controllers\SortieStockController;
+use App\Http\Controllers\MouvementStockController;
+
+Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    return redirect()->route('login');
+});
+
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Routes pour les articles
+    Route::resource('articles', ArticleController::class);
+
+    // Routes supplémentaires pour les autres fonctionnalités
+    Route::prefix('articles')->group(function () {
+        // Catégories
+        Route::post('/categories/store', [ArticleController::class, 'storeCategorie'])->name('categories.store');
+        Route::put('/categories/{categorie}', [ArticleController::class, 'updateCategorie'])->name('categories.update');
+        Route::delete('/categories/{categorie}', [ArticleController::class, 'destroyCategorie'])->name('categories.destroy');
+        
+        // Catégories principales
+        Route::post('/categorie-principales/store', [ArticleController::class, 'storeCategoriePrincipale'])->name('categorie-principales.store');
+        Route::put('/categorie-principales/{categoriePrincipale}', [ArticleController::class, 'updateCategoriePrincipale'])->name('categorie-principales.update');
+        Route::delete('/categorie-principales/{categoriePrincipale}', [ArticleController::class, 'destroyCategoriePrincipale'])->name('categorie-principales.destroy');
+        
+        // Natures de prestation
+        Route::post('/nature-prestations/store', [ArticleController::class, 'storeNaturePrestation'])->name('nature-prestations.store');
+        Route::put('/nature-prestations/{naturePrestation}', [ArticleController::class, 'updateNaturePrestation'])->name('nature-prestations.update');
+        Route::delete('/nature-prestations/{naturePrestation}', [ArticleController::class, 'destroyNaturePrestation'])->name('nature-prestations.destroy');
+    });
+
+    // Module Achats
+    Route::prefix('achats')->group(function () {
+        // Bons de commande
+        Route::resource('bon-commandes', BonCommandeController::class);
+        Route::post('bon-commandes/{bonCommande}/statut', [BonCommandeController::class, 'updateStatut'])->name('bon-commandes.statut');
+        Route::post('bon-commandes/fournisseurs/store', [BonCommandeController::class, 'storeFournisseur'])->name('bon-commandes.fournisseurs.store');
+        Route::get('bon-commandes/{bonCommande}/pdf', [BonCommandeController::class, 'generatePdf'])->name('bon-commandes.pdf');
+        Route::get('/bon-commandes/{bonCommande}/debug', [BonCommandeController::class, 'debugBonCommande'])->name('bon-commandes.debug');
+
+        // Bons de réception - TOUTES LES ROUTES ICI
+
+// Bons de réception - TOUTES LES ROUTES ICI
+Route::get('bon-receptions', [BonReceptionController::class, 'index'])->name('bon-receptions.index');
+Route::get('bon-receptions/create', [BonReceptionController::class, 'create'])->name('bon-receptions.create');
+Route::get('bon-receptions/create/{bonCommande}', [BonReceptionController::class, 'create'])->name('bon-receptions.create-from-commande');
+Route::post('bon-receptions', [BonReceptionController::class, 'store'])->name('bon-receptions.store');
+Route::get('bon-receptions/{bonReception}', [BonReceptionController::class, 'show'])->name('bon-receptions.show');
+Route::get('bon-receptions/{bonReception}/edit', [BonReceptionController::class, 'edit'])->name('bon-receptions.edit');
+Route::put('bon-receptions/{bonReception}', [BonReceptionController::class, 'update'])->name('bon-receptions.update');
+Route::delete('bon-receptions/{bonReception}', [BonReceptionController::class, 'destroy'])->name('bon-receptions.destroy');
+
+// Route pour récupérer les détails d'une commande en AJAX
+Route::get('bon-receptions/commande-details/{id}', [BonReceptionController::class, 'getCommandeDetails'])
+    ->name('bon-receptions.commande-details');
+
+// Routes pour les documents
+Route::get('/bon-receptions/{bon_reception}/download-document/{type}', 
+    [BonReceptionController::class, 'downloadDocument'])
+    ->name('bon-receptions.download-document');
+    
+Route::get('/bon-receptions/{bon_reception}/document-urls', 
+    [BonReceptionController::class, 'getDocumentUrls'])
+    ->name('bon-receptions.document-urls');
+
+
+    // Routes pour les bons de réception
+Route::get('/bon-receptions/{bonReception}/details', [BonReceptionController::class, 'showDetails'])
+    ->name('bon-receptions.show-details');
+Route::get('/bon-receptions/{bonReception}/download-bon-livraison', [BonReceptionController::class, 'downloadBonLivraison'])
+    ->name('bon-receptions.download-bon-livraison');
+Route::get('/bon-receptions/{bonReception}/download-facture', [BonReceptionController::class, 'downloadFacture'])
+    ->name('bon-receptions.download-facture');
+Route::get('/bon-receptions/{bonReception}/download-pdf', [BonReceptionController::class, 'downloadPdf'])
+    ->name('bon-receptions.download-pdf');
+Route::get('/bon-receptions/{bonReception}/preview-pdf', [BonReceptionController::class, 'previewPdf'])
+    ->name('bon-receptions.preview-pdf');
+
+        // Fournisseurs
+        Route::get('fournisseurs', [FournisseurController::class, 'index'])->name('fournisseurs.index');
+        Route::post('fournisseurs', [FournisseurController::class, 'store'])->name('fournisseurs.store');
+        Route::get('fournisseurs/{fournisseur}', [FournisseurController::class, 'show'])->name('fournisseurs.show');
+        Route::put('fournisseurs/{fournisseur}', [FournisseurController::class, 'update'])->name('fournisseurs.update');
+        Route::delete('fournisseurs/{fournisseur}', [FournisseurController::class, 'destroy'])->name('fournisseurs.destroy');
+        Route::patch('fournisseurs/{fournisseur}/toggle-statut', [FournisseurController::class, 'toggleStatut'])->name('fournisseurs.toggle-statut');
+        Route::get('fournisseurs/export', [FournisseurController::class, 'export'])->name('fournisseurs.export');
+        Route::get('fournisseurs/stats', [FournisseurController::class, 'stats'])->name('fournisseurs.stats');
+    });
+
+    // Routes pour la Gestion du Stock
+    Route::prefix('stock')->group(function () {
+        
+        // Routes des Entrées en Stock
+        Route::get('/entrees', [EntreeStockController::class, 'index'])->name('entree-stocks.index');
+        Route::get('/entrees/create', [EntreeStockController::class, 'create'])->name('entree-stocks.create');
+        Route::post('/entrees', [EntreeStockController::class, 'store'])->name('entree-stocks.store');
+        Route::get('/entrees/{entreeStock}', [EntreeStockController::class, 'show'])->name('entree-stocks.show');
+        Route::get('/entrees/{entreeStock}/edit', [EntreeStockController::class, 'edit'])->name('entree-stocks.edit');
+        Route::put('/entrees/{entreeStock}', [EntreeStockController::class, 'update'])->name('entree-stocks.update');
+        Route::delete('/entrees/{entreeStock}', [EntreeStockController::class, 'destroy'])->name('entree-stocks.destroy');
+        Route::get('/entrees/{entreeStock}/download-pdf', [EntreeStockController::class, 'downloadPdf'])->name('entree-stocks.download-pdf');
+        
+        // Routes des Sorties de Stock
+        Route::get('/sorties', [SortieStockController::class, 'index'])->name('sortie-stocks.index');
+        Route::get('/sorties/create', [SortieStockController::class, 'create'])->name('sortie-stocks.create');
+        Route::post('/sorties', [SortieStockController::class, 'store'])->name('sortie-stocks.store');
+        Route::get('/sorties/{sortieStock}', [SortieStockController::class, 'show'])->name('sortie-stocks.show');
+        Route::get('/sorties/{sortieStock}/edit', [SortieStockController::class, 'edit'])->name('sortie-stocks.edit');
+        Route::put('/sorties/{sortieStock}', [SortieStockController::class, 'update'])->name('sortie-stocks.update');
+        Route::delete('/sorties/{sortieStock}', [SortieStockController::class, 'destroy'])->name('sortie-stocks.destroy');
+        Route::get('/sorties/{sortieStock}/download-pdf', [SortieStockController::class, 'downloadPdf'])->name('sortie-stocks.download-pdf');
+
+        
+        
+        // Routes des Mouvements de Stock
+        Route::get('/mouvements', [MouvementStockController::class, 'index'])->name('mouvement-stocks.index');
+        Route::get('/mouvements/export', [MouvementStockController::class, 'export'])->name('mouvement-stocks.export');
+        Route::get('/mouvements/stats', [MouvementStockController::class, 'stats'])->name('mouvement-stocks.stats');
+        Route::get('/mouvements/article/{article}', [MouvementStockController::class, 'byArticle'])->name('mouvement-stocks.by-article');
+    });
+});
+
+require __DIR__.'/auth.php';
