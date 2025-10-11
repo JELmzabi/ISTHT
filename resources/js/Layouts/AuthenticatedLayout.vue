@@ -290,12 +290,7 @@
             <main class="flex-1 p-4 md:p-6 lg:p-8 transition-all duration-300">
                 <!-- En-tête de page dynamique -->
                 <div class="mb-6">
-                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                        {{ getCurrentPageTitle() }}
-                    </h1>
-                    <p class="text-gray-600 text-sm md:text-base">
-                        {{ getCurrentPageDescription() }}
-                    </p>
+                   
                 </div>
 
                 <!-- Contenu de la page -->

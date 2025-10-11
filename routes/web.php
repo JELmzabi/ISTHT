@@ -31,6 +31,14 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+
+    // Route API pour les détails des commandes
+    Route::get('api/commandes/{id}/details', [BonReceptionController::class, 'getCommandeDetails'])
+        ->name('bon-receptions.commande-details');
+    
+    // Route pour les statistiques
+    Route::get('api/bon-receptions/stats', [BonReceptionController::class, 'stats'])
+        ->name('bon-receptions.stats');
     // Routes pour les articles
     Route::resource('articles', ArticleController::class);
 
@@ -61,44 +69,50 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('bon-commandes/{bonCommande}/pdf', [BonCommandeController::class, 'generatePdf'])->name('bon-commandes.pdf');
         Route::get('/bon-commandes/{bonCommande}/debug', [BonCommandeController::class, 'debugBonCommande'])->name('bon-commandes.debug');
 
-        // Bons de réception - TOUTES LES ROUTES ICI
-
-// Bons de réception - TOUTES LES ROUTES ICI
-Route::get('bon-receptions', [BonReceptionController::class, 'index'])->name('bon-receptions.index');
-Route::get('bon-receptions/create', [BonReceptionController::class, 'create'])->name('bon-receptions.create');
-Route::get('bon-receptions/create/{bonCommande}', [BonReceptionController::class, 'create'])->name('bon-receptions.create-from-commande');
-Route::post('bon-receptions', [BonReceptionController::class, 'store'])->name('bon-receptions.store');
-Route::get('bon-receptions/{bonReception}', [BonReceptionController::class, 'show'])->name('bon-receptions.show');
-Route::get('bon-receptions/{bonReception}/edit', [BonReceptionController::class, 'edit'])->name('bon-receptions.edit');
-Route::put('bon-receptions/{bonReception}', [BonReceptionController::class, 'update'])->name('bon-receptions.update');
-Route::delete('bon-receptions/{bonReception}', [BonReceptionController::class, 'destroy'])->name('bon-receptions.destroy');
-
-// Route pour récupérer les détails d'une commande en AJAX
+      // Routes pour les bons de réception
+Route::resource('bon-receptions', BonReceptionController::class);
+Route::get('bon-receptions/create/{bonCommande}', [BonReceptionController::class, 'create'])
+    ->name('bon-receptions.create-from-commande');
+Route::get('bon-receptions/{bonReception}/details', [BonReceptionController::class, 'showDetails'])
+    ->name('bon-receptions.show-details');
+Route::get('bon-receptions/{bonReception}/download-pdf', [BonReceptionController::class, 'downloadPdf'])
+    ->name('bon-receptions.download-pdf');
+Route::get('bon-receptions/{bonReception}/download-bon-livraison', [BonReceptionController::class, 'downloadBonLivraison'])
+    ->name('bon-receptions.download-bon-livraison');
+Route::get('bon-receptions/{bonReception}/download-facture', [BonReceptionController::class, 'downloadFacture'])
+    ->name('bon-receptions.download-facture');
 Route::get('bon-receptions/commande-details/{id}', [BonReceptionController::class, 'getCommandeDetails'])
     ->name('bon-receptions.commande-details');
 
-// Routes pour les documents
-Route::get('/bon-receptions/{bon_reception}/download-document/{type}', 
-    [BonReceptionController::class, 'downloadDocument'])
-    ->name('bon-receptions.download-document');
     
-Route::get('/bon-receptions/{bon_reception}/document-urls', 
-    [BonReceptionController::class, 'getDocumentUrls'])
-    ->name('bon-receptions.document-urls');
 
+    Route::get('/debug-commande/{id}', function ($id) {
+    $commande = \App\Models\BonCommande::with(['articles.article'])->find($id);
+    
+    if (!$commande) {
+        return response()->json(['error' => 'Commande non trouvée'], 404);
+    }
 
-    // Routes pour les bons de réception
-Route::get('/bon-receptions/{bonReception}/details', [BonReceptionController::class, 'showDetails'])
-    ->name('bon-receptions.show-details');
-Route::get('/bon-receptions/{bonReception}/download-bon-livraison', [BonReceptionController::class, 'downloadBonLivraison'])
-    ->name('bon-receptions.download-bon-livraison');
-Route::get('/bon-receptions/{bonReception}/download-facture', [BonReceptionController::class, 'downloadFacture'])
-    ->name('bon-receptions.download-facture');
-Route::get('/bon-receptions/{bonReception}/download-pdf', [BonReceptionController::class, 'downloadPdf'])
-    ->name('bon-receptions.download-pdf');
-Route::get('/bon-receptions/{bonReception}/preview-pdf', [BonReceptionController::class, 'previewPdf'])
-    ->name('bon-receptions.preview-pdf');
+    $debugData = [
+        'commande_id' => $commande->id,
+        'reference' => $commande->reference,
+        'articles_count' => $commande->articles->count(),
+        'articles' => $commande->articles->map(function ($article) {
+            return [
+                'article_id' => $article->article_id,
+                'designation' => $article->article->designation,
+                'quantite_commandee' => $article->quantite_commandee,
+                'prix_unitaire_ht' => $article->prix_unitaire_ht,
+                'taux_tva' => $article->taux_tva,
+                'montant_ht' => $article->montant_ht,
+                'montant_tva' => $article->montant_tva,
+                'montant_ttc' => $article->montant_ttc,
+            ];
+        })
+    ];
 
+    return response()->json($debugData);
+});
         // Fournisseurs
         Route::get('fournisseurs', [FournisseurController::class, 'index'])->name('fournisseurs.index');
         Route::post('fournisseurs', [FournisseurController::class, 'store'])->name('fournisseurs.store');
@@ -112,7 +126,6 @@ Route::get('/bon-receptions/{bonReception}/preview-pdf', [BonReceptionController
 
     // Routes pour la Gestion du Stock
     Route::prefix('stock')->group(function () {
-        
         // Routes des Entrées en Stock
         Route::get('/entrees', [EntreeStockController::class, 'index'])->name('entree-stocks.index');
         Route::get('/entrees/create', [EntreeStockController::class, 'create'])->name('entree-stocks.create');
@@ -122,7 +135,11 @@ Route::get('/bon-receptions/{bonReception}/preview-pdf', [BonReceptionController
         Route::put('/entrees/{entreeStock}', [EntreeStockController::class, 'update'])->name('entree-stocks.update');
         Route::delete('/entrees/{entreeStock}', [EntreeStockController::class, 'destroy'])->name('entree-stocks.destroy');
         Route::get('/entrees/{entreeStock}/download-pdf', [EntreeStockController::class, 'downloadPdf'])->name('entree-stocks.download-pdf');
-        
+        // Routes pour la gestion des statuts des entrées de stock
+Route::post('/entrees/{entreeStock}/valider', [EntreeStockController::class, 'valider'])
+    ->name('entree-stocks.valider');
+Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'annuler'])
+    ->name('entree-stocks.annuler');
         // Routes des Sorties de Stock
         Route::get('/sorties', [SortieStockController::class, 'index'])->name('sortie-stocks.index');
         Route::get('/sorties/create', [SortieStockController::class, 'create'])->name('sortie-stocks.create');
@@ -133,8 +150,6 @@ Route::get('/bon-receptions/{bonReception}/preview-pdf', [BonReceptionController
         Route::delete('/sorties/{sortieStock}', [SortieStockController::class, 'destroy'])->name('sortie-stocks.destroy');
         Route::get('/sorties/{sortieStock}/download-pdf', [SortieStockController::class, 'downloadPdf'])->name('sortie-stocks.download-pdf');
 
-        
-        
         // Routes des Mouvements de Stock
         Route::get('/mouvements', [MouvementStockController::class, 'index'])->name('mouvement-stocks.index');
         Route::get('/mouvements/export', [MouvementStockController::class, 'export'])->name('mouvement-stocks.export');

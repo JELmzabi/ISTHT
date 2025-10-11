@@ -312,25 +312,51 @@ public function index(Request $request)
 
     /**
      * Annuler une entrée en stock
-     */
-    public function annuler(EntreeStock $entreeStock)
-    {
-        try {
-            DB::beginTransaction();
+     */// Dans app/Http/Controllers/EntreeStockController.php
 
-            $entreeStock->update([
-                'statut' => EntreeStock::STATUT_ANNULE
-            ]);
-
-            DB::commit();
-
-            return redirect()->back()->with('success', 'Entrée en stock annulée avec succès');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
+/**
+ * Valider une entrée de stock
+ */
+public function valider(EntreeStock $entreeStock)
+{
+    try {
+        if (!$entreeStock->peut_etre_valide) {
             return redirect()->back()->withErrors([
-                'error' => 'Erreur lors de l\'annulation: ' . $e->getMessage()
+                'error' => 'Cette entrée de stock ne peut pas être validée.'
             ]);
         }
+
+        $entreeStock->valider();
+
+        return redirect()->back()->with('success', 'Entrée de stock validée avec succès. Les stocks ont été mis à jour.');
+
+    } catch (\Exception $e) {
+        return redirect()->back()->withErrors([
+            'error' => 'Erreur lors de la validation: ' . $e->getMessage()
+        ]);
     }
+}
+
+/**
+ * Annuler une entrée de stock
+ */
+public function annuler(EntreeStock $entreeStock)
+{
+    try {
+        if (!$entreeStock->peut_etre_annule) {
+            return redirect()->back()->withErrors([
+                'error' => 'Cette entrée de stock ne peut pas être annulée.'
+            ]);
+        }
+
+        $entreeStock->annuler();
+
+        return redirect()->back()->with('success', 'Entrée de stock annulée avec succès.');
+
+    } catch (\Exception $e) {
+        return redirect()->back()->withErrors([
+            'error' => 'Erreur lors de l\'annulation: ' . $e->getMessage()
+        ]);
+    }
+}
 }

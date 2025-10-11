@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class BonReception extends Model
 {
@@ -53,25 +55,22 @@ class BonReception extends Model
         return $this->belongsTo(Fournisseur::class);
     }
 
-  
+    public function lignesReception(): HasMany
+    {
+        return $this->hasMany(LigneReception::class);
+    }
 
-   
-public function lignesReception(): HasMany
-{
-    return $this->hasMany(LigneReception::class);
-}
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    // Accessor pour le numéro d'affichage
-    public function getNumeroAffichageAttribute(): string
+    public function responsableReception(): BelongsTo
     {
-        return 'BR-' . str_pad($this->numero, 6, '0', STR_PAD_LEFT);
+        return $this->belongsTo(User::class, 'responsable_reception_id');
     }
 
-
+  
     // Méthode pour calculer le total
     public function getTotalAttribute(): float
     {
@@ -84,7 +83,6 @@ public function lignesReception(): HasMany
         return $this->lignesReception->sum('montant_tva');
     }
 
-    
     // Méthode pour uploader le fichier bon de livraison
     public function uploadFichierBonlivraison($file): string
     {
@@ -167,18 +165,9 @@ public function lignesReception(): HasMany
         return $query->whereNotNull('fichier_facture');
     }
 
-    // Méthode pour générer le numéro automatique
-    public static function genererNumero(): string
-    {
-        $lastNumber = self::withTrashed()->max('numero');
-        return ($lastNumber ? $lastNumber + 1 : 1);
-    }
-   public function responsableReception(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'responsable_reception_id');
-    }
 
-      // Accessor pour l'URL du fichier bon de livraison
+
+    // Accessor pour l'URL du fichier bon de livraison
     public function getFichierBonlivraisonUrlAttribute()
     {
         if ($this->fichier_bonlivraison && Storage::disk('public')->exists($this->fichier_bonlivraison)) {
@@ -206,5 +195,94 @@ public function lignesReception(): HasMany
     public function hasFichierFacture(): bool
     {
         return !empty($this->fichier_facture) && Storage::disk('public')->exists($this->fichier_facture);
+    }
+
+    // Relation avec les mouvements de stock
+    public function mouvementsStock(): HasMany
+    {
+        return $this->hasMany(MouvementStock::class, 'document_id')
+            ->where('document_type', self::class);
+    }
+
+    // Méthode pour créer automatiquement une entrée de stock
+    public function creerEntreeStockAutomatique()
+    {
+        try {
+            DB::transaction(function () {
+                // Vérifier si une entrée de stock existe déjà
+                $existingEntree = EntreeStock::where('bon_reception_id', $this->id)->first();
+                
+                if ($existingEntree) {
+                    Log::info("Une entrée de stock existe déjà pour ce bon de réception: {$this->id}");
+                    return;
+                }
+
+                // Créer l'entrée de stock
+                $entreeStock = EntreeStock::create([
+                    'numero' => EntreeStock::genererNumero(),
+                    'bon_reception_id' => $this->id,
+                    'fournisseur_id' => $this->fournisseur_id,
+                    'date_entree' => $this->date_reception,
+                    'statut' => 'attente_validation',
+                    'notes' => $this->notes . "\n\nCréé automatiquement à partir du bon de réception " . $this->numero_affichage,
+                    'created_by' => $this->created_by,
+                ]);
+
+                // Créer les lignes d'entrée de stock à partir des lignes de réception
+                foreach ($this->lignesReception as $ligneReception) {
+                    LigneEntreeStock::create([
+                        'entree_stock_id' => $entreeStock->id,
+                        'article_id' => $ligneReception->article_id,
+                        'quantite' => $ligneReception->quantite_receptionnee,
+                        'prix_unitaire' => $ligneReception->prix_unitaire,
+                        'taux_tva' => $ligneReception->taux_tva,
+                        'montant_tva' => $ligneReception->montant_tva,
+                        'prix_total' => $ligneReception->prix_total,
+                    ]);
+                }
+
+                Log::info("Entrée de stock créée automatiquement pour le bon de réception: {$this->id}");
+            });
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Erreur création entrée stock automatique: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Créer automatiquement une entrée de stock après la création d'un bon de réception
+        static::created(function ($bonReception) {
+            if ($bonReception->statut === BonReception::STATUT_VALIDE) {
+                $bonReception->creerEntreeStockAutomatique();
+            }
+        });
+
+        // Mettre à jour l'entrée de stock si le bon de réception est modifié
+        static::updated(function ($bonReception) {
+            if ($bonReception->isDirty('statut') && $bonReception->statut === BonReception::STATUT_VALIDE) {
+                $bonReception->creerEntreeStockAutomatique();
+            }
+        });
+    }
+
+
+
+        public static function genererNumero(): int // Retourne un int au lieu de string
+    {
+        $lastNumber = (int) self::withTrashed()->max('numero');
+        return $lastNumber + 1;
+    }
+
+    // Accessor pour le numéro d'affichage - CORRIGÉ
+    public function getNumeroAffichageAttribute(): string
+    {
+        // CORRECTION : Vérifier que $this->numero est bien un nombre
+        $numero = is_numeric($this->numero) ? $this->numero : 0;
+        return 'BR-' . str_pad($numero, 6, '0', STR_PAD_LEFT);
     }
 }

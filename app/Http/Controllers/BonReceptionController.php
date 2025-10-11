@@ -10,12 +10,15 @@ use App\Models\MouvementStock;
 use App\Models\Article;
 use App\Models\User;
 use App\Models\Fournisseur; // Ajouter si nécessaire
+use App\Models\BonCommandeArticle; // AJOUTER CET IMPORT
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
+
+
 
 class BonReceptionController extends Controller
 {
@@ -139,445 +142,7 @@ class BonReceptionController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Request $request)
-    {
-        try {
-            $bonCommande = null;
-            
-            if ($request->has('bon_commande')) {
-                $bonCommande = BonCommande::with(['fournisseur', 'articles.article'])
-                    ->findOrFail($request->bon_commande);
-                
-                // Préparer les données pour le formulaire
-                $bonCommande->articles->each(function ($ligneCommande) use ($bonCommande) {
-                    $quantiteRecue = LigneReception::whereHas('bonReception', function($query) use ($bonCommande) {
-                            $query->where('bon_commande_id', $bonCommande->id);
-                        })
-                        ->where('article_id', $ligneCommande->article_id)
-                        ->sum('quantite_receptionnee');
-                    
-                    $ligneCommande->quantite_deja_recue = $quantiteRecue;
-                    $ligneCommande->reste_a_recevoir = max(0, $ligneCommande->quantite_commandee - $quantiteRecue);
-                    $ligneCommande->quantite_max_receptionnable = $ligneCommande->reste_a_recevoir;
-                });
-            }
-
-            // SIMPLIFIÉ : Récupérer toutes les commandes avec statut 'attente_livraison' ou 'livre_partiellement'
-            $bonCommandes = BonCommande::whereIn('statut', ['attente_livraison', 'livre_partiellement'])
-                ->with(['fournisseur', 'articles.article'])
-                ->get()
-                ->map(function ($commande) {
-                    // Calculer les statistiques de réception
-                    $commande->quantite_totale_commandee = $commande->articles->sum('quantite_commandee');
-                    $quantiteTotaleRecue = 0;
-                    
-                    foreach ($commande->articles as $ligne) {
-                        $quantiteRecue = LigneReception::whereHas('bonReception', function($query) use ($commande) {
-                                $query->where('bon_commande_id', $commande->id);
-                            })
-                            ->where('article_id', $ligne->article_id)
-                            ->sum('quantite_receptionnee');
-                        
-                        $ligne->quantite_deja_recue = $quantiteRecue;
-                        $ligne->reste_a_recevoir = max(0, $ligne->quantite_commandee - $quantiteRecue);
-                        $quantiteTotaleRecue += $quantiteRecue;
-                    }
-                    
-                    $commande->quantite_totale_recue = $quantiteTotaleRecue;
-                    $commande->reste_a_recevoir = $commande->quantite_totale_commandee - $quantiteTotaleRecue;
-                    $commande->pourcentage_recu = $commande->quantite_totale_commandee > 0 ? 
-                        round(($quantiteTotaleRecue / $commande->quantite_totale_commandee) * 100, 2) : 0;
-                    
-                    return $commande;
-                });
-
-            // DEBUG : Log pour voir les commandes récupérées
-            Log::info('Commandes disponibles pour réception dans create', [
-                'total_commandes' => $bonCommandes->count(),
-                'commandes' => $bonCommandes->map(function($commande) {
-                    return [
-                        'id' => $commande->id,
-                        'reference' => $commande->reference,
-                        'statut' => $commande->statut,
-                        'reste_a_recevoir' => $commande->reste_a_recevoir,
-                        'articles_count' => $commande->articles->count(),
-                        'fournisseur' => $commande->fournisseur?->raison_sociale
-                    ];
-                })
-            ]);
-
-           $magasiniers = User::where('role', 'MAGASINIER')
-    ->where('status', 1)
-    ->orderBy('name')
-    ->get(['id', 'name', 'email']);
-
-
-            return inertia('Achats/BonReceptions/Create', [
-                'bonCommandes' => $bonCommandes,
-                'selectedBonCommande' => $bonCommande,
-                'magasiniers' => $magasiniers,
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Error in BonReceptionController@create: ' . $e->getMessage());
-            
-            return redirect()->route('bon-receptions.index')
-                ->with('error', 'Erreur lors du chargement du formulaire: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-
-
-    public function store(Request $request)
-{
-    try {
-        DB::beginTransaction();
-
-        $validated = $request->validate([
-            'bon_commande_id' => 'required|exists:bon_commandes,id',
-            'date_reception' => 'required|date',
-            'responsable_reception_id' => 'required|exists:users,id',
-            'fichier_bonlivraison' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'fichier_facture' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'lignes_reception' => 'required|array|min:1',
-            'lignes_reception.*.article_id' => 'required|exists:articles,id',
-            'lignes_reception.*.quantite_receptionnee' => 'required|numeric|min:0',
-            'notes' => 'nullable|string'
-        ]);
-
-        $bonCommande = BonCommande::with(['fournisseur', 'articles.article'])->find($validated['bon_commande_id']);
-
-        // Vérifier qu'il y a au moins une ligne avec quantité > 0
-        $hasQuantitePositive = collect($validated['lignes_reception'])->contains(function ($ligne) {
-            return $ligne['quantite_receptionnee'] > 0;
-        });
-
-        if (!$hasQuantitePositive) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['quantites' => 'Au moins une quantité doit être supérieure à 0']);
-        }
-
-        // Vérifier les quantités par rapport au reste à recevoir
-        $quantitesValides = true;
-        $messagesErreur = [];
-
-        foreach ($validated['lignes_reception'] as $index => $ligneReception) {
-            if ($ligneReception['quantite_receptionnee'] > 0) {
-                // Calculer le reste à recevoir pour cet article
-                $quantiteDejaRecue = LigneReception::whereHas('bonReception', function($query) use ($bonCommande) {
-                        $query->where('bon_commande_id', $bonCommande->id);
-                    })
-                    ->where('article_id', $ligneReception['article_id'])
-                    ->sum('quantite_receptionnee');
-                
-                $ligneCommande = $bonCommande->articles->firstWhere('article_id', $ligneReception['article_id']);
-                $resteARecevoir = $ligneCommande ? max(0, $ligneCommande->quantite_commandee - $quantiteDejaRecue) : 0;
-                
-                if ($ligneReception['quantite_receptionnee'] > $resteARecevoir) {
-                    $quantitesValides = false;
-                    $article = Article::find($ligneReception['article_id']);
-                    $messagesErreur[] = "{$article->designation} : quantité maximale = {$resteARecevoir}";
-                }
-            }
-        }
-
-        if (!$quantitesValides) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['quantites' => 'Quantités invalides: ' . implode(', ', $messagesErreur)]);
-        }
-
-        // Déterminer le type de réception
-        $typeReception = $this->determinerTypeReception($bonCommande, $validated['lignes_reception']);
-
-        // Créer le bon de réception
-        $bonReception = BonReception::create([
-            'numero' => BonReception::genererNumero(),
-            'bon_commande_id' => $validated['bon_commande_id'],
-            'fournisseur_id' => $bonCommande->fournisseur_id,
-            'date_reception' => $validated['date_reception'],
-            'type_reception' => $typeReception,
-            'statut' => BonReception::STATUT_VALIDE,
-            'responsable_reception_id' => $validated['responsable_reception_id'],
-            'notes' => $validated['notes'] ?? null,
-            'created_by' => Auth::id(),
-        ]);
-
-        // Gestion des fichiers
-        if ($request->hasFile('fichier_bonlivraison')) {
-            $file = $request->file('fichier_bonlivraison');
-            $filename = 'BL_' . time() . '_' . $bonReception->id . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('bon-receptions/bon-livraison', $filename, 'public');
-            $bonReception->update(['fichier_bonlivraison' => $path]);
-        }
-
-        if ($request->hasFile('fichier_facture')) {
-            $file = $request->file('fichier_facture');
-            $filename = 'FACT_' . time() . '_' . $bonReception->id . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('bon-receptions/factures', $filename, 'public');
-            $bonReception->update(['fichier_facture' => $path]);
-        }
-
-        // Créer les lignes de réception pour TOUS les articles avec quantité > 0
-        $totalQuantiteReceptionnee = 0;
-        $lignesCreees = 0;
-
-        foreach ($validated['lignes_reception'] as $ligneData) {
-            if ($ligneData['quantite_receptionnee'] > 0) {
-                // Trouver la ligne de commande correspondante pour récupérer le prix et TVA
-                $ligneCommande = $bonCommande->articles->firstWhere('article_id', $ligneData['article_id']);
-                
-                if ($ligneCommande) {
-                    // Calculer les montants
-                    $prixUnitaire = $ligneCommande->prix_unitaire_ht;
-                    $tauxTva = $ligneCommande->taux_tva;
-                    $quantite = $ligneData['quantite_receptionnee'];
-                    
-                    $prixTotalHt = $quantite * $prixUnitaire;
-                    $montantTva = $prixTotalHt * ($tauxTva / 100);
-                    $prixTotalTtc = $prixTotalHt + $montantTva;
-                    
-                    LigneReception::create([
-                        'bon_reception_id' => $bonReception->id,
-                        'article_id' => $ligneData['article_id'],
-                        'quantite_receptionnee' => $quantite,
-                        'prix_unitaire' => $prixUnitaire,
-                        'taux_tva' => $tauxTva,
-                        'montant_tva' => $montantTva,
-                        'prix_total' => $prixTotalTtc,
-                    ]);
-
-                    $totalQuantiteReceptionnee += $quantite;
-                    $lignesCreees++;
-                }
-            }
-        }
-
-        // Mettre à jour le statut de la commande
-        $this->mettreAJourStatutCommande($bonCommande);
-
-        DB::commit();
-
-        Log::info('Bon réception created successfully', [
-            'id' => $bonReception->id,
-            'type' => $typeReception,
-            'quantite_totale' => $totalQuantiteReceptionnee,
-            'lignes_creees' => $lignesCreees
-        ]);
-
-        return redirect()->route('bon-receptions.index')
-            ->with('success', 'Bon de réception créé avec succès - ' . $lignesCreees . ' article(s) réceptionné(s) - Type: ' . 
-                ($typeReception === BonReception::TYPE_COMPLET ? 'Complet' : 'Partiel'));
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Error creating bon reception: ' . $e->getMessage());
-        
-        return redirect()->back()
-            ->withInput()
-            ->withErrors(['error' => 'Erreur lors de la création: ' . $e->getMessage()]);
-    }
-}
-/**
- * Pré-remplir tous les articles avec les quantités restantes
- */
-public function prefillAllArticles($bonCommandeId)
-{
-    try {
-        $bonCommande = BonCommande::with(['articles.article'])
-            ->findOrFail($bonCommandeId);
-
-        $articlesARecevoir = [];
-
-        foreach ($bonCommande->articles as $ligneCommande) {
-            // Calculer la quantité déjà reçue
-            $quantiteDejaRecue = LigneReception::whereHas('bonReception', function($query) use ($bonCommande) {
-                    $query->where('bon_commande_id', $bonCommande->id);
-                })
-                ->where('article_id', $ligneCommande->article_id)
-                ->sum('quantite_receptionnee');
-            
-            $resteARecevoir = max(0, $ligneCommande->quantite_commandee - $quantiteDejaRecue);
-
-            if ($resteARecevoir > 0) {
-                $articlesARecevoir[] = [
-                    'article_id' => $ligneCommande->article_id,
-                    'designation' => $ligneCommande->article->designation,
-                    'reference' => $ligneCommande->article->reference,
-                    'unite_mesure' => $ligneCommande->article->unite_mesure,
-                    'quantite_commandee' => $ligneCommande->quantite_commandee,
-                    'quantite_deja_recue' => $quantiteDejaRecue,
-                    'reste_a_recevoir' => $resteARecevoir,
-                    'quantite_receptionnee' => $resteARecevoir, // Pré-remplir avec le reste à recevoir
-                    'prix_unitaire' => $ligneCommande->prix_unitaire_ht,
-                    'taux_tva' => $ligneCommande->taux_tva
-                ];
-            }
-        }
-
-        return response()->json([
-            'success' => true,
-            'articles' => $articlesARecevoir
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error('Error prefilling articles: ' . $e->getMessage());
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Erreur lors du pré-remplissage des articles'
-        ], 500);
-    }
-}
-//     public function store(Request $request)
-// {
-//     try {
-//         DB::beginTransaction();
-
-//         $validated = $request->validate([
-//             'bon_commande_id' => 'required|exists:bon_commandes,id',
-//             'date_reception' => 'required|date',
-//             'responsable_reception_id' => 'required|exists:users,id',
-//             'fichier_bonlivraison' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-//             'fichier_facture' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-//             'lignes_reception' => 'required|array|min:1',
-//             'lignes_reception.*.article_id' => 'required|exists:articles,id',
-//             'lignes_reception.*.quantite_receptionnee' => 'required|numeric|min:0.01',
-//             'notes' => 'nullable|string'
-//         ]);
-
-//         $bonCommande = BonCommande::with(['fournisseur', 'articles.article'])->find($validated['bon_commande_id']);
-
-//         // Vérifier les quantités par rapport au reste à recevoir
-//         $quantitesValides = true;
-//         $messagesErreur = [];
-
-//         foreach ($validated['lignes_reception'] as $index => $ligneReception) {
-//             if ($ligneReception['quantite_receptionnee'] > 0) {
-//                 // Calculer le reste à recevoir pour cet article
-//                 $quantiteDejaRecue = LigneReception::whereHas('bonReception', function($query) use ($bonCommande) {
-//                         $query->where('bon_commande_id', $bonCommande->id);
-//                     })
-//                     ->where('article_id', $ligneReception['article_id'])
-//                     ->sum('quantite_receptionnee');
-                
-//                 $ligneCommande = $bonCommande->articles->firstWhere('article_id', $ligneReception['article_id']);
-//                 $resteARecevoir = $ligneCommande ? max(0, $ligneCommande->quantite_commandee - $quantiteDejaRecue) : 0;
-                
-//                 if ($ligneReception['quantite_receptionnee'] > $resteARecevoir) {
-//                     $quantitesValides = false;
-//                     $article = Article::find($ligneReception['article_id']);
-//                     $messagesErreur[] = "{$article->designation} : quantité maximale = {$resteARecevoir}";
-//                 }
-//             }
-//         }
-
-//         if (!$quantitesValides) {
-//             return redirect()->back()
-//                 ->withInput()
-//                 ->withErrors(['quantites' => 'Quantités invalides: ' . implode(', ', $messagesErreur)]);
-//         }
-
-//         // Déterminer le type de réception
-//         $typeReception = $this->determinerTypeReception($bonCommande, $validated['lignes_reception']);
-
-//         // Créer le bon de réception
-//         $bonReception = BonReception::create([
-//             'numero' => BonReception::genererNumero(),
-//             'bon_commande_id' => $validated['bon_commande_id'],
-//             'fournisseur_id' => $bonCommande->fournisseur_id,
-//             'date_reception' => $validated['date_reception'],
-//             'type_reception' => $typeReception,
-//             'statut' => BonReception::STATUT_VALIDE,
-//             'responsable_reception_id' => $validated['responsable_reception_id'],
-//             'notes' => $validated['notes'] ?? null,
-//             'created_by' => Auth::id(),
-//         ]);
-
-//         // Gestion des fichiers - CORRECTION ICI
-//         if ($request->hasFile('fichier_bonlivraison')) {
-//             $file = $request->file('fichier_bonlivraison');
-//             $filename = 'BL_' . time() . '_' . $bonReception->id . '.' . $file->getClientOriginalExtension();
-//             $path = $file->storeAs('bon-receptions/bon-livraison', $filename, 'public');
-//             $bonReception->update(['fichier_bonlivraison' => $path]);
-//         }
-
-//         if ($request->hasFile('fichier_facture')) {
-//             $file = $request->file('fichier_facture');
-//             $filename = 'FACT_' . time() . '_' . $bonReception->id . '.' . $file->getClientOriginalExtension();
-//             $path = $file->storeAs('bon-receptions/factures', $filename, 'public');
-//             $bonReception->update(['fichier_facture' => $path]);
-//         }
-
-//         // Créer les lignes de réception
-//         $totalQuantiteReceptionnee = 0;
-//         foreach ($validated['lignes_reception'] as $ligneData) {
-//             if ($ligneData['quantite_receptionnee'] > 0) {
-//                 // Trouver la ligne de commande correspondante pour récupérer le prix et TVA
-//                 $ligneCommande = $bonCommande->articles->firstWhere('article_id', $ligneData['article_id']);
-                
-//                 if ($ligneCommande) {
-//                     // Calculer les montants
-//                     $prixUnitaire = $ligneCommande->prix_unitaire_ht;
-//                     $tauxTva = $ligneCommande->taux_tva;
-//                     $quantite = $ligneData['quantite_receptionnee'];
-                    
-//                     $prixTotalHt = $quantite * $prixUnitaire;
-//                     $montantTva = $prixTotalHt * ($tauxTva / 100);
-//                     $prixTotalTtc = $prixTotalHt + $montantTva;
-                    
-//                     $ligneReception = LigneReception::create([
-//                         'bon_reception_id' => $bonReception->id,
-//                         'article_id' => $ligneData['article_id'],
-//                         'quantite_receptionnee' => $quantite,
-//                         'prix_unitaire' => $prixUnitaire,
-//                         'taux_tva' => $tauxTva,
-//                         'montant_tva' => $montantTva,
-//                         'prix_total' => $prixTotalTtc,
-//                     ]);
-
-//                     Log::info('Ligne réception créée', [
-//                         'id' => $ligneReception->id,
-//                         'article_id' => $ligneData['article_id'],
-//                         'quantite' => $quantite,
-//                         'prix_unitaire' => $prixUnitaire,
-//                         'prix_total' => $prixTotalTtc
-//                     ]);
-
-//                     $totalQuantiteReceptionnee += $quantite;
-//                 }
-//             }
-//         }
-
-//         // Mettre à jour le statut de la commande
-//         $this->mettreAJourStatutCommande($bonCommande);
-
-//         DB::commit();
-
-//         Log::info('Bon réception created successfully', [
-//             'id' => $bonReception->id,
-//             'type' => $typeReception,
-//             'quantite_totale' => $totalQuantiteReceptionnee
-//         ]);
-
-//         // CORRECTION : Redirection vers l'index avec message de succès
-//         return redirect()->route('bon-receptions.index')
-//             ->with('success', 'Bon de réception créé avec succès - Type: ' . 
-//                 ($typeReception === BonReception::TYPE_COMPLET ? 'Complet' : 'Partiel'));
-
-//     } catch (\Exception $e) {
-//         DB::rollBack();
-//         Log::error('Error creating bon reception: ' . $e->getMessage());
-        
-//         return redirect()->back()
-//             ->withInput()
-//             ->withErrors(['error' => 'Erreur lors de la création: ' . $e->getMessage()]);
-//     }
-// }
+   
 
 
     public function show(BonReception $bonReception)
@@ -798,128 +363,15 @@ public function prefillAllArticles($bonCommandeId)
     /**
      * Récupérer les détails d'une commande pour AJAX
      */
-    public function getCommandeDetails($id)
-    {
-        try {
-            $commande = BonCommande::with(['fournisseur', 'articles.article'])
-                ->findOrFail($id);
-            
-            // Préparer les données pour le formulaire
-            $commande->articles->each(function ($ligneCommande) use ($commande) {
-                $quantiteRecue = LigneReception::whereHas('bonReception', function($query) use ($commande) {
-                        $query->where('bon_commande_id', $commande->id);
-                    })
-                    ->where('article_id', $ligneCommande->article_id)
-                    ->sum('quantite_receptionnee');
-                
-                $ligneCommande->quantite_deja_recue = $quantiteRecue;
-                $ligneCommande->reste_a_recevoir = max(0, $ligneCommande->quantite_commandee - $quantiteRecue);
-                $ligneCommande->quantite_max_receptionnable = $ligneCommande->reste_a_recevoir;
-            });
 
-            // Calculer les totaux
-            $commande->quantite_totale_commandee = $commande->articles->sum('quantite_commandee');
-            $commande->quantite_totale_recue = $commande->articles->sum('quantite_deja_recue');
-            $commande->reste_a_recevoir = $commande->quantite_totale_commandee - $commande->quantite_totale_recue;
-            $commande->pourcentage_recu = $commande->quantite_totale_commandee > 0 ? 
-                round(($commande->quantite_totale_recue / $commande->quantite_totale_commandee) * 100, 2) : 0;
 
-            return response()->json([
-                'success' => true,
-                'commande' => $commande
-            ]);
 
-        } catch (\Exception $e) {
-            Log::error('Error getting commande details: ' . $e->getMessage());
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors du chargement des détails de la commande'
-            ], 500);
-        }
-    }
-
-    // =========================================================================
-    // MÉTHODES PRIVÉES
-    // =========================================================================
-
-    /**
-     * Déterminer le type de réception
-     */
-    private function determinerTypeReception(BonCommande $bonCommande, array $lignesReception): string
-    {
-        $tousLesArticlesComplets = true;
-
-        foreach ($bonCommande->articles as $ligneCommande) {
-            // Quantité déjà reçue avant cette réception
-            $quantiteDejaRecue = LigneReception::whereHas('bonReception', function($query) use ($bonCommande) {
-                    $query->where('bon_commande_id', $bonCommande->id);
-                })
-                ->where('article_id', $ligneCommande->article_id)
-                ->sum('quantite_receptionnee');
-            
-            // Ajouter les quantités de cette réception
-            $ligneReception = collect($lignesReception)->firstWhere('article_id', $ligneCommande->article_id);
-            if ($ligneReception) {
-                $quantiteDejaRecue += $ligneReception['quantite_receptionnee'];
-            }
-
-            // Vérifier si cet article est complètement reçu
-            if ($quantiteDejaRecue < $ligneCommande->quantite_commandee) {
-                $tousLesArticlesComplets = false;
-                break;
-            }
-        }
-
-        return $tousLesArticlesComplets ? 
-            BonReception::TYPE_COMPLET : 
-            BonReception::TYPE_PARTIEL;
-    }
-
-    /**
-     * Mettre à jour le statut de la commande
-     */
-    private function mettreAJourStatutCommande(BonCommande $bonCommande): void
-    {
-        $estCompletementLivree = true;
-        $estPartiellementLivree = false;
-
-        foreach ($bonCommande->articles as $ligneCommande) {
-            $quantiteRecue = LigneReception::whereHas('bonReception', function($query) use ($bonCommande) {
-                    $query->where('bon_commande_id', $bonCommande->id);
-                })
-                ->where('article_id', $ligneCommande->article_id)
-                ->sum('quantite_receptionnee');
-            
-            if ($quantiteRecue < $ligneCommande->quantite_commandee) {
-                $estCompletementLivree = false;
-            }
-            
-            if ($quantiteRecue > 0) {
-                $estPartiellementLivree = true;
-            }
-        }
-
-        if ($estCompletementLivree) {
-            $nouveauStatut = 'livre_completement';
-        } elseif ($estPartiellementLivree) {
-            $nouveauStatut = 'livre_partiellement';
-        } else {
-            $nouveauStatut = 'attente_livraison';
-        }
-
-        $bonCommande->update(['statut' => $nouveauStatut]);
-        
-        Log::info('Statut commande mis à jour', [
-            'commande_id' => $bonCommande->id,
-            'ancien_statut' => $bonCommande->getOriginal('statut'),
-            'nouveau_statut' => $nouveauStatut
-        ]);
-    }
-
+ 
     /**
      * Méthode de débogage pour vérifier les données des commandes
      */
+
+
     public function debugCommandes()
     {
         $commandes = BonCommande::whereIn('statut', ['attente_livraison', 'livre_partiellement'])->get();
@@ -1242,6 +694,407 @@ public function previewPdf(BonReception $bonReception)
 }
 
 
+// :::::::::::::::::::::::
 
+
+
+public function create(Request $request)
+{
+    try {
+        $bonCommande = null;
+        
+        if ($request->has('bon_commande')) {
+            $bonCommande = BonCommande::with(['fournisseur', 'articles.article'])
+                ->findOrFail($request->bon_commande);
+            
+            // Préparer les données pour le formulaire - CORRECTION ICI
+            $bonCommande->articles->each(function ($ligneCommande) use ($bonCommande) {
+                $quantiteRecue = LigneReception::whereHas('bonReception', function($query) use ($bonCommande) {
+                        $query->where('bon_commande_id', $bonCommande->id);
+                    })
+                    ->where('article_id', $ligneCommande->article_id)
+                    ->sum('quantite_receptionnee');
+                
+                $ligneCommande->quantite_deja_recue = $quantiteRecue;
+                $ligneCommande->reste_a_recevoir = max(0, $ligneCommande->quantite_commandee - $quantiteRecue);
+                $ligneCommande->quantite_max_receptionnable = $ligneCommande->reste_a_recevoir;
+                
+                // AJOUTER LES CHAMPS MANQUANTS
+                $ligneCommande->prix_unitaire_ht = $ligneCommande->prix_unitaire_ht ?? 0;
+                $ligneCommande->taux_tva = $ligneCommande->taux_tva ?? 0;
+            });
+        }
+
+        // Récupérer les commandes avec des articles à recevoir - CORRECTION ICI
+        $bonCommandes = BonCommande::whereIn('statut', ['attente_livraison', 'livre_partiellement'])
+            ->with(['fournisseur', 'articles.article'])
+            ->get()
+            ->filter(function ($commande) {
+                // Filtrer seulement les commandes qui ont encore des articles à recevoir
+                foreach ($commande->articles as $ligne) {
+                    $quantiteRecue = LigneReception::whereHas('bonReception', function($query) use ($commande) {
+                            $query->where('bon_commande_id', $commande->id);
+                        })
+                        ->where('article_id', $ligne->article_id)
+                        ->sum('quantite_receptionnee');
+                    
+                    if (($ligne->quantite_commandee - $quantiteRecue) > 0) {
+                        return true;
+                    }
+                }
+                return false;
+            })
+            ->map(function ($commande) {
+                // Calculer les statistiques de réception
+                $commande->quantite_totale_commandee = $commande->articles->sum('quantite_commandee');
+                $quantiteTotaleRecue = 0;
+                
+                foreach ($commande->articles as $ligne) {
+                    $quantiteRecue = LigneReception::whereHas('bonReception', function($query) use ($commande) {
+                            $query->where('bon_commande_id', $commande->id);
+                        })
+                        ->where('article_id', $ligne->article_id)
+                        ->sum('quantite_receptionnee');
+                    
+                    $ligne->quantite_deja_recue = $quantiteRecue;
+                    $ligne->reste_a_recevoir = max(0, $ligne->quantite_commandee - $quantiteRecue);
+                    $quantiteTotaleRecue += $quantiteRecue;
+                    
+                    // AJOUTER LES CHAMPS MANQUANTS
+                    $ligne->prix_unitaire_ht = $ligne->prix_unitaire_ht ?? 0;
+                    $ligne->taux_tva = $ligne->taux_tva ?? 0;
+                }
+                
+                $commande->quantite_totale_recue = $quantiteTotaleRecue;
+                $commande->reste_a_recevoir = $commande->quantite_totale_commandee - $quantiteTotaleRecue;
+                $commande->pourcentage_recu = $commande->quantite_totale_commandee > 0 ? 
+                    round(($quantiteTotaleRecue / $commande->quantite_totale_commandee) * 100, 2) : 0;
+                
+                return $commande;
+            });
+
+        $magasiniers = User::where('role', 'MAGASINIER')
+            ->where('status', 1)
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
+
+        return inertia('Achats/BonReceptions/Create', [
+            'bonCommandes' => $bonCommandes,
+            'selectedBonCommande' => $bonCommande,
+            'magasiniers' => $magasiniers,
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error in BonReceptionController@create: ' . $e->getMessage());
+        
+        return redirect()->route('bon-receptions.index')
+            ->with('error', 'Erreur lors du chargement du formulaire: ' . $e->getMessage());
+    }
+}
+
+  
+    /**
+     * Déterminer le type de réception
+     */
+ 
+    /**
+     * Mettre à jour le statut de la commande
+     */
+    private function mettreAJourStatutCommande(BonCommande $bonCommande): void
+    {
+        $estCompletementLivree = true;
+        $estPartiellementLivree = false;
+
+        foreach ($bonCommande->articles as $ligneCommande) {
+            $quantiteRecue = LigneReception::whereHas('bonReception', function($query) use ($bonCommande) {
+                    $query->where('bon_commande_id', $bonCommande->id);
+                })
+                ->where('article_id', $ligneCommande->article_id)
+                ->sum('quantite_receptionnee');
+            
+            if ($quantiteRecue < $ligneCommande->quantite_commandee) {
+                $estCompletementLivree = false;
+            }
+            
+            if ($quantiteRecue > 0) {
+                $estPartiellementLivree = true;
+            }
+        }
+
+        if ($estCompletementLivree) {
+            $nouveauStatut = 'livre_completement';
+        } elseif ($estPartiellementLivree) {
+            $nouveauStatut = 'livre_partiellement';
+        } else {
+            $nouveauStatut = 'attente_livraison';
+        }
+
+        $bonCommande->update(['statut' => $nouveauStatut]);
+        
+        Log::info('Statut commande mis à jour', [
+            'commande_id' => $bonCommande->id,
+            'ancien_statut' => $bonCommande->getOriginal('statut'),
+            'nouveau_statut' => $nouveauStatut
+        ]);
+    }
+
+
+
+     public function getCommandeDetails($id)
+    {
+        try {
+            $commande = BonCommande::with(['fournisseur', 'articles.article'])
+                ->findOrFail($id);
+            
+            // Préparer les données pour le formulaire
+            $commande->articles->each(function ($ligneCommande) use ($commande) {
+                $quantiteRecue = LigneReception::whereHas('bonReception', function($query) use ($commande) {
+                        $query->where('bon_commande_id', $commande->id);
+                    })
+                    ->where('article_id', $ligneCommande->article_id)
+                    ->sum('quantite_receptionnee');
+                
+                $ligneCommande->quantite_deja_recue = $quantiteRecue;
+                $ligneCommande->reste_a_recevoir = max(0, $ligneCommande->quantite_commandee - $quantiteRecue);
+                $ligneCommande->quantite_max_receptionnable = $ligneCommande->reste_a_recevoir;
+                
+                // Assurer que les champs prix existent
+                $ligneCommande->prix_unitaire_ht = $ligneCommande->prix_unitaire_ht ?? 0;
+                $ligneCommande->taux_tva = $ligneCommande->taux_tva ?? 0;
+            });
+
+            // Calculer les totaux
+            $commande->quantite_totale_commandee = $commande->articles->sum('quantite_commandee');
+            $commande->quantite_totale_recue = $commande->articles->sum('quantite_deja_recue');
+            $commande->reste_a_recevoir = $commande->quantite_totale_commandee - $commande->quantite_totale_recue;
+            $commande->pourcentage_recu = $commande->quantite_totale_commandee > 0 ? 
+                round(($commande->quantite_totale_recue / $commande->quantite_totale_commandee) * 100, 2) : 0;
+
+            return response()->json([
+                'success' => true,
+                'commande' => $commande
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error getting commande details: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors du chargement des détails de la commande: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage - CORRIGÉ
+     */
+    /**
+     * Store a newly created resource in storage - CORRIGÉ
+     */
+    public function store(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            Log::info('=== DÉBUT CRÉATION BON RÉCEPTION ===');
+
+            // Validation des données
+            $validated = $request->validate([
+                'bon_commande_id' => 'required|exists:bon_commandes,id',
+                'date_reception' => 'required|date',
+                'responsable_reception_id' => 'required|exists:users,id',
+                'fichier_bonlivraison' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+                'fichier_facture' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+                'lignes_reception' => 'required|array|min:1',
+                'lignes_reception.*.article_id' => 'required|exists:articles,id',
+                'lignes_reception.*.quantite_receptionnee' => 'required|numeric|min:0',
+                'notes' => 'nullable|string'
+            ]);
+
+            Log::info('Données validées:', $validated);
+
+            // Vérifier qu'il y a au moins une ligne avec quantité > 0
+            $hasQuantitePositive = collect($validated['lignes_reception'])->contains(function ($ligne) {
+                return floatval($ligne['quantite_receptionnee']) > 0;
+            });
+
+            if (!$hasQuantitePositive) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['quantites' => 'Au moins une quantité doit être supérieure à 0']);
+            }
+
+            $bonCommande = BonCommande::with(['fournisseur', 'articles.article'])
+                ->findOrFail($validated['bon_commande_id']);
+
+            // Vérifier les quantités
+            foreach ($validated['lignes_reception'] as $index => $ligneReception) {
+                $quantite = floatval($ligneReception['quantite_receptionnee']);
+                
+                if ($quantite > 0) {
+                    $quantiteDejaRecue = LigneReception::whereHas('bonReception', function($query) use ($bonCommande) {
+                            $query->where('bon_commande_id', $bonCommande->id);
+                        })
+                        ->where('article_id', $ligneReception['article_id'])
+                        ->sum('quantite_receptionnee');
+                    
+                    $ligneCommande = $bonCommande->articles->firstWhere('article_id', $ligneReception['article_id']);
+                    
+                    if (!$ligneCommande) {
+                        throw new \Exception("Article non trouvé dans la commande");
+                    }
+                    
+                    $resteARecevoir = max(0, $ligneCommande->quantite_commandee - $quantiteDejaRecue);
+                    
+                    if ($quantite > $resteARecevoir) {
+                        $article = Article::find($ligneReception['article_id']);
+                        throw new \Exception("{$article->designation} : quantité maximale = {$resteARecevoir}");
+                    }
+                }
+            }
+
+            // Déterminer le type de réception
+            $typeReception = $this->determinerTypeReception($bonCommande, $validated['lignes_reception']);
+
+            // CORRECTION : Générer le numéro correctement
+            $numero = BonReception::genererNumero();
+            
+            // Créer le bon de réception
+            $bonReceptionData = [
+                'numero' => $numero, // Utiliser la variable générée
+                'bon_commande_id' => $validated['bon_commande_id'],
+                'fournisseur_id' => $bonCommande->fournisseur_id,
+                'date_reception' => $validated['date_reception'],
+                'type_reception' => $typeReception,
+                'statut' => BonReception::STATUT_VALIDE,
+                'responsable_reception_id' => $validated['responsable_reception_id'],
+                'notes' => $validated['notes'] ?? null,
+                'created_by' => Auth::id(),
+            ];
+
+            Log::info('Création du bon réception avec données:', $bonReceptionData);
+
+            $bonReception = BonReception::create($bonReceptionData);
+
+            if (!$bonReception) {
+                throw new \Exception("Échec de la création du bon de réception");
+            }
+
+            // Gestion des fichiers
+            if ($request->hasFile('fichier_bonlivraison')) {
+                $bonReception->uploadFichierBonlivraison($request->file('fichier_bonlivraison'));
+            }
+
+            if ($request->hasFile('fichier_facture')) {
+                // Vérifier si la réception est complète avant d'autoriser la facture
+                if ($typeReception !== BonReception::TYPE_COMPLET) {
+                    throw new \Exception("La facture ne peut être ajoutée que pour une réception complète");
+                }
+                $bonReception->uploadFichierFacture($request->file('fichier_facture'));
+            }
+
+            // Créer les lignes de réception
+            $lignesCreees = 0;
+            foreach ($validated['lignes_reception'] as $ligneData) {
+                $quantite = floatval($ligneData['quantite_receptionnee']);
+                
+                if ($quantite > 0) {
+                    $ligneCommande = $bonCommande->articles->firstWhere('article_id', $ligneData['article_id']);
+                    
+                    if ($ligneCommande) {
+                        $prixUnitaire = $ligneCommande->prix_unitaire_ht ?? 0;
+                        $tauxTva = $ligneCommande->taux_tva ?? 0;
+                        
+                        // CORRECTION : Calculs corrects des montants
+                        $prixTotalHt = $quantite * $prixUnitaire;
+                        $montantTva = $prixTotalHt * ($tauxTva / 100);
+                        $prixTotalTtc = $prixTotalHt + $montantTva;
+                        
+                        LigneReception::create([
+                            'bon_reception_id' => $bonReception->id,
+                            'article_id' => $ligneData['article_id'],
+                            'quantite_receptionnee' => $quantite,
+                            'prix_unitaire' => $prixUnitaire,
+                            'taux_tva' => $tauxTva,
+                            'montant_tva' => $montantTva,
+                            'prix_total' => $prixTotalTtc,
+                        ]);
+
+                        $lignesCreees++;
+                    }
+                }
+            }
+
+            // Mettre à jour le statut de la commande
+            $this->mettreAJourStatutCommande($bonCommande);
+
+            DB::commit();
+
+            Log::info('=== BON RÉCEPTION CRÉÉ AVEC SUCCÈS ===', [
+                'id' => $bonReception->id,
+                'numero' => $bonReception->numero,
+                'lignes_creees' => $lignesCreees,
+                'type_reception' => $typeReception
+            ]);
+
+            return redirect()->route('bon-receptions.index')
+                ->with('success', 'Bon de réception ' . $bonReception->numero_affichage . ' créé avec succès - Type: ' . 
+                    ($typeReception === BonReception::TYPE_COMPLET ? 'Complet' : 'Partiel'));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error('=== ERREUR CRÉATION BON RÉCEPTION ===');
+            Log::error('Message: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Erreur lors de la création: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Déterminer le type de réception - CORRIGÉ
+     */
+    private function determinerTypeReception(BonCommande $bonCommande, array $lignesReception): string
+    {
+        $tousLesArticlesComplets = true;
+        $auMoinsUnArticleRecu = false;
+
+        foreach ($bonCommande->articles as $ligneCommande) {
+            // Quantité déjà reçue avant cette réception
+            $quantiteDejaRecue = LigneReception::whereHas('bonReception', function($query) use ($bonCommande) {
+                    $query->where('bon_commande_id', $bonCommande->id);
+                })
+                ->where('article_id', $ligneCommande->article_id)
+                ->sum('quantite_receptionnee');
+            
+            // Ajouter les quantités de cette réception
+            $ligneReception = collect($lignesReception)->firstWhere('article_id', $ligneCommande->article_id);
+            $quantiteCetteReception = $ligneReception ? floatval($ligneReception['quantite_receptionnee']) : 0;
+            
+            $quantiteTotaleRecue = $quantiteDejaRecue + $quantiteCetteReception;
+
+            // Vérifier si cet article est complètement reçu
+            if ($quantiteTotaleRecue < $ligneCommande->quantite_commandee) {
+                $tousLesArticlesComplets = false;
+            }
+
+            // Vérifier si au moins un article a été reçu dans cette réception
+            if ($quantiteCetteReception > 0) {
+                $auMoinsUnArticleRecu = true;
+            }
+        }
+
+        // Si aucun article n'a été reçu dans cette réception, considérer comme partiel
+        if (!$auMoinsUnArticleRecu) {
+            return BonReception::TYPE_PARTIEL;
+        }
+
+        return $tousLesArticlesComplets ? 
+            BonReception::TYPE_COMPLET : 
+            BonReception::TYPE_PARTIEL;
+    }
 
 }

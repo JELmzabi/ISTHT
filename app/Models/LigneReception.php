@@ -5,6 +5,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class LigneReception extends Model
 {
@@ -36,29 +38,28 @@ class LigneReception extends Model
         return $this->belongsTo(Article::class);
     }
 
-    // CORRECTION : Commenter temporairement le boot pour déboguer
-    /*
     protected static function boot()
     {
         parent::boot();
 
-        // AVANT la sauvegarde, calculer les montants si nécessaire
+        // Calcul automatique des montants avant sauvegarde
         static::saving(function ($ligne) {
-            // Ne calculer que si les champs de base sont présents
+            // Calculer les montants
             if ($ligne->quantite_receptionnee && $ligne->prix_unitaire && $ligne->taux_tva) {
                 $ligne->prix_total = $ligne->quantite_receptionnee * $ligne->prix_unitaire;
                 $ligne->montant_tva = $ligne->prix_total * ($ligne->taux_tva / 100);
             }
         });
 
-        // APRÈS la création, mettre à jour le stock
+        // Mettre à jour le stock après création
         static::created(function ($ligne) {
-            if ($ligne->article && $ligne->quantite_receptionnee > 0) {
-                $ligne->article->increment('quantite_stock', $ligne->quantite_receptionnee);
-                
-                // Créer un mouvement de stock
-                if (class_exists('App\Models\MouvementStock')) {
-                    \App\Models\MouvementStock::create([
+            try {
+                if ($ligne->article && $ligne->quantite_receptionnee > 0) {
+                    // Mettre à jour le stock de l'article
+                    $ligne->article->increment('quantite_stock', $ligne->quantite_receptionnee);
+                    
+                    // Créer un mouvement de stock
+                    MouvementStock::create([
                         'article_id' => $ligne->article_id,
                         'type_mouvement' => 'entree',
                         'quantite' => $ligne->quantite_receptionnee,
@@ -69,26 +70,30 @@ class LigneReception extends Model
                         'created_by' => auth()->id() ?? 1
                     ]);
                 }
+            } catch (\Exception $e) {
+                Log::error('Erreur lors de la mise à jour du stock: ' . $e->getMessage());
             }
         });
 
-        // Après suppression, ajuster le stock
+        // Mettre à jour le stock après suppression
         static::deleted(function ($ligne) {
-            if ($ligne->article && $ligne->quantite_receptionnee > 0) {
-                $ligne->article->decrement('quantite_stock', $ligne->quantite_receptionnee);
-                
-                // Supprimer le mouvement de stock associé
-                if (class_exists('App\Models\MouvementStock')) {
-                    \App\Models\MouvementStock::where('article_id', $ligne->article_id)
+            try {
+                if ($ligne->article && $ligne->quantite_receptionnee > 0) {
+                    // Décrementer le stock
+                    $ligne->article->decrement('quantite_stock', $ligne->quantite_receptionnee);
+                    
+                    // Supprimer le mouvement de stock associé
+                    MouvementStock::where('article_id', $ligne->article_id)
                         ->where('reference', 'BR-' . ($ligne->bonReception->numero ?? 'N/A'))
                         ->where('type_mouvement', 'entree')
                         ->where('quantite', $ligne->quantite_receptionnee)
                         ->delete();
                 }
+            } catch (\Exception $e) {
+                Log::error('Erreur lors de la suppression du mouvement de stock: ' . $e->getMessage());
             }
         });
     }
-    */
 
     // Accessor pour le montant HT
     public function getMontantHtAttribute(): float

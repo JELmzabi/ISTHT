@@ -1,5 +1,4 @@
 <?php
-// app/Models/LigneEntreeStock.php
 
 namespace App\Models;
 
@@ -42,18 +41,18 @@ class LigneEntreeStock extends Model
         parent::boot();
 
         static::saving(function ($ligne) {
-            $ligne->prix_total = $ligne->quantite * $ligne->prix_unitaire;
-            $ligne->montant_tva = $ligne->prix_total * ($ligne->taux_tva / 100);
+            if ($ligne->quantite && $ligne->prix_unitaire) {
+                $ligne->prix_total = $ligne->quantite * $ligne->prix_unitaire;
+                if ($ligne->taux_tva) {
+                    $ligne->montant_tva = $ligne->prix_total * ($ligne->taux_tva / 100);
+                }
+            }
         });
+    }
 
-        // Après création, mettre à jour le stock
-        static::created(function ($ligne) {
-            $ligne->article->increment('quantite_stock', $ligne->quantite);
-        });
-
-        // Après suppression, ajuster le stock
-        static::deleted(function ($ligne) {
-            $ligne->article->decrement('quantite_stock', $ligne->quantite);
-        });
+    // Accessor pour le montant HT
+    public function getMontantHtAttribute(): float
+    {
+        return $this->prix_total - $this->montant_tva;
     }
 }
