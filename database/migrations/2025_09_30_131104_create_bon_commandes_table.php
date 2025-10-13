@@ -22,11 +22,11 @@ return new class extends Migration
             $table->string('statut')->nullable();
             $table->longText('pieces_jointes')->nullable();
             $table->text('notes')->nullable();
-            $table->foreignId('categorie_principale_id')->constrained('categorie_principales')->nullOnDelete();
-            $table->foreignId('nature_prestation_id')->constrained('nature_prestations')->nullOnDelete();
-            $table->foreignId('fournisseur_id')->constrained('fournisseurs')->nullOnDelete();
-            $table->foreignId('created_by')->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->constrained('users')->nullOnDelete(); 
+            $table->foreignId('categorie_principale_id')->constrained('categorie_principales');
+            $table->foreignId('nature_prestation_id')->constrained('nature_prestations');
+            $table->foreignId('fournisseur_id')->constrained('fournisseurs');
+            $table->foreignId('created_by')->constrained('users');
+            $table->foreignId('updated_by')->constrained('users'); 
             $table->softDeletes();
             $table->timestamps();
         });
