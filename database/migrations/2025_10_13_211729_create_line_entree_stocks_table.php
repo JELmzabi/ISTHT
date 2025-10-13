@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('line_entree_stocks', function (Blueprint $table) {
+        Schema::create('ligne_entree_stocks', function (Blueprint $table) {
             $table->id();
             $table->decimal('quantite', 10, 2);
             $table->decimal('prix_unitaire', 10, 2);
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('line_entree_stocks');
+        Schema::dropIfExists('ligne_entree_stocks');
     }
 };

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->string('statut')->nullable();
             $table->foreignId('bon_reception_id')->constrained('bon_receptions');
-            $table->foreignId('fournisseur_id')->constrained('fournisseur_id');
+            $table->foreignId('fournisseur_id')->constrained('fournisseurs');
             $table->foreignId('created_by')->constrained('users', 'id');
             $table->softDeletes();
             $table->timestamps();
