@@ -802,7 +802,7 @@ public function create(Request $request)
      */
     private function mettreAJourStatutCommande(BonCommande $bonCommande): void
     {
-        $estCompletementLivree = true;
+        $estCompletementLivree = false;
         $estPartiellementLivree = false;
 
         foreach ($bonCommande->articles as $ligneCommande) {
@@ -812,8 +812,8 @@ public function create(Request $request)
                 ->where('article_id', $ligneCommande->article_id)
                 ->sum('quantite_receptionnee');
             
-            if ($quantiteRecue < $ligneCommande->quantite_commandee) {
-                $estCompletementLivree = false;
+            if ($quantiteRecue == $ligneCommande->quantite_commandee) {
+                $estCompletementLivree = true;
             }
             
             if ($quantiteRecue > 0) {
@@ -958,7 +958,7 @@ public function create(Request $request)
 
             // CORRECTION : Générer le numéro correctement
             $numero = BonReception::genererNumero();
-            
+
             // Créer le bon de réception
             $bonReceptionData = [
                 'numero' => $numero, // Utiliser la variable générée
@@ -974,8 +974,14 @@ public function create(Request $request)
 
             Log::info('Création du bon réception avec données:', $bonReceptionData);
 
+            if ($typeReception === BonReception::TYPE_COMPLET && !$request->hasFile('fichier_facture')) {
+                // Vérifier si la réception est complète avant d'autoriser la facture
+                throw new \Exception("La facture ne peut être ajoutée que pour une réception complète");
+            }
+            
             $bonReception = BonReception::create($bonReceptionData);
 
+            
             if (!$bonReception) {
                 throw new \Exception("Échec de la création du bon de réception");
             }
@@ -985,11 +991,7 @@ public function create(Request $request)
                 $bonReception->uploadFichierBonlivraison($request->file('fichier_bonlivraison'));
             }
 
-            if ($request->hasFile('fichier_facture')) {
-                // Vérifier si la réception est complète avant d'autoriser la facture
-                if ($typeReception !== BonReception::TYPE_COMPLET) {
-                    throw new \Exception("La facture ne peut être ajoutée que pour une réception complète");
-                }
+            if ($typeReception === BonReception::TYPE_COMPLET && $request->hasFile('fichier_facture')) {
                 $bonReception->uploadFichierFacture($request->file('fichier_facture'));
             }
 
@@ -1059,42 +1061,23 @@ public function create(Request $request)
      */
     private function determinerTypeReception(BonCommande $bonCommande, array $lignesReception): string
     {
-        $tousLesArticlesComplets = true;
-        $auMoinsUnArticleRecu = false;
-
         foreach ($bonCommande->articles as $ligneCommande) {
-            // Quantité déjà reçue avant cette réception
-            $quantiteDejaRecue = LigneReception::whereHas('bonReception', function($query) use ($bonCommande) {
+            $quantityCommanded = $ligneCommande->quantite_commandee;
+            $previousReception = LigneReception::whereHas('bonReception', function($query) use ($bonCommande) {
                     $query->where('bon_commande_id', $bonCommande->id);
                 })
                 ->where('article_id', $ligneCommande->article_id)
                 ->sum('quantite_receptionnee');
-            
-            // Ajouter les quantités de cette réception
-            $ligneReception = collect($lignesReception)->firstWhere('article_id', $ligneCommande->article_id);
-            $quantiteCetteReception = $ligneReception ? floatval($ligneReception['quantite_receptionnee']) : 0;
-            
-            $quantiteTotaleRecue = $quantiteDejaRecue + $quantiteCetteReception;
+            $currentReception = collect($lignesReception)->firstWhere('article_id', $ligneCommande->article_id)['quantite_receptionnee'] ?? 0;
 
-            // Vérifier si cet article est complètement reçu
-            if ($quantiteTotaleRecue < $ligneCommande->quantite_commandee) {
-                $tousLesArticlesComplets = false;
-            }
-
-            // Vérifier si au moins un article a été reçu dans cette réception
-            if ($quantiteCetteReception > 0) {
-                $auMoinsUnArticleRecu = true;
+            $isPartialReception = floatval($quantityCommanded) > (floatval($previousReception) + floatval($currentReception));
+            
+            if ($isPartialReception) {
+                return BonReception::TYPE_PARTIEL;
             }
         }
 
-        // Si aucun article n'a été reçu dans cette réception, considérer comme partiel
-        if (!$auMoinsUnArticleRecu) {
-            return BonReception::TYPE_PARTIEL;
-        }
-
-        return $tousLesArticlesComplets ? 
-            BonReception::TYPE_COMPLET : 
-            BonReception::TYPE_PARTIEL;
+        return BonReception::TYPE_COMPLET;
     }
 
 }

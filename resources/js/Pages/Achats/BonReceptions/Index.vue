@@ -1160,18 +1160,21 @@ const showNotification = (message, type = 'success') => {
 
 // Computed pour vérifier si la réception est complète
 const isReceptionComplete = computed(() => {
-    if (!selectedCommande.value) return false;
+    // if (!selectedCommande.value) return false;
     
-    // Vérifier si tous les articles sont complètement reçus
-    return selectedCommande.value.articles.every(article => {
-        const ligneReception = form.value.lignes_reception.find(
-            l => l.article_id === article.article_id
-        );
-        const quantiteRecue = parseFloat(ligneReception?.quantite_receptionnee) || 0;
+    // console.log(selectedCommande.value);
+    
+    // // Vérifier si tous les articles sont complètement reçus
+    // return selectedCommande.value.articles.every(article => {
+    //     const ligneReception = form.value.lignes_reception.find(
+    //         l => l.article_id === article.article_id
+    //     );
+    //     const quantiteRecue = parseFloat(ligneReception?.quantite_receptionnee) || 0;
         
-        // La réception est complète si la quantité reçue + déjà reçue = quantité commandée
-        return (quantiteRecue + (article.quantite_deja_recue || 0)) >= article.quantite_commandee;
-    });
+    //     // La réception est complète si la quantité reçue + déjà reçue = quantité commandée
+    //     return (quantiteRecue + (article.quantite_deja_recue || 0)) >= article.quantite_commandee;
+    // });
+    return true;
 });
 
 // Vérifier si une commande a des articles à recevoir
