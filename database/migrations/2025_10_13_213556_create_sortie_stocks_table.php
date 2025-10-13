@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('entree_stocks', function (Blueprint $table) {
+        Schema::create('sortie_stocks', function (Blueprint $table) {
             $table->id();
             $table->string('numero')->unique();
-            $table->date('date_entree');
+            $table->string('type_sortie');
+            $table->date('date_sortie');
+            $table->text('motif');
             $table->text('notes')->nullable();
-            $table->string('statut')->nullable();
-            $table->foreignId('bon_reception_id')->constrained('bon_receptions');
-            $table->foreignId('fournisseur_id')->constrained('fournisseur_id');
+            $table->string('statut')->default('valide');
+            # what the client_id should be 
+            // $table->bigInteger('client_id')->nullable();
             $table->foreignId('created_by')->constrained('users', 'id');
             $table->softDeletes();
             $table->timestamps();
@@ -30,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('entree_stocks');
+        Schema::dropIfExists('sortie_stocks');
     }
 };

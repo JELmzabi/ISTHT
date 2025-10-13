@@ -13,12 +13,10 @@ return new class extends Migration {
             $table->text('description')->nullable();
 
             $table->foreignId('categorie_principale_id')
-                  ->constrained('categorie_principales')
-                  ->cascadeOnDelete();
+                  ->constrained('categorie_principales');
 
             $table->foreignId('nature_prestation_id')
-                  ->constrained('nature_prestations')
-                  ->cascadeOnDelete();
+                  ->constrained('nature_prestations');
 
             $table->boolean('est_actif')->default(true);
             $table->timestamps();

@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('historique_statut_bcs', function (Blueprint $table) {
             $table->id();
+            $table->string('ancien_statut');
+            $table->string('nouveau_statut');
+            $table->text('raison')->nullable();
+            $table->foreignId('bon_commande_id')->constrained('bon_commandes', 'id');
+            $table->foreignId('changed_by')->constrained('users', 'id');
             $table->timestamps();
         });
     }

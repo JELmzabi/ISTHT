@@ -11,16 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('entree_stocks', function (Blueprint $table) {
+        Schema::create('ligne_receptions', function (Blueprint $table) {
             $table->id();
-            $table->string('numero')->unique();
-            $table->date('date_entree');
-            $table->text('notes')->nullable();
-            $table->string('statut')->nullable();
+            $table->decimal('quantite_receptionnee', 10, 2);
+            $table->decimal('prix_unitaire', 10, 2);
+            $table->decimal('taux_tva', 5, 2)->nullable();
+            $table->decimal('montant_tva', 10, 2)->nullable();
+            $table->decimal('prix_total', 10, 2);
             $table->foreignId('bon_reception_id')->constrained('bon_receptions');
-            $table->foreignId('fournisseur_id')->constrained('fournisseur_id');
-            $table->foreignId('created_by')->constrained('users', 'id');
-            $table->softDeletes();
+            $table->foreignId('article_id')->constrained('articles');
             $table->timestamps();
         });
     }
@@ -30,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('entree_stocks');
+        Schema::dropIfExists('ligne_receptions');
     }
 };

@@ -13,6 +13,18 @@ return new class extends Migration
     {
         Schema::create('bon_receptions', function (Blueprint $table) {
             $table->id();
+            $table->string('numero');
+            $table->dateTime('date_reception');
+            $table->string('type_reception');
+            $table->string('statut');
+            $table->string('fichier_bonlivraison')->nullable();
+            $table->string('fichier_facture')->nullable();
+            $table->text('notes')->nullable();
+            $table->foreignId('bon_commande_id')->constrained('bon_commandes');
+            $table->foreignId('fournisseur_id')->constrained('fournisseurs');
+            $table->foreignId('responsable_reception_id')->constrained('users', 'id');
+            $table->foreignId('created_by')->constrained('users', 'id');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
