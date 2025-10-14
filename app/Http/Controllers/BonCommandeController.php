@@ -2,6 +2,7 @@
 // app/Http/Controllers/BonCommandeController.php
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ShowBonCommandeResource;
 use App\Models\BonCommande;
 use App\Models\Fournisseur;
 use App\Models\CategoriePrincipale;
@@ -409,13 +410,10 @@ public function show(BonCommande $bonCommande)
         'categoriePrincipale', 
         'naturePrestation', 
         'fournisseur', 
-        'articles.article.categoriePrincipale',
-        'articles.article.naturePrestation',
-        'articles.article.categorie',
-        'articles.article.images',
-        'historiqueStatuts.user'
+        'articles.article',
     ]);
 
+    // return response()->json(ShowBonCommandeResource::make($bonCommande));
     // CORRECTION : Logger pour débogage
     Log::info('Affichage du bon de commande', [
         'bon_commande_id' => $bonCommande->id,
@@ -432,7 +430,7 @@ public function show(BonCommande $bonCommande)
     ]);
 
     return Inertia::render('Achats/BonCommandes/Show', [
-        'bonCommande' => $bonCommande,
+        'bonCommande' => ShowBonCommandeResource::make($bonCommande),
         'fournisseurs' => Fournisseur::where('est_actif', true)->get(),
     ]);
 }
