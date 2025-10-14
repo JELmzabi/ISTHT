@@ -24,9 +24,9 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->foreignId('categorie_principale_id')->constrained('categorie_principales');
             $table->foreignId('nature_prestation_id')->constrained('nature_prestations');
-            $table->foreignId('fournisseur_id')->constrained('fournisseurs');
+            $table->foreignId('fournisseur_id')->nullable()->constrained('fournisseurs');
             $table->foreignId('created_by')->constrained('users');
-            $table->foreignId('updated_by')->constrained('users'); 
+            $table->foreignId('updated_by')->nullable()->constrained('users'); 
             $table->softDeletes();
             $table->timestamps();
         });
