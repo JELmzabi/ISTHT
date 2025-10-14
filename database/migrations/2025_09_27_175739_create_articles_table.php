@@ -11,6 +11,7 @@ return new class extends Migration {
             $table->string('reference', 50)->unique();
             $table->string('designation');
             $table->text('description')->nullable();
+            $table->decimal('quantite_stock', 8, 2)->default(0);
 
             // FK vers tables cohérentes
             $table->foreignId('categorie_id')->constrained('categories')->cascadeOnDelete();

@@ -321,37 +321,48 @@ public function index(Request $request)
 public function valider(EntreeStock $entreeStock)
 {
     try {
-        if (!$entreeStock->peut_etre_valide) {
-            return redirect()->back()->withErrors([
+        DB::transaction(function () use ($entreeStock) {
+            
+            if (!$entreeStock->peut_etre_valide) {
+                return redirect()->back()->withErrors([
                 'error' => 'Cette entrée de stock ne peut pas être validée.'
-            ]);
-        }
-
-        $entreeStock->update(['statut' => EntreeStock::STATUT_VALIDE]);
-        
-        // Mettre à jour les stocks des articles
-        foreach ($entreeStock->lignesEntree as $ligne) {
-            if ($ligne->article) {
-                $ligne->article->increment('quantite_stock', $ligne->quantite);
-                
-                // Créer un mouvement de stock
-                MouvementStock::create([
-                    'article_id' => $ligne->article_id,
-                    'type_mouvement' => 'entree',
-                    'quantite' => $ligne->quantite,
-                    'prix_unitaire' => $ligne->prix_unitaire,
-                    'reference' => 'ES-' . $entreeStock->numero_affichage,
-                    'date_mouvement' => $entreeStock->date_entree,
-                    'motif' => 'Entrée de stock validée',
-                    'created_by' => auth()->id() ?? 1
                 ]);
             }
-        }
-        
 
+        
+            $entreeStock->update(['statut' => EntreeStock::STATUT_VALIDE]);
+            
+            $lignesEntree = $entreeStock->lignesEntree()->with('article')->get();
+            // Mettre à jour les stocks des articles
+            foreach ($lignesEntree as $ligne) {
+
+                if ($ligne->article) {
+                    
+                    $ligne->article->increment('quantite_stock', $ligne->quantite);
+                    
+                    $nouvelleQuantiteActuelle = $ligne->article->quantite_stock;
+                    
+                    MouvementStock::create([
+                        'type' => MouvementStock::TYPE_ENTREE,
+                        'article_id' => $ligne->article_id,
+                        'created_by' => auth()->id() ?? 1,
+                        'date_mouvement' => $entreeStock->date_entree,
+                        'prix_unitaire' => $ligne->prix_unitaire,
+                        'prix_ht' => $ligne->prix_unitaire,
+                        'type_mouvement' => MouvementStock::TYPE_ENTREE,
+                        'quantite_entree' => $ligne->quantite,
+                        'quantite_actuelle' => $nouvelleQuantiteActuelle,
+                        'motif' => 'Entrée de stock validée',
+                    ]);
+                }
+            }
+        });
+        
+        DB::commit();
         return redirect()->back()->with('success', 'Entrée de stock validée avec succès. Les stocks ont été mis à jour.');
 
     } catch (\Exception $e) {
+        DB::rollBack();
         return redirect()->back()->withErrors([
             'error' => 'Erreur lors de la validation: ' . $e->getMessage()
         ]);

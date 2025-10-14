@@ -13,19 +13,27 @@ return new class extends Migration
     {
         Schema::create('mouvement_stocks', function (Blueprint $table) {
             $table->id();
-            $table->string('type_mouvement');
-            $table->string('reference');
-            $table->string('source_type')->nullable();
-            $table->bigInteger('source_id')->nullable();
-            $table->decimal('quantite', 10, 2);
+            $table->string('type'); # IN - OUT
+            $table->string('type_mouvement'); # ['reception', 'retour', 'usage_interne']
+            
+            // Date et heure
+            $table->dateTime('date_mouvement');
+            
+            // Article
             $table->decimal('prix_unitaire', 10, 2);
-            $table->decimal('prix_total', 10, 2);
-            $table->decimal('stock_avant', 10, 2);
-            $table->decimal('stock_apres', 10, 2);
-            $table->date('date_mouvement');
+            $table->decimal('prix_ht', 10, 2);
+            
+            // Quantités
+            $table->decimal('quantite_entree', 10, 2)->default(0);
+            $table->decimal('quantite_sortie')->default(0);
+            $table->decimal('quantite_actuelle')->default(0);
+            
+            // Références
             $table->text('motif')->nullable();
+            
+            $table->nullableMorphs('referenceable'); // SorieStock or EntreeStock
             $table->foreignId('article_id')->constrained('articles');
-            $table->foreignId('created_by')->constrained('users', 'id');
+            $table->foreignId('created_by')->nullable()->constrained('users', 'id');
             $table->timestamps();
         });
     }

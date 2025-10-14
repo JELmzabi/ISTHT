@@ -7,32 +7,37 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MouvementStock extends Model
 {
+
     protected $fillable = [
+        'type',
         'article_id',
-        'type_mouvement',
-        'quantite',
-        'prix_unitaire',
-        'reference',
+        'created_by',
         'date_mouvement',
+        'prix_unitaire',
+        'prix_ht',
+        'type_mouvement',
+        'quantite_entree',
+        'quantite_sortie',
+        'quantite_actuelle',
+        'referenceable',
         'motif',
-        'stock_avant',
-        'stock_apres',
-        'source_type',
-        'source_id',
-        'created_by'
     ];
 
     protected $casts = [
         'quantite' => 'decimal:2',
         'prix_unitaire' => 'decimal:2',
-        'stock_avant' => 'decimal:2',
+        'prix_ht' => 'decimal:2',
         'stock_apres' => 'decimal:2',
+        'quantite_entree' => 'decimal:2',
+        'quantite_sortie' => 'decimal:2',
+        'quantite_actuelle' => 'decimal:2',
         'date_mouvement' => 'datetime',
     ];
 
     // Types de mouvement
     const TYPE_ENTREE = 'entree';
     const TYPE_SORTIE = 'sortie';
+    const M_TYPE_RECEPTION = 'reception';
     const TYPE_INVENTAIRE = 'inventaire';
     const TYPE_CORRECTION = 'correction';
 
