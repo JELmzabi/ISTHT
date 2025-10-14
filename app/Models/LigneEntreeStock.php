@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LigneEntreeStock extends Model
 {
+    protected $appends = ['total_ttc'];
+    
     protected $fillable = [
         'entree_stock_id',
         'article_id',
@@ -24,6 +26,11 @@ class LigneEntreeStock extends Model
         'montant_tva' => 'decimal:2',
         'prix_total' => 'decimal:2',
     ];
+
+    public function getTotalTtcAttribute()
+    {
+        return floatval($this->montant_tva + $this->prix_total);
+    }
 
     public function entreeStock(): BelongsTo
     {

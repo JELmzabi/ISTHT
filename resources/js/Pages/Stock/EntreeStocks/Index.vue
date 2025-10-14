@@ -474,9 +474,83 @@
         </div>
 
         <!-- Modals (garder les mêmes modaux que précédemment) -->
-        <Modal :show="showDetailModal" @close="closeDetailModal" max-width="6xl">
-            <!-- Contenu du modal de détail -->
-        </Modal>
+       <div v-if="showDetailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-full max-w-6xl shadow-lg rounded-md bg-white">
+                <!-- En-tête du modal -->
+                <div class="flex items-center justify-between pb-4 border-b">
+                    <h3 class="text-xl font-semibold text-gray-900">
+                        Détails de l’entrée de stock
+                    </h3>
+                    <button 
+                        @click="closeDetailModal"
+                        class="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <!-- Header -->
+
+                <!-- Stock Info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+                    <div class="bg-white rounded-xl shadow p-4">
+                        <h2 class="font-semibold text-gray-800 mb-2">Informations générales</h2>
+                        <p><strong>Numéro :</strong> {{ selectedEntree.numero }}</p>
+                        <p><strong>Date d’entrée :</strong> {{ formatDate(selectedEntree.date_entree) }}</p>
+                        <p><strong>Référence bon de réception :</strong> {{ selectedEntree.bon_reception.numero }}</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow p-4">
+                        <h2 class="font-semibold text-gray-800 mb-2">Fournisseur</h2>
+                        <p><strong>Nom :</strong> {{ selectedEntree.fournisseur.nom }}</p>
+                        <p><strong>Téléphone :</strong> {{ selectedEntree.fournisseur.telephone }}</p>
+                        <p><strong>Email :</strong> {{ selectedEntree.fournisseur.email }}</p>
+                        <p><strong>Adresse :</strong> {{ selectedEntree.fournisseur.adresse }}</p>
+                    </div>
+                </div>
+
+                <!-- Articles Table -->
+                <div class="bg-white rounded-xl shadow overflow-hidden">
+                <table class="min-w-full border-collapse">
+                    <thead class="bg-gray-100 border-b">
+                    <tr class="text-gray-700 text-sm">
+                        <th class="py-3 px-4 text-left">Code Article</th>
+                        <th class="py-3 px-4 text-left">Désignation</th>
+                        <th class="py-3 px-4 text-center">Quantité</th>
+                        <th class="py-3 px-4 text-right">Prix unitaire (DH)</th>
+                        <th class="py-3 px-4 text-right">Montant HT</th>
+                        <th class="py-3 px-4 text-right">TVA (%)</th>
+                        <th class="py-3 px-4 text-right">Montant TTC</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr class="text-sm border-b hover:bg-gray-50" v-for="ligne in selectedEntree.lignes_entree" :key="ligne.id">
+                        <td class="py-3 px-4">{{ ligne.article.reference }}</td>
+                        <td class="py-3 px-4">{{ ligne.article.designation }}</td>
+                        <td class="py-3 px-4 text-center">{{ ligne.quantite }}</td>
+                        <td class="py-3 px-4 text-right">{{ formatCurrency(ligne.prix_unitaire) }}</td>
+                        <td class="py-3 px-4 text-right">{{  formatCurrency(ligne.prix_total)  }}</td>
+                        <td class="py-3 px-4 text-right">{{ ligne.taux_tva ?? 0 }}%</td>
+                        <td class="py-3 px-4 text-right">{{formatCurrency(ligne.total_ttc) }}</td>
+                    </tr>
+                    </tbody>
+
+                    <tfoot class="bg-gray-100 font-semibold text-gray-800">
+                    <tr>
+                        <td></td>
+                        <td colspan="2" class="py-3 px-4 text-right">Total</td>
+                        <td></td>
+                        <td class="py-3 px-4 text-right">{{formatCurrency(calculateTotalMontant(selectedEntree))}}</td>
+                        <td></td>
+                        <td class="py-3 px-4 text-right">{{formatCurrency(calculateTotalMontantTtc(selectedEntree))}}</td>
+                    </tr>
+                    </tfoot>
+                </table>
+                </div>
+            </div>
+        </div>
 
         <Modal :show="showValidationModal" @close="closeValidationModal">
             <!-- Contenu du modal de validation -->
@@ -518,6 +592,7 @@ import {
     ArrowTrendingUpIcon,
     CheckCircleIcon
 } from '@heroicons/vue/24/outline';
+import Dump from '@/Components/Dump.vue';
 
 // Props
 const props = defineProps({
@@ -534,6 +609,11 @@ const props = defineProps({
         default: () => ({})
     },
 });
+
+const calculateTotalMontantTtc = (entree) => {
+    if (!entree.lignes_entree) return 0;
+    return entree.lignes_entree.reduce((total, ligne) => total + parseFloat(ligne.total_ttc), 0);
+};
 
 // États
 const filters = ref({
