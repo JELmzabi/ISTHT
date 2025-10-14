@@ -803,8 +803,8 @@ public function create(Request $request)
      */
     private function mettreAJourStatutCommande(BonCommande $bonCommande): void
     {
-        $estCompletementLivree = false;
-        $estPartiellementLivree = false;
+        $toutesLignesLivrees = true; // Assume all lines delivered initially
+        $auMoinsUneLigneRecue = false;
 
         foreach ($bonCommande->articles as $ligneCommande) {
             $quantiteRecue = LigneReception::whereHas('bonReception', function($query) use ($bonCommande) {
@@ -812,19 +812,19 @@ public function create(Request $request)
                 })
                 ->where('article_id', $ligneCommande->article_id)
                 ->sum('quantite_receptionnee');
-            
-            if ($quantiteRecue == $ligneCommande->quantite_commandee) {
-                $estCompletementLivree = true;
+
+            if ($quantiteRecue < $ligneCommande->quantite_commandee) {
+                $toutesLignesLivrees = false; // This line not fully delivered
             }
-            
+
             if ($quantiteRecue > 0) {
-                $estPartiellementLivree = true;
+                $auMoinsUneLigneRecue = true; // At least one line received
             }
         }
 
-        if ($estCompletementLivree) {
+        if ($toutesLignesLivrees) {
             $nouveauStatut = 'livre_completement';
-        } elseif ($estPartiellementLivree) {
+        } elseif ($auMoinsUneLigneRecue) {
             $nouveauStatut = 'livre_partiellement';
         } else {
             $nouveauStatut = 'attente_livraison';
