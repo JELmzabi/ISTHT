@@ -272,10 +272,11 @@ class BonReception extends Model
 
 
 
-        public static function genererNumero(): int // Retourne un int au lieu de string
+        public static function genererNumero() // Retourne un int au lieu de string
     {
-        $lastNumber = (int) self::withTrashed()->max('numero');
-        return $lastNumber + 1;
+        $lastNumber = self::withTrashed()->latest('id')->first()->id ?? 0;
+        $lastNumber++;
+        return 'BR-' . $lastNumber;
     }
 
     // Accessor pour le numéro d'affichage - CORRIGÉ
