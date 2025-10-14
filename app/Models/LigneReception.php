@@ -56,19 +56,19 @@ class LigneReception extends Model
             try {
                 if ($ligne->article && $ligne->quantite_receptionnee > 0) {
                     // Mettre à jour le stock de l'article
-                    $ligne->article->increment('quantite_stock', $ligne->quantite_receptionnee);
+                    // $ligne->article->increment('quantite_stock', $ligne->quantite_receptionnee);
                     
-                    // Créer un mouvement de stock
-                    MouvementStock::create([
-                        'article_id' => $ligne->article_id,
-                        'type_mouvement' => 'entree',
-                        'quantite' => $ligne->quantite_receptionnee,
-                        'prix_unitaire' => $ligne->prix_unitaire,
-                        'reference' => 'BR-' . ($ligne->bonReception->numero ?? 'N/A'),
-                        'date_mouvement' => now(),
-                        'motif' => 'Réception fournisseur',
-                        'created_by' => auth()->id() ?? 1
-                    ]);
+                    // // Créer un mouvement de stock
+                    // MouvementStock::create([
+                    //     'article_id' => $ligne->article_id,
+                    //     'type_mouvement' => 'entree',
+                    //     'quantite' => $ligne->quantite_receptionnee,
+                    //     'prix_unitaire' => $ligne->prix_unitaire,
+                    //     'reference' => 'BR-' . ($ligne->bonReception->numero ?? 'N/A'),
+                    //     'date_mouvement' => now(),
+                    //     'motif' => 'Réception fournisseur',
+                    //     'created_by' => auth()->id() ?? 1
+                    // ]);
                 }
             } catch (\Exception $e) {
                 Log::error('Erreur lors de la mise à jour du stock: ' . $e->getMessage());
@@ -80,14 +80,14 @@ class LigneReception extends Model
             try {
                 if ($ligne->article && $ligne->quantite_receptionnee > 0) {
                     // Décrementer le stock
-                    $ligne->article->decrement('quantite_stock', $ligne->quantite_receptionnee);
+                //     $ligne->article->decrement('quantite_stock', $ligne->quantite_receptionnee);
                     
-                    // Supprimer le mouvement de stock associé
-                    MouvementStock::where('article_id', $ligne->article_id)
-                        ->where('reference', 'BR-' . ($ligne->bonReception->numero ?? 'N/A'))
-                        ->where('type_mouvement', 'entree')
-                        ->where('quantite', $ligne->quantite_receptionnee)
-                        ->delete();
+                //     // Supprimer le mouvement de stock associé
+                //     MouvementStock::where('article_id', $ligne->article_id)
+                //         ->where('reference', 'BR-' . ($ligne->bonReception->numero ?? 'N/A'))
+                //         ->where('type_mouvement', 'entree')
+                //         ->where('quantite', $ligne->quantite_receptionnee)
+                //         ->delete();
                 }
             } catch (\Exception $e) {
                 Log::error('Erreur lors de la suppression du mouvement de stock: ' . $e->getMessage());

@@ -8,6 +8,7 @@ use App\Models\LigneEntreeStock;
 use App\Models\Fournisseur;
 use App\Models\Article;
 use App\Models\BonReception;
+use App\Models\MouvementStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -326,7 +327,27 @@ public function valider(EntreeStock $entreeStock)
             ]);
         }
 
-        $entreeStock->valider();
+        $entreeStock->update(['statut' => EntreeStock::STATUT_VALIDE]);
+        
+        // Mettre à jour les stocks des articles
+        foreach ($entreeStock->lignesEntree as $ligne) {
+            if ($ligne->article) {
+                $ligne->article->increment('quantite_stock', $ligne->quantite);
+                
+                // Créer un mouvement de stock
+                MouvementStock::create([
+                    'article_id' => $ligne->article_id,
+                    'type_mouvement' => 'entree',
+                    'quantite' => $ligne->quantite,
+                    'prix_unitaire' => $ligne->prix_unitaire,
+                    'reference' => 'ES-' . $entreeStock->numero_affichage,
+                    'date_mouvement' => $entreeStock->date_entree,
+                    'motif' => 'Entrée de stock validée',
+                    'created_by' => auth()->id() ?? 1
+                ]);
+            }
+        }
+        
 
         return redirect()->back()->with('success', 'Entrée de stock validée avec succès. Les stocks ont été mis à jour.');
 

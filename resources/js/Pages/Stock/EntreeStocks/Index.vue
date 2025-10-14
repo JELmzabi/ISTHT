@@ -338,17 +338,19 @@
                                         </button>
 
                                         <!-- Valider -->
-                                        <button
+                                        <Link
                                             v-if="entree.statut === 'attente_validation'"
-                                            @click="openValidationModal(entree)"
+                                            :href="route('entree-stocks.valider', entree.id)"
                                             class="p-2 text-green-600 hover:text-green-800 hover:bg-green-100 rounded-xl transition-all duration-200 group/tooltip relative"
+                                            as="button"
+                                            method="post"
                                             title="Valider l'entrée"
                                         >
                                             <CheckIcon class="h-5 w-5" />
                                             <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap">
                                                 Valider
                                             </div>
-                                        </button>
+                                        </Link>
 
                                         <!-- Annuler -->
                                         <button

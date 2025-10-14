@@ -224,7 +224,7 @@ class BonReception extends Model
                     'fournisseur_id' => $this->fournisseur_id,
                     'date_entree' => $this->date_reception,
                     'statut' => 'attente_validation',
-                    'notes' => $this->notes . "\n\nCréé automatiquement à partir du bon de réception " . $this->numero_affichage,
+                    'notes' => $this->notes . "Créé automatiquement à partir du bon de réception " . $this->numero_affichage,
                     'created_by' => $this->created_by,
                 ]);
 
@@ -251,24 +251,24 @@ class BonReception extends Model
         }
     }
 
-    protected static function boot()
-    {
-        parent::boot();
+    // protected static function boot()
+    // {
+    //     parent::boot();
 
-        // Créer automatiquement une entrée de stock après la création d'un bon de réception
-        static::created(function ($bonReception) {
-            if ($bonReception->statut === BonReception::STATUT_VALIDE) {
-                $bonReception->creerEntreeStockAutomatique();
-            }
-        });
+    //     // Créer automatiquement une entrée de stock après la création d'un bon de réception
+    //     static::created(function ($bonReception) {
+    //         if ($bonReception->statut === BonReception::STATUT_VALIDE) {
+    //             $bonReception->creerEntreeStockAutomatique();
+    //         }
+    //     });
 
-        // Mettre à jour l'entrée de stock si le bon de réception est modifié
-        static::updated(function ($bonReception) {
-            if ($bonReception->isDirty('statut') && $bonReception->statut === BonReception::STATUT_VALIDE) {
-                $bonReception->creerEntreeStockAutomatique();
-            }
-        });
-    }
+    //     // Mettre à jour l'entrée de stock si le bon de réception est modifié
+    //     static::updated(function ($bonReception) {
+    //         if ($bonReception->isDirty('statut') && $bonReception->statut === BonReception::STATUT_VALIDE) {
+    //             $bonReception->creerEntreeStockAutomatique();
+    //         }
+    //     });
+    // }
 
 
 

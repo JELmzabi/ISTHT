@@ -11,7 +11,8 @@ use App\Models\Article;
 use App\Models\User;
 use App\Models\Fournisseur; // Ajouter si nécessaire
 use App\Models\BonCommandeArticle; // AJOUTER CET IMPORT
-
+use App\Models\EntreeStock;
+use App\Models\LigneEntreeStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -1029,6 +1030,49 @@ public function create(Request $request)
 
             // Mettre à jour le statut de la commande
             $this->mettreAJourStatutCommande($bonCommande);
+
+            if ($bonReception->statut == BonReception::STATUT_VALIDE) {
+                try {
+                    DB::transaction(function () use ($bonReception) {
+                        // Vérifier si une entrée de stock existe déjà
+                        $existingEntree = EntreeStock::where('bon_reception_id', $bonReception->id)->first();
+                        
+                        if ($existingEntree) {
+                            Log::info("Une entrée de stock existe déjà pour ce bon de réception: {$bonReception->id}");
+                            return;
+                        }
+
+                        // Créer l'entrée de stock
+                        $entreeStock = EntreeStock::create([
+                            'numero' => EntreeStock::genererNumero(),
+                            'bon_reception_id' => $bonReception->id,
+                            'fournisseur_id' => $bonReception->fournisseur_id,
+                            'date_entree' => $bonReception->date_reception,
+                            'statut' => 'attente_validation',
+                            'notes' => $bonReception->notes . "Créé automatiquement à partir du bon de réception " . $bonReception->numero_affichage,
+                            'created_by' => $bonReception->created_by,
+                        ]);
+
+                        // Créer les lignes d'entrée de stock à partir des lignes de réception
+                        foreach ($bonReception->lignesReception as $ligneReception) {
+                            LigneEntreeStock::create([
+                                'entree_stock_id' => $entreeStock->id,
+                                'article_id' => $ligneReception->article_id,
+                                'quantite' => $ligneReception->quantite_receptionnee,
+                                'prix_unitaire' => $ligneReception->prix_unitaire,
+                                'taux_tva' => $ligneReception->taux_tva,
+                                'montant_tva' => $ligneReception->montant_tva,
+                                'prix_total' => $ligneReception->prix_total,
+                            ]);
+                        }
+
+                        Log::info("Entrée de stock créée automatiquement pour le bon de réception: {$bonReception->id}");
+                    });
+
+                } catch (\Exception $e) {
+                    Log::error('Erreur création entrée stock automatique: ' . $e->getMessage());
+                }
+            }
 
             DB::commit();
 

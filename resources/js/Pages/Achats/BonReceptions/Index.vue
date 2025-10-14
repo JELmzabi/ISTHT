@@ -1162,6 +1162,8 @@ const showNotification = (message, type = 'success') => {
 const isReceptionComplete = computed(() => {
     if (!selectedCommande.value) return false;
 
+    return calculateNewProgression() === 100;
+
     // Vérifier si tous les articles sont complètement reçus
     return selectedCommande.value.articles.every(article => {
         const ligneReception = form.value.lignes_reception.find(
