@@ -58,7 +58,7 @@ const submit = () => {
         <p class="text-gray-500 mt-1">Accédez à votre espace administrateur</p>
 
         <!-- Message de statut (ex : lien de réinitialisation envoyé) -->
-        <div v-if="status" class="mt-3 text-sm font-medium text-green-600">
+        <div v-if="status" class="mt-3 text-sm bg-red-300 rounded-lg p-3 text-red-700">
           {{ status }}
         </div>
 

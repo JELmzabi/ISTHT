@@ -33,6 +33,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $isActive = $request->user()->statut;
+        if (!$isActive) {
+            Auth::logout();
+
+            return redirect()->back()->with('status', 'Votre compte est desactive, veuillez contacter l\'administrateur');
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
