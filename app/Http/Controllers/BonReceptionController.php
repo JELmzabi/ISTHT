@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ShowBonReceptionResource;
 use App\Models\BonReception;
 use App\Models\BonCommande;
 use App\Models\LigneReception;
@@ -148,6 +149,8 @@ class BonReceptionController extends Controller
 
     public function show(BonReception $bonReception)
     {
+
+        dsd($bonReception);
         try {
             $bonReception->load([
                 'bonCommande',
@@ -417,12 +420,11 @@ class BonReceptionController extends Controller
  */
 public function showDetails(BonReception $bonReception)
 {
+    
     try {
         $bonReception->load([
-            'bonCommande.fournisseur',
             'fournisseur',
             'responsableReception',
-            'lignesReception.article.unite',
             'createdBy'
         ]);
 
@@ -475,7 +477,7 @@ public function showDetails(BonReception $bonReception)
         }
 
         return inertia('Achats/BonReceptions/ShowDetails', [
-            'bonReception' => $bonReception,
+            'bonReception' => ShowBonReceptionResource::make($bonReception),
             'totaux' => $totaux,
             'comparaison' => $comparaison,
         ]);

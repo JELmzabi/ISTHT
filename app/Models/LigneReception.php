@@ -96,10 +96,10 @@ class LigneReception extends Model
     }
 
     // Accessor pour le montant HT
-    public function getMontantHtAttribute(): float
-    {
-        return $this->prix_total - $this->montant_tva;
-    }
+    // public function getMontantHtAttribute(): float
+    // {
+    //     return $this->prix_total - $this->montant_tva;
+    // }
 
     // Vérifier si la ligne est complètement reçue (par rapport à la commande)
     public function estComplete(): bool

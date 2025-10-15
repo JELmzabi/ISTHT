@@ -2,12 +2,12 @@
     <AuthenticatedLayout>
         <Head :title="`Bon Réception ${bonReception.numero_affichage}`" />
 
-        <div class="space-y-6">
+        <div class="space-y-6 py-8 px-4">
             <!-- En-tête -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
-                        Bon de Réception {{ bonReception.numero_affichage }}
+                        Bon de Réception {{ bonReception.numero }}
                     </h1>
                     <p class="text-gray-600">Détails complets de la réception</p>
                 </div>
@@ -33,17 +33,17 @@
             </div>
 
             <!-- Alertes -->
-            <div v-if="$page.props.flash.success" class="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div v-if="$page.props.flash?.success" class="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div class="flex items-center">
                     <CheckCircleIcon class="h-5 w-5 text-green-400 mr-2" />
-                    <span class="text-green-800">{{ $page.props.flash.success }}</span>
+                    <span class="text-green-800">{{ $page.props.flash?.success }}</span>
                 </div>
             </div>
 
-            <div v-if="$page.props.flash.error" class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div v-if="$page.props.flash?.error" class="bg-red-50 border border-red-200 rounded-lg p-4">
                 <div class="flex items-center">
                     <ExclamationTriangleIcon class="h-5 w-5 text-red-400 mr-2" />
-                    <span class="text-red-800">{{ $page.props.flash.error }}</span>
+                    <span class="text-red-800">{{ $page.props.flash?.error }}</span>
                 </div>
             </div>
 
@@ -55,7 +55,7 @@
                     <div class="space-y-3">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Numéro:</span>
-                            <span class="font-medium">{{ bonReception.numero_affichage }}</span>
+                            <span class="font-medium">{{ bonReception.numero }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Date réception:</span>
@@ -211,7 +211,7 @@
                                     <span class="font-semibold">{{ ligne.quantite_receptionnee }}</span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                                    {{ ligne.article?.unite?.nom || 'Pièce' }}
+                                    {{ ligne.article?.unite_mesure || 'Pièce' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                                     {{ formatCurrency(ligne.prix_unitaire) }}
@@ -220,13 +220,13 @@
                                     {{ ligne.taux_tva }}%
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                                    {{ formatCurrency(ligne.quantite_receptionnee * ligne.prix_unitaire) }}
+                                    {{ formatCurrency(ligne.montant_ht) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                                     {{ formatCurrency(ligne.montant_tva) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-semibold">
-                                    {{ formatCurrency(ligne.prix_total) }}
+                                    {{ formatCurrency(ligne.montant_ttc) }}
                                 </td>
                             </tr>
                         </tbody>
@@ -334,6 +334,7 @@ import {
     ExclamationTriangleIcon,
     CheckBadgeIcon
 } from '@heroicons/vue/24/outline';
+import Dump from '@/Components/Dump.vue';
 
 const props = defineProps({
     bonReception: {
