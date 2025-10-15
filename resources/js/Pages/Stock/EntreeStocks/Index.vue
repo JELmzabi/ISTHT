@@ -430,13 +430,13 @@
                                'Aucun résultat ne correspond à vos critères de recherche.' : 
                                'Commencez par créer votre première entrée de stock pour gérer vos approvisionnements.' }}
                         </p>
-                        <Link
+                        <!-- <Link
                             :href="route('entree-stocks.create')"
                             class="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors"
                         >
                             <PlusIcon class="h-5 w-5" />
                             Créer une entrée
-                        </Link>
+                        </Link> -->
                     </div>
                 </div>
 
