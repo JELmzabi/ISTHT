@@ -18,9 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Barryvdh\DomPDF\Facade\Pdf;
-
-
+use Spatie\LaravelPdf\Facades\Pdf;
 
 class BonReceptionController extends Controller
 {
@@ -581,21 +579,21 @@ public function downloadPdf(BonReception $bonReception)
         $totaux = $this->calculerTotaux($bonReception);
 
         // Utiliser une vue simplifiée pour éviter les problèmes
-        $pdf = PDF::loadView('pdf.bon-reception-simple', [
-            'bonReception' => $bonReception,
-            'totaux' => $totaux
-        ]);
+        // $pdf = PDF::loadView('pdf.bon-reception', [
+        //     'bonReception' => $bonReception,
+        //     'totaux' => $totaux
+        // ]);
 
-        // Options du PDF avec gestion de mémoire
-        $pdf->setPaper('A4', 'portrait');
-        $pdf->setOptions([
-            'isHtml5ParserEnabled' => true,
-            'isRemoteEnabled' => false, // Désactiver le remote pour éviter les problèmes
-            'defaultFont' => 'dejavu sans',
-            'dpi' => 96,
-            'isPhpEnabled' => false,
-            'isJavascriptEnabled' => false,
-        ]);
+        // // Options du PDF avec gestion de mémoire
+        // $pdf->setPaper('A4', 'portrait');
+        // $pdf->setOptions([
+        //     'isHtml5ParserEnabled' => true,
+        //     'isRemoteEnabled' => false, // Désactiver le remote pour éviter les problèmes
+        //     'defaultFont' => 'dejavu sans',
+        //     'dpi' => 96,
+        //     'isPhpEnabled' => false,
+        //     'isJavascriptEnabled' => false,
+        // ]);
 
         $fileName = "bon-reception-{$bonReception->numero}.pdf";
 
@@ -604,7 +602,8 @@ public function downloadPdf(BonReception $bonReception)
             'total_lignes' => $bonReception->lignesReception->count()
         ]);
 
-        return $pdf->download($fileName);
+        return Pdf::view('pdf.bon-reception', compact('bonReception'))->name($fileName)
+            ->download();
 
     } catch (\Exception $e) {
         Log::error('Error generating PDF for bon reception: ' . $e->getMessage(), [
