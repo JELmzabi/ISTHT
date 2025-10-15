@@ -66,10 +66,7 @@
                     @endforeach
 
                     <tr class="bg-gray-200 font-bold">
-                        <td colspan="2" class="border border-black text-right p-1">Total</td>
-                        <td class="border border-black text-center p-1">{{ number_format($totalQuantite, 2) }}</td>
-                        <td class="border border-black text-right p-1">{{ number_format($totalHT, 2, ',', ' ') }} DH</td>
-                        <td class="border border-black text-right p-1">{{ number_format($totalTVA, 2, ',', ' ') }} DH</td>
+                        <td colspan="5" class="border border-black text-right p-1">Total</td>
                         <td class="border border-black text-right p-1">{{ number_format($totalTTC, 2, ',', ' ') }} DH</td>
                     </tr>
                 </tbody>
