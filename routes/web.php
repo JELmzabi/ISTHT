@@ -12,6 +12,7 @@ use App\Http\Controllers\BonReceptionController;
 use App\Http\Controllers\EntreeStockController;
 use App\Http\Controllers\SortieStockController;
 use App\Http\Controllers\MouvementStockController;
+use App\Http\Controllers\UserManagementController;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -156,6 +157,16 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
         Route::get('/mouvements/stats', [MouvementStockController::class, 'stats'])->name('mouvement-stocks.stats');
         Route::get('/mouvements/article/{article}', [MouvementStockController::class, 'byArticle'])->name('mouvement-stocks.by-article');
     });
+
+
+
+    Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+    Route::get('/users/create', [UserManagementController::class, 'create'])->name('users.create');
+    Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
+    Route::get('/users/{user}', [UserManagementController::class, 'show'])->name('users.show');
+    Route::get('/users/{user}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
+    Route::patch('/users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('users.toggle-status');
 });
 
 require __DIR__.'/auth.php';
