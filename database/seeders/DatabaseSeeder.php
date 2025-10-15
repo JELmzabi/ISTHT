@@ -19,13 +19,13 @@ class DatabaseSeeder extends Seeder
             ArticlesSeeder::class,
             ArticleImagesSeeder::class,
             FournisseursSeeder::class,
-            BonCommandesSeeder::class,
-            BonCommandeArticlesSeeder::class,
-            BonReceptionsSeeder::class,
-            LigneReceptionsSeeder::class,
-            EntreeStocksSeeder::class,
-            LigneEntreeStocksSeeder::class,
-            HistoriqueStatutBcsSeeder::class,
+            // BonCommandesSeeder::class,
+            // BonCommandeArticlesSeeder::class,
+            // BonReceptionsSeeder::class,
+            // LigneReceptionsSeeder::class,
+            // EntreeStocksSeeder::class,
+            // LigneEntreeStocksSeeder::class,
+            // HistoriqueStatutBcsSeeder::class,
         ]);
     }
 }
