@@ -128,8 +128,8 @@ Route::get('bon-receptions/commande-details/{id}', [BonReceptionController::clas
     Route::prefix('stock')->group(function () {
         // Routes des Entrées en Stock
         Route::get('/entrees', [EntreeStockController::class, 'index'])->name('entree-stocks.index');
-        Route::get('/entrees/create', [EntreeStockController::class, 'create'])->name('entree-stocks.create');
-        Route::post('/entrees', [EntreeStockController::class, 'store'])->name('entree-stocks.store');
+        // Route::get('/entrees/create', [EntreeStockController::class, 'create'])->name('entree-stocks.create');
+        // Route::post('/entrees', [EntreeStockController::class, 'store'])->name('entree-stocks.store');
         Route::get('/entrees/{entreeStock}', [EntreeStockController::class, 'show'])->name('entree-stocks.show');
         Route::get('/entrees/{entreeStock}/edit', [EntreeStockController::class, 'edit'])->name('entree-stocks.edit');
         Route::put('/entrees/{entreeStock}', [EntreeStockController::class, 'update'])->name('entree-stocks.update');

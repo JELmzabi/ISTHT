@@ -11,13 +11,13 @@
                         <p class="text-blue-100 text-lg opacity-90">Gestion complète des entrées en stock et validation</p>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                        <Link
+                        <!-- <Link
                             :href="route('entree-stocks.create')"
                             class="bg-white text-blue-600 px-6 py-3 rounded-xl hover:bg-blue-50 flex items-center justify-center gap-3 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
                         >
                             <PlusIcon class="h-5 w-5" />
                             Nouvelle Entrée
-                        </Link>
+                        </Link> -->
                         <button
                             @click="exportData"
                             class="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-400 flex items-center justify-center gap-3 transition-all duration-200 font-semibold border border-blue-400"
@@ -41,10 +41,10 @@
                             <DocumentTextIcon class="h-8 w-8 text-blue-600" />
                         </div>
                     </div>
-                    <div class="mt-4 flex items-center text-sm text-green-600">
+                    <!-- <div class="mt-4 flex items-center text-sm text-green-600">
                         <ArrowTrendingUpIcon class="h-4 w-4 mr-1" />
                         <span>+12% ce mois</span>
-                    </div>
+                    </div> -->
                 </div>
 
                 <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
@@ -378,7 +378,7 @@
                                         </Link>
 
                                         <!-- Menu contextuel -->
-                                        <div class="relative">
+                                        <!-- <div class="relative">
                                             <button
                                                 @click="toggleContextMenu(entree.id)"
                                                 class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200"
@@ -412,7 +412,7 @@
                                                     Dupliquer
                                                 </button>
                                             </div>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </td>
                             </tr>
