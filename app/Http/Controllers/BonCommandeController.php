@@ -17,7 +17,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
 
-use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\Log;
+use Spatie\LaravelPdf\Facades\Pdf as FacadesPdf;
+
 class BonCommandeController extends Controller
 {
     // Ajouter cette propriété pour les taux de TVA
@@ -569,23 +571,24 @@ private function notifyAnnulation(BonCommande $bonCommande, string $raison)
 }
 
 
-public function downloadPdf(BonCommande $bon_commande)
-{
-    // Vérifier que le statut n'est pas "cree" ou "annule"
-    if ($bon_commande->statut === 'cree' || $bon_commande->statut === 'annule') {
-        abort(403, 'PDF non disponible pour ce statut');
-    }
+// public function downloadPdf(BonCommande $bon_commande)
+// {
+//     dd($bon_commande);
+//     // Vérifier que le statut n'est pas "cree" ou "annule"
+//     if ($bon_commande->statut === 'cree' || $bon_commande->statut === 'annule') {
+//         abort(403, 'PDF non disponible pour ce statut');
+//     }
 
-    $data = [
-        'bonCommande' => $bon_commande,
-        'articles' => $bon_commande->articles,
-        'fournisseur' => $bon_commande->fournisseur,
-    ];
+//     $data = [
+//         'bonCommande' => $bon_commande,
+//         'articles' => $bon_commande->articles,
+//         'fournisseur' => $bon_commande->fournisseur,
+//     ];
 
-    $pdf = PDF::loadView('bon-commandes.pdf', $data);
+//     $pdf = PDF::loadView('bon-commandes.pdf', $data);
     
-    return $pdf->download("bon-commande-{$bon_commande->reference}.pdf");
-}
+//     return $pdf->download("bon-commande-{$bon_commande->reference}.pdf");
+// }
 /**
  * Méthode spécifique pour annuler sans passer par updateStatut
  * (Optionnel - pour une annulation directe)
@@ -742,12 +745,11 @@ public function updateFournisseurLogo(Request $request, Fournisseur $fournisseur
             'fournisseur' => $bonCommande->fournisseur,
         ];
 
-        $pdf = PDF::loadView('bon-commandes.pdf', $data);
         
         $cleanReference = preg_replace('/[\/\\\\]/', '-', $bonCommande->reference);
         $fileName = "bon-commande-{$cleanReference}.pdf";
         
-        return $pdf->download($fileName);
+        return FacadesPdf::view('pdf.bon-commande', $data)->download($fileName);
     }
  
 }
