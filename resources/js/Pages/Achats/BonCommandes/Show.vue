@@ -5,6 +5,27 @@
     <div class="bg-white rounded-lg shadow-lg border border-gray-200 w-full mx-auto">
     <!-- En-tête -->
     <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+      <div class="flex space-x-3 mb-4">
+        <!-- Bouton retour -->
+        <Link
+          :href="route('bon-commandes.index')"
+          class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center gap-2 transition-colors"
+        >
+        <ArrowLeftIcon class="h-5 w-5" />
+          Retour
+        </Link>
+
+        <!-- Bouton PDF -->
+        <a
+          :href="route('bon-commandes.pdf', bonCommande.id)"
+          target="_blank"
+          class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2 transition-colors"
+        >
+          <DocumentArrowDownIcon class="h-5 w-5" />
+          PDF
+        </a>
+      </div>
+      
       <div class="flex justify-between items-start">
         <div>
             <p class="flex items-center">
@@ -131,6 +152,7 @@
 import { computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { ArrowLeftIcon, DocumentArrowDownIcon } from '@heroicons/vue/24/outline';
 
 // Props
 const props = defineProps({

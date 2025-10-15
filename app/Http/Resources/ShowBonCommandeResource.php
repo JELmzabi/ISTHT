@@ -17,6 +17,7 @@ class ShowBonCommandeResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'reference' => $this->reference,
             'date_mise_ligne' => $this->date_mise_ligne,
             'created_at' => $this->created_at,
