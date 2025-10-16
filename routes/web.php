@@ -122,7 +122,6 @@ Route::get('bon-receptions/commande-details/{id}', [BonReceptionController::clas
         Route::put('fournisseurs/{fournisseur}', [FournisseurController::class, 'update'])->name('fournisseurs.update');
         Route::delete('fournisseurs/{fournisseur}', [FournisseurController::class, 'destroy'])->name('fournisseurs.destroy');
         Route::patch('fournisseurs/{fournisseur}/toggle-statut', [FournisseurController::class, 'toggleStatut'])->name('fournisseurs.toggle-statut');
-        Route::get('fournisseurs/export', [FournisseurController::class, 'export'])->name('fournisseurs.export');
         Route::get('fournisseurs/stats', [FournisseurController::class, 'stats'])->name('fournisseurs.stats');
     });
 
@@ -184,6 +183,9 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::put('/demandes/{demande}/approve', [DemandeController::class, 'approve'])->name('demandes.approve');
     Route::put('/demandes/{demande}/reject', [DemandeController::class, 'reject'])->name('demandes.reject');
     
+
+    ##### Exports #####
+    Route::get('fournisseurs/export', [FournisseurController::class, 'export'])->name('fournisseurs.export');
 });
 
 require __DIR__.'/auth.php';

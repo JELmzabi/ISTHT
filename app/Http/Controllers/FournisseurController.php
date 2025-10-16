@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\FournisseursExport;
 use App\Models\Fournisseur;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FournisseurController extends Controller
@@ -260,79 +262,79 @@ class FournisseurController extends Controller
     /**
      * Export fournisseurs to CSV/Excel
      */
-    public function export(Request $request): StreamedResponse
-    {
-        try {
-            $query = Fournisseur::withCount('bonCommandes');
+    // public function export(Request $request): StreamedResponse
+    // {
+    //     try {
+    //         $query = Fournisseur::withCount('bonCommandes');
 
-            // Appliquer les mêmes filtres que pour l'index
-            if ($request->has('est_actif') && $request->est_actif !== '') {
-                $query->where('est_actif', $request->boolean('est_actif'));
-            }
+    //         // Appliquer les mêmes filtres que pour l'index
+    //         if ($request->has('est_actif') && $request->est_actif !== '') {
+    //             $query->where('est_actif', $request->boolean('est_actif'));
+    //         }
 
-            if ($request->filled('ville')) {
-                $query->where('ville', 'like', '%' . $request->ville . '%');
-            }
+    //         if ($request->filled('ville')) {
+    //             $query->where('ville', 'like', '%' . $request->ville . '%');
+    //         }
 
-            if ($request->filled('search')) {
-                $search = $request->search;
-                $query->where(function ($q) use ($search) {
-                    $q->where('nom', 'like', '%' . $search . '%')
-                      ->orWhere('raison_sociale', 'like', '%' . $search . '%')
-                      ->orWhere('contact', 'like', '%' . $search . '%')
-                      ->orWhere('ville', 'like', '%' . $search . '%');
-                });
-            }
+    //         if ($request->filled('search')) {
+    //             $search = $request->search;
+    //             $query->where(function ($q) use ($search) {
+    //                 $q->where('nom', 'like', '%' . $search . '%')
+    //                   ->orWhere('raison_sociale', 'like', '%' . $search . '%')
+    //                   ->orWhere('contact', 'like', '%' . $search . '%')
+    //                   ->orWhere('ville', 'like', '%' . $search . '%');
+    //             });
+    //         }
 
-            $fournisseurs = $query->get();
+    //         $fournisseurs = $query->get();
 
-            $fileName = 'fournisseurs_' . now()->format('Y-m-d_H-i-s') . '.csv';
+    //         $fileName = 'fournisseurs_' . now()->format('Y-m-d_H-i-s') . '.csv';
 
-            return response()->streamDownload(function () use ($fournisseurs) {
-                $handle = fopen('php://output', 'w');
+    //         return response()->streamDownload(function () use ($fournisseurs) {
+    //             $handle = fopen('php://output', 'w');
                 
-                // En-têtes
-                fputcsv($handle, [
-                    'Nom',
-                    'Raison Sociale',
-                    'Contact',
-                    'Téléphone',
-                    'Email',
-                    'Adresse',
-                    'Ville',
-                    'ICE',
-                    'Bons de Commande',
-                    'Statut',
-                    'Date Création'
-                ]);
+    //             // En-têtes
+    //             fputcsv($handle, [
+    //                 'Nom',
+    //                 'Raison Sociale',
+    //                 'Contact',
+    //                 'Téléphone',
+    //                 'Email',
+    //                 'Adresse',
+    //                 'Ville',
+    //                 'ICE',
+    //                 'Bons de Commande',
+    //                 'Statut',
+    //                 'Date Création'
+    //             ]);
 
-                // Données
-                foreach ($fournisseurs as $fournisseur) {
-                    fputcsv($handle, [
-                        $fournisseur->nom,
-                        $fournisseur->raison_sociale,
-                        $fournisseur->contact,
-                        $fournisseur->telephone,
-                        $fournisseur->email,
-                        $fournisseur->adresse,
-                        $fournisseur->ville,
-                        $fournisseur->ice,
-                        $fournisseur->bon_commandes_count,
-                        $fournisseur->est_actif ? 'Actif' : 'Inactif',
-                        $fournisseur->created_at->format('d/m/Y H:i')
-                    ]);
-                }
+    //             // Données
+    //             foreach ($fournisseurs as $fournisseur) {
+    //                 fputcsv($handle, [
+    //                     $fournisseur->nom,
+    //                     $fournisseur->raison_sociale,
+    //                     $fournisseur->contact,
+    //                     $fournisseur->telephone,
+    //                     $fournisseur->email,
+    //                     $fournisseur->adresse,
+    //                     $fournisseur->ville,
+    //                     $fournisseur->ice,
+    //                     $fournisseur->bon_commandes_count,
+    //                     $fournisseur->est_actif ? 'Actif' : 'Inactif',
+    //                     $fournisseur->created_at->format('d/m/Y H:i')
+    //                 ]);
+    //             }
 
-                fclose($handle);
-            }, $fileName);
+    //             fclose($handle);
+    //         }, $fileName);
 
-        } catch (\Exception $e) {
-            // Fallback pour les erreurs d'export
-            return response()->streamDownload(function () use ($e) {
-                echo "Erreur lors de l'export: " . $e->getMessage();
-            }, 'erreur_export.txt');
-        }
-    }
+    //     } catch (\Exception $e) {
+    //         // Fallback pour les erreurs d'export
+    //         return response()->streamDownload(function () use ($e) {
+    //             echo "Erreur lors de l'export: " . $e->getMessage();
+    //         }, 'erreur_export.txt');
+    //     }
+    // }
 
     /**
      * Get fournisseur statistics
@@ -356,5 +358,11 @@ class FournisseurController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+
+    public function export() 
+    {
+        return Excel::download(new FournisseursExport, 'fournisseurs.xlsx');
     }
 }
