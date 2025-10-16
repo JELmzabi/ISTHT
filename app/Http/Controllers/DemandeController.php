@@ -10,13 +10,14 @@ use App\Models\Article;
 use App\Models\Demande;
 use App\Models\MouvementStock;
 use App\Rules\InStockRule;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class DemandeController extends Controller
 {
-
+    use AuthorizesRequests;
 
     public function mesDemandes(Request $request)
     {
@@ -56,6 +57,8 @@ class DemandeController extends Controller
     }
 
     public function create(Request $request) {
+        $this->authorize('create', Demande::class);
+
         $articles = Article::all(['id', 'designation']);
         return Inertia::render('Demandes/CreateDemandeModal', [
             'articles' => $articles
@@ -63,6 +66,8 @@ class DemandeController extends Controller
     }
     
     public function store(Request $request) {
+        $this->authorize('create', Demande::class);
+        
         $request->validate([
             'articles' => 'required|array|min:1',
             'articles.*.article_id' => ['required', 'exists:articles,id'],
@@ -92,7 +97,7 @@ class DemandeController extends Controller
     }
 
     public function edit(Demande $demande) {
-        $this->ensureAllowed($demande);
+        $this->authorize('update', $demande);
         
         $articles = Article::all(['id', 'designation']);
         $demande->load(['articles']);
@@ -105,7 +110,7 @@ class DemandeController extends Controller
 
     public function update(Request $request, Demande $demande) {
         
-        $this->ensureAllowed($demande);
+        $this->authorize('update', $demande);
         
         $request->validate([
             'articles' => 'required|array|min:1',
@@ -138,7 +143,7 @@ class DemandeController extends Controller
     }
 
     public function show(Demande $demande) {
-        $this->ensureAllowed($demande);
+        $this->authorize('show', $demande);
         
         $demande->load(['articles', 'valideur']);
 
@@ -148,16 +153,10 @@ class DemandeController extends Controller
     }
 
     public function cancel(Demande $demande) {
-        $this->ensureAllowed($demande);
+        $this->authorize('cancel', $demande);
+
         $demande->update(['statut' => DemandeStatut::ANNULEE]);
         return redirect()->back();
-    }
-
-    private function ensureAllowed($demande)
-    {
-        if ($demande->demandeur_id !== auth()->user()->id || $demande->statut !== DemandeStatut::EN_ATTENTE->value) {
-            abort(404);
-        }
     }
 
 }
