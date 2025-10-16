@@ -19,8 +19,10 @@ class DemandeController extends Controller
 {
     use AuthorizesRequests;
 
-    public function mesDemandes(Request $request)
+    public function index(Request $request)
     {
+        $this->authorize('list', Demande::class);
+        
         $user = auth()->user();
 
         $search = $request->get('search');
@@ -45,7 +47,7 @@ class DemandeController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('Demandes/MesDemandes', [
+        return Inertia::render('Demandes/Index', [
             'demandes' => MesDemendesResource::collection($demandes),
             'filters' => [
                 'search' => $search,

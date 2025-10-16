@@ -169,7 +169,7 @@ const sidebarSections = [
   {
     label: 'Demmande des Articles',
     items: [
-      { name: 'Mes Demandes', href: '/mes-demandes', match: '/mes-demandes', icon: ArrowUpCircleIcon, bgColor: 'bg-gray-100 text-gray-600' },
+      { name: 'Les Demandes', href: '/demandes', match: '/demandes', icon: ArrowUpCircleIcon, bgColor: 'bg-gray-100 text-gray-600' },
     ]
   },
   {
@@ -196,7 +196,7 @@ const pageTitles = {
   '/achats/bon-receptions': 'Bons de Réception',
   '/inventaire': 'Inventaire du Stock',
   '/mouvements': 'Mouvements de Stock',
-  '/mes-demandes': 'Mes Demandes',
+  '/demandes': 'Mes Demandes',
   '/users': 'Gestion des Utilisateurs',
   '/profile': 'Mon Profil',
   '/parametres': 'Paramètres du Système',

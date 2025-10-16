@@ -100,14 +100,14 @@ function cancelDemande() {
 
 <template>
     <AuthenticatedLayout>
-        <Head title="Mes Demandes" />
+        <Head title="Les Demandes" />
 
         <div class="space-y-6">
             <!-- Header with actions -->
             <div class="bg-gradient-to-r from-blue-600 to-purple-700 rounded-2xl p-6 text-white shadow-lg">
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                     <div class="flex-1">
-                        <h1 class="text-3xl md:text-4xl font-bold mb-2">Mes Demandes</h1>
+                        <h1 class="text-3xl md:text-4xl font-bold mb-2">Les Demandes</h1>
                         <p class="text-blue-100 text-lg opacity-90">Suivez et gérez toutes vos demandes</p>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
