@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -26,5 +27,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Préchargement Vite
         Vite::prefetch(concurrency: 3);
+
+
+        JsonResource::withoutWrapping();
     }
 }

@@ -9,6 +9,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\BonCommandeController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\BonReceptionController;
+use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\EntreeStockController;
 use App\Http\Controllers\SortieStockController;
 use App\Http\Controllers\MouvementStockController;
@@ -167,6 +168,17 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::get('/users/{user}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
     Route::patch('/users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('users.toggle-status');
+
+
+    Route::get('/demandes', [DemandeController::class, 'index'])->name('demandes.index');
+    Route::get('/mes-demandes', [DemandeController::class, 'mesDemandes'])->name('demandes.mes-demandes');
+    Route::get('/demandes/create', [DemandeController::class, 'create'])->name('demandes.create');
+    Route::post('/demandes', [DemandeController::class, 'store'])->name('demandes.store');
+    Route::get('/demandes/{demande}', [DemandeController::class, 'show'])->name('demandes.show');
+    Route::get('/demandes/{demande}/edit', [DemandeController::class, 'edit'])->name('demandes.edit');
+    Route::put('/demandes/{demande}', [DemandeController::class, 'update'])->name('demandes.update');
+    Route::delete('/demandes/{demande}', [DemandeController::class, 'destroy'])->name('demandes.destroy');
+    
 });
 
 require __DIR__.'/auth.php';

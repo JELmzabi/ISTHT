@@ -131,7 +131,8 @@ import {
   ArrowPathIcon,
   UserIcon,
   Cog6ToothIcon,
-  DocumentChartBarIcon
+  DocumentChartBarIcon,
+  ArrowUpCircleIcon
 } from '@heroicons/vue/24/outline'
 
 const isSidebarOpen = ref(false)
@@ -166,6 +167,12 @@ const sidebarSections = [
     ]
   },
   {
+    label: 'Demmande des Articles',
+    items: [
+      { name: 'Mes Demandes', href: '/mes-demandes', match: '/mes-demandes', icon: ArrowUpCircleIcon, bgColor: 'bg-gray-100 text-gray-600' },
+    ]
+  },
+  {
     label: 'Gestion des Utilisateurs',
     items: [
       { name: 'Utilisateurs', href: '/users', match: '/users', icon: UserGroupIcon, bgColor: 'bg-blue-100 text-blue-600' },
@@ -177,7 +184,7 @@ const sidebarSections = [
       { name: 'Profil', href: '/profile', match: '/profile', icon: UserIcon, bgColor: 'bg-gray-100 text-gray-600' },
       { name: 'Paramètres', href: '/parametres', match: '/parametres', icon: Cog6ToothIcon, bgColor: 'bg-red-100 text-red-600' },
     ]
-  }
+  },
 ]
 
 // Dynamic page titles and descriptions
@@ -189,9 +196,10 @@ const pageTitles = {
   '/achats/bon-receptions': 'Bons de Réception',
   '/inventaire': 'Inventaire du Stock',
   '/mouvements': 'Mouvements de Stock',
+  '/mes-demandes': 'Mes Demandes',
   '/users': 'Gestion des Utilisateurs',
   '/profile': 'Mon Profil',
-  '/parametres': 'Paramètres du Système'
+  '/parametres': 'Paramètres du Système',
 }
 
 const pageDescriptions = {
