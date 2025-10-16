@@ -8,13 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class MouvementStock extends Model
 {
 
+    protected $appends = ['quantite'];
+
+    
     protected $fillable = [
         'type',
         'article_id',
         'created_by',
         'date_mouvement',
         'prix_unitaire',
-        'prix_ht',
+        'taux_tva',
         'type_mouvement',
         'quantite_entree',
         'quantite_sortie',
@@ -26,7 +29,7 @@ class MouvementStock extends Model
     protected $casts = [
         'quantite' => 'decimal:2',
         'prix_unitaire' => 'decimal:2',
-        'prix_ht' => 'decimal:2',
+        'taux_tva' => 'decimal:2',
         'stock_apres' => 'decimal:2',
         'quantite_entree' => 'decimal:2',
         'quantite_sortie' => 'decimal:2',
@@ -103,4 +106,31 @@ class MouvementStock extends Model
     {
         return $query->whereBetween('date_mouvement', [$dateDebut, $dateFin]);
     }
+
+    public function getQuantiteAttribute()
+    {
+        $quantity = $this->type == self::TYPE_ENTREE ? $this->quantite_entree : $this->quantite_sortie;
+        return $quantity;
+    }
+
+    public function getTotalTtcAttribute()
+    {
+        return $this->quantite * $this->prix_unitaire * (1 + ($this->taux_tva / 100));
+    }
+
+    public function getTotalHtAttribute()
+    {
+        return $this->quantite * $this->prix_unitaire;
+    }
+
+    public function getMontantHtAttribute()
+    {
+        return $this->quantite * $this->prix_unitaire;
+    }
+
+    public function getMontantTvaAttribute()
+    {
+        return $this->quantite * $this->prix_unitaire * ($this->taux_tva / 100);
+    }
+
 }

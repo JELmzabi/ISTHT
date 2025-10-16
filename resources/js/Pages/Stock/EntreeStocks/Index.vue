@@ -18,13 +18,14 @@
                             <PlusIcon class="h-5 w-5" />
                             Nouvelle Entrée
                         </Link> -->
-                        <button
-                            @click="exportData"
+                        <ModalLink
+                            as="button"
+                            :href="route('entree-stocks.export.create')"
                             class="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-400 flex items-center justify-center gap-3 transition-all duration-200 font-semibold border border-blue-400"
                         >
                             <DocumentArrowDownIcon class="h-5 w-5" />
                             Exporter
-                        </button>
+                        </ModalLink>
                     </div>
                 </div>
             </div>

@@ -3,6 +3,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\EntreeExport;
+use App\Exports\FournisseursExport;
+use App\Http\Resources\ExportEntreeStockRecource;
 use App\Models\EntreeStock;
 use App\Models\LigneEntreeStock;
 use App\Models\Fournisseur;
@@ -13,6 +16,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Carbon;
+use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EntreeStockController extends Controller
 {
@@ -348,7 +354,7 @@ public function valider(EntreeStock $entreeStock)
                         'created_by' => auth()->id() ?? 1,
                         'date_mouvement' => $entreeStock->date_entree,
                         'prix_unitaire' => $ligne->prix_unitaire,
-                        'prix_ht' => $ligne->prix_unitaire,
+                        'taux_tva' => $ligne->taux_tva,
                         'type_mouvement' => MouvementStock::TYPE_ENTREE,
                         'quantite_entree' => $ligne->quantite,
                         'quantite_actuelle' => $nouvelleQuantiteActuelle,
@@ -391,4 +397,36 @@ public function annuler(EntreeStock $entreeStock)
         ]);
     }
 }
+
+    function createExport() 
+    {
+        
+        return Inertia::modal('Stock/EntreeStocks/CreateExportModal')->baseRoute('entree-stocks.index');
+    }
+
+    public function export(Request $request) 
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date',
+        ]);
+
+        $startDate = Carbon::parse($request->start_date)->startOfDay();
+
+        $query = MouvementStock::entrees();
+
+        if ($request->end_date) {
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+            $data = $query->whereBetween('created_at', [$startDate, $endDate])->get();
+        } else {
+            // get data for entire month of start_date
+            $data = $query->whereYear('created_at', $startDate->year)
+                        ->whereMonth('created_at', $startDate->month)
+                        ->get();
+        }
+
+        $data = ExportEntreeStockRecource::collection($data);
+
+        return Excel::download(new EntreeExport($data), 'entree_stock.xlsx');
+    }
 }

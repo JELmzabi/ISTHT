@@ -186,6 +186,9 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
 
     ##### Exports #####
     Route::get('fournisseurs/export', [FournisseurController::class, 'export'])->name('fournisseurs.export');
+
+    Route::get('entree-stocks/export/create', [EntreeStockController::class, 'createExport'])->name('entree-stocks.export.create');
+    Route::get('entree-stocks/export', [EntreeStockController::class, 'export'])->name('entree-stocks.export');
 });
 
 require __DIR__.'/auth.php';
