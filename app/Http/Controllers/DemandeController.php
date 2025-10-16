@@ -182,7 +182,8 @@ class DemandeController extends Controller
             
             $demande->update([
                 'statut' => DemandeStatut::APPROUVEE,
-                'commentaire_validation' => $request->input('commentaire_validation')
+                'commentaire_validation' => $request->input('commentaire_validation'),
+                'date_validation' => now(),
             ]);
 
             foreach ($demande->articles as $articleLine) {
@@ -236,7 +237,8 @@ class DemandeController extends Controller
 
         $demande->update([
             'statut' => DemandeStatut::REJETEE,
-            'commentaire_validation' => $request->input('commentaire_validation')
+            'commentaire_validation' => $request->input('commentaire_validation'),
+            'date_validation' => now(),
         ]);
 
         

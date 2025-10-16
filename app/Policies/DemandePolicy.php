@@ -14,6 +14,11 @@ class DemandePolicy
         return $user->isAdmin() || $user->isMagasinier();
     }
 
+    public function create(User $user): bool
+    {
+        return $user->isDemandeur();
+    }
+
     public function show(User $user, Demande $demande): bool
     {
         return $user->id == $demande->demandeur_id;
