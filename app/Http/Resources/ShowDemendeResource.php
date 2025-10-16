@@ -33,6 +33,7 @@ class ShowDemendeResource extends JsonResource
                     'article_id' => $article->article_id,
                     'designation' => $article->article->designation,
                     'quantite_demandee' => $article->quantite_demandee,
+                    'quantite_stock' => $article->article->quantite_stock,
                 ];
             }),
         ];

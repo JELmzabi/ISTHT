@@ -30,4 +30,9 @@ class DemandePolicy
     }
 
 
+    public function approve(User $user, Demande $demande): bool
+    {
+        return $demande->statut == DemandeStatut::EN_ATTENTE->value && $user->isAdmin();
+    }
+
 }

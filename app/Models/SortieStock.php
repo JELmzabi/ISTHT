@@ -40,6 +40,8 @@ class SortieStock extends Model
     const STATUT_VALIDE = 'valide';
     const STATUT_ANNULE = 'annule';
 
+    const TYPE_DEMANDE = 'demande';
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
@@ -77,19 +79,19 @@ class SortieStock extends Model
     // Événements pour gérer les mouvements de stock
     protected static function boot()
     {
-        parent::boot();
+        // parent::boot();
 
-        static::created(function ($sortieStock) {
-            foreach ($sortieStock->lignesSortie as $ligne) {
-                MouvementStock::creerDepuisSortie($ligne);
-            }
-        });
+        // static::created(function ($sortieStock) {
+        //     foreach ($sortieStock->lignesSortie as $ligne) {
+        //         MouvementStock::creerDepuisSortie($ligne);
+        //     }
+        // });
 
-        static::updated(function ($sortieStock) {
-            if ($sortieStock->isDirty('statut') && $sortieStock->statut === self::STATUT_ANNULE) {
-                $sortieStock->annulerMouvements();
-            }
-        });
+        // static::updated(function ($sortieStock) {
+        //     if ($sortieStock->isDirty('statut') && $sortieStock->statut === self::STATUT_ANNULE) {
+        //         $sortieStock->annulerMouvements();
+        //     }
+        // });
     }
 
     // Annuler les mouvements associés

@@ -180,6 +180,10 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::delete('/demandes/{demande}', [DemandeController::class, 'destroy'])->name('demandes.destroy');
     
     Route::delete('/demandes/{demande}/annuler', [DemandeController::class, 'cancel'])->name('demandes.cancel');
+    Route::get('/demandes/{demande}/approve', [DemandeController::class, 'showApprove'])->name('demandes.show.approve');
+    Route::put('/demandes/{demande}/approve', [DemandeController::class, 'approve'])->name('demandes.approve');
+    Route::put('/demandes/{demande}/reject', [DemandeController::class, 'reject'])->name('demandes.reject');
+    
 });
 
 require __DIR__.'/auth.php';

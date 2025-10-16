@@ -107,7 +107,7 @@ class DemandeController extends Controller
         return Inertia::modal('Demandes/EditDemandeModal', [
             'demande' => EditDemendeResource::make($demande),
             'articles' => $articles
-        ])->baseRoute('demandes.mes-demandes');
+        ])->baseRoute('demandes.index');
     }
 
     public function update(Request $request, Demande $demande) {
@@ -151,7 +151,7 @@ class DemandeController extends Controller
 
         return Inertia::modal('Demandes/ShowDemandeModal', [
             'demande' => ShowDemendeResource::make($demande)
-        ])->baseRoute('demandes.mes-demandes');
+        ])->baseRoute('demandes.index');
     }
 
     public function cancel(Demande $demande) {
@@ -160,5 +160,87 @@ class DemandeController extends Controller
         $demande->update(['statut' => DemandeStatut::ANNULEE]);
         return redirect()->back();
     }
+
+    public function showApprove(Demande $demande) {
+        $this->authorize('approve', $demande);
+
+        return Inertia::modal('Demandes/ApproveModal', [
+            'demande' => ShowDemendeResource::make($demande)
+        ])->baseRoute('demandes.index');
+    } 
+
+    public function approve(Request $request, Demande $demande) {
+        $this->authorize('approve', $demande);
+
+        $request->validate([
+            'commentaire_validation' => 'nullable|string|max:500',
+        ]);
+
+
+        
+        DB::transaction(function () use ($demande, $request) {
+            
+            $demande->update([
+                'statut' => DemandeStatut::APPROUVEE,
+                'commentaire_validation' => $request->input('commentaire_validation')
+            ]);
+
+            foreach ($demande->articles as $articleLine) {
+
+                $articleLine->article->decrement('quantite_stock', $articleLine->quantite_demandee);
+
+                $nouvelleQuantiteActuelle = $articleLine->article->quantite_stock;
+
+                # How can we get the article price ? and where ?
+
+                // dsd($articleLine->article);
+                // dsd([
+                //     'type' => MouvementStock::TYPE_SORTIE,
+                //         'article_id' => $articleLine->article_id,
+                //         'created_by' => $demande->demandeur_id,
+                //         'date_mouvement' => now(),
+                //         'prix_unitaire' => $articleLine->article->prix_unitaire,
+                //         'prix_ht' => $articleLine->article->prix_unitaire,
+                //         'type_mouvement' => MouvementStock::M_TYPE_INRENAL,
+                //         'quantite_entree' => $articleLine->quantite_demandee,
+                //         'quantite_actuelle' => $nouvelleQuantiteActuelle,
+                //         'motif' => 'demande ' . $demande->numero,
+                // ]);
+                
+                // MouvementStock::create([
+                //     'type' => MouvementStock::TYPE_SORTIE,
+                //         'article_id' => $articleLine->article_id,
+                //         'created_by' => $demande->demandeur_id,
+                //         'date_mouvement' => now(),
+                //         'prix_unitaire' => $articleLine->article->prix_unitaire,
+                //         'prix_ht' => $articleLine->article->prix_unitaire,
+                //         'type_mouvement' => MouvementStock::M_TYPE_INRENAL,
+                //         'quantite_entree' => $articleLine->quantite_demandee,
+                //         'quantite_actuelle' => $nouvelleQuantiteActuelle,
+                //         'motif' => 'demande ' . $demande->numero,
+                // ]);
+            }
+        
+        });
+        
+        return redirect()->back();
+    } 
+
+
+    public function reject(Request $request, Demande $demande) {
+        $this->authorize('approve', $demande);
+
+         $request->validate([
+            'commentaire_validation' => 'nullable|string|max:500',
+        ]);
+
+        $demande->update([
+            'statut' => DemandeStatut::REJETEE,
+            'commentaire_validation' => $request->input('commentaire_validation')
+        ]);
+
+        
+        return redirect()->back();
+    } 
 
 }

@@ -41,6 +41,8 @@ class MouvementStock extends Model
     const TYPE_INVENTAIRE = 'inventaire';
     const TYPE_CORRECTION = 'correction';
 
+    const M_TYPE_INRENAL = 'internal_use';
+
     public function article(): BelongsTo
     {
         return $this->belongsTo(Article::class);

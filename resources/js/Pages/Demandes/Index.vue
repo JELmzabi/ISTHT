@@ -10,7 +10,8 @@ import {
     DocumentArrowDownIcon,
     MagnifyingGlassIcon,
     PencilIcon,
-    TrashIcon
+    TrashIcon,
+    CheckIcon
 } from '@heroicons/vue/24/outline'
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -286,6 +287,26 @@ function cancelDemande() {
                                         >
                                             <TrashIcon class="h-5 w-5" />
                                         </button>
+
+                                        <!-- Approve -->
+<Link
+    :href="route('demandes.show.approve', demande.id)"
+    class="text-green-600 hover:text-green-900 p-1"
+    title="Approuver la demande"
+    v-if="demande.statut === 'en_attente'"
+>
+    <CheckIcon class="h-5 w-5" />
+</Link>
+
+
+    <!-- <button
+      @click="openRejectModal(demande.id)"
+      class="text-yellow-600 hover:text-yellow-900 p-1"
+      title="Rejeter la demande"
+      v-if="demande.statut === 'en_attente'"
+    >
+      <XMarkIcon class="h-5 w-5" />
+    </button> -->
                                     </div>
                                 </td>
                             </tr>
