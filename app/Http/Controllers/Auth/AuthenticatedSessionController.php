@@ -33,7 +33,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        $isActive = $request->user()->statut;
+        $isActive = $request->user()->status;
         if (!$isActive) {
             Auth::logout();
 
