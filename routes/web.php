@@ -179,6 +179,7 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::put('/demandes/{demande}', [DemandeController::class, 'update'])->name('demandes.update');
     Route::delete('/demandes/{demande}', [DemandeController::class, 'destroy'])->name('demandes.destroy');
     
+    Route::delete('/demandes/{demande}/annuler', [DemandeController::class, 'cancel'])->name('demandes.cancel');
 });
 
 require __DIR__.'/auth.php';

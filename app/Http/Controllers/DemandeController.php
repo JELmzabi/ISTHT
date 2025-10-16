@@ -147,6 +147,11 @@ class DemandeController extends Controller
         ])->baseRoute('demandes.mes-demandes');
     }
 
+    public function cancel(Demande $demande) {
+        $this->ensureAllowed($demande);
+        $demande->update(['statut' => DemandeStatut::ANNULEE]);
+        return redirect()->back();
+    }
 
     private function ensureAllowed($demande)
     {

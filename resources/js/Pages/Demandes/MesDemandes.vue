@@ -9,12 +9,14 @@ import {
     XCircleIcon,
     DocumentArrowDownIcon,
     MagnifyingGlassIcon,
-    PencilIcon
+    PencilIcon,
+    TrashIcon
 } from '@heroicons/vue/24/outline'
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { ModalLink } from '@inertiaui/modal-vue';
 import Dump from '@/Components/Dump.vue';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
 const props = defineProps({
     demandes: Object,
@@ -74,6 +76,25 @@ function getStatutLabel(statut) {
     default:
       return statut;
   }
+}
+
+const showCancelModal = ref(false)
+const demandeIdToCancel = ref(null)
+
+function openCancelModal(id) {
+  demandeIdToCancel.value = id
+  showCancelModal.value = true
+}
+
+function cancelDemande() {
+  return router.delete(route('demandes.cancel', demandeIdToCancel.value), {}, {
+    onSuccess: () => {
+      alert('Demande annulée avec succès !')
+    },
+    onError: (errors) => {
+      alert('Impossible d’annuler la demande : ' + errors.message)
+    }
+  })
 }
 </script>
 
@@ -257,6 +278,14 @@ function getStatutLabel(statut) {
                                         >
                                             <PencilIcon class="h-5 w-5" />
                                         </ModalLink>
+
+                                        <button
+                                            @click="openCancelModal(demande.id)"
+                                            class="text-red-600 hover:text-red-900 p-1"
+                                            title="Annuler la demande"
+                                        >
+                                            <TrashIcon class="h-5 w-5" />
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -314,5 +343,13 @@ function getStatutLabel(statut) {
                 </div>
             </div>
         </div>
+
+        <ConfirmationModal
+            :show="showCancelModal"
+            title="Annuler la demande"
+            message="Êtes-vous sûr de vouloir annuler cette demande ?"
+            :onConfirm="cancelDemande"
+            @close="showCancelModal = false"
+        />
     </AuthenticatedLayout>
 </template>
