@@ -15,8 +15,15 @@
         @include('pdf.header')
 
         <!-- TITLE -->
-        <div class="text-center font-bold text-lg uppercase underline mb-4">
-            Bon de commande N° {{ $bonCommande->reference }}
+        <div class="text-center font-bold text-4xl uppercase underline mb-4">
+            Fiche des entrées
+        </div>
+        <div class="text-center font-bold text-lg mb-4">
+            @if ($endDate)
+                {{ 'de ' . \Carbon\Carbon::parse($startDate)->translatedFormat('F Y') . ' à ' . \Carbon\Carbon::parse($endDate)->translatedFormat('F Y') }}
+            @else
+                {{ 'du mois de ' . \Carbon\Carbon::parse($startDate)->translatedFormat('F Y') }}
+            @endif
         </div>
 
 
@@ -25,16 +32,36 @@
             <table class="w-full border border-black border-collapse text-xs">
                 <thead class="bg-gray-200 font-bold">
                     <tr>
+                        <th class="border border-black p-1">Date d'entrée</th>
                         <th class="border border-black p-1">Code d'article</th>
-                        <th class="border border-black p-1">Désignation</th>
+                        <th class="border border-black p-1">Désignation d'article</th>
+                        <th class="border border-black p-1">Stock initial</th>
+                        <th class="border border-black p-1">Quantité entrée</th>
+                        <th class="border border-black p-1">Référence du bon de réception</th>
+                        <th class="border border-black p-1">Stock actuel</th>
                         <th class="border border-black p-1">Unité</th>
-                        <th class="border border-black p-1">Quantité</th>
-                        <th class="border border-black p-1">Prix unitaire</th>
-                        <th class="border border-black p-1">TVA appliquée</th>
+                        <th class="border border-black p-1">Prix unitaire (Dhs)</th>
+                        <th class="border border-black p-1">TVA appliqué</th>
                         <th class="border border-black p-1">Montant total</th>
                     </tr>
                 </thead>
+
                 <tbody>
+                    @foreach($articles as $article)
+                        <tr>
+                            <td class="border border-black text-center p-1">{{ $article['date_entree'] }}</td>
+                            <td class="border border-black text-center p-1">{{ $article['code_article'] }}</td>
+                            <td class="border border-black text-center p-1">{{ $article['designation_article'] }}</td>
+                            <td class="border border-black text-center p-1">{{ $article['stock_initial'] }}</td>
+                            <td class="border border-black text-center p-1">{{ $article['quantite_entree'] }}</td>
+                            <td class="border border-black text-center p-1">{{ $article['reference_bon_reception'] }}</td>
+                            <td class="border border-black text-center p-1">{{ $article['stock_actuel'] }}</td>
+                            <td class="border border-black text-center p-1">{{ $article['unite'] }}</td>
+                            <td class="border border-black text-center p-1">{{ $article['prix_unitaire'] }}</td>
+                            <td class="border border-black text-center p-1">{{ $article['tva_appliquee'] }}</td>
+                            <td class="border border-black text-center p-1">{{ $article['total_ttc'] }}</td>
+                        </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -43,19 +70,8 @@
 
 
         <!-- Signatures -->
-        <div class="grid grid-cols-3 gap-8 text-center" style="margin-top: 36px;">
-            <div>
-                <div class="font-bold text-base">Le magasinier</div>
-                <div class="border-t border-black h-10 mt-8"></div>
-            </div>
-            <div>
-                <div class="font-bold text-base">L'économe</div>
-                <div class="border-t border-black h-10 mt-8"></div>
-            </div>
-            <div>
-                <div class="font-bold text-base">Le directeur</div>
-                <div class="border-t border-black h-10 mt-8"></div>
-            </div>
+        <div class="flex justify-end" style="margin-top: 36px;">
+            <div class="font-bold text-base">Le responsable </div>
         </div>
 
     </div>
