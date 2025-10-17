@@ -40,10 +40,13 @@ function openDeleteModal(id) {
 }
 
 function deleteFiche() {
-    return router.delete(route('fiches.destroy', ficheToDelete.value), {}, {
-        onSuccess: () => alert('Fiche supprimée avec succès !'),
-        onError: (errors) => alert('Impossible de supprimer la fiche : ' + errors.message),
+    router.delete(route('fiches-techniques.destroy', ficheToDelete.value), {
+        onFinish: () => {
+            ficheToDelete.value = null;
+        }
     });
+
+    ficheToDelete.value = null;
 }
 
 function formatDate(date) {

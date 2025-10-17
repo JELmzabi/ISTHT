@@ -40,10 +40,13 @@ function openDeleteModal(id) {
 }
 
 function deleteFiche() {
-    return router.delete(route('fiches.destroy', ficheToDelete.value), {}, {
-        onSuccess: () => alert('Fiche supprimée avec succès !'),
-        onError: (errors) => alert('Impossible de supprimer la fiche : ' + errors.message),
+    router.delete(route('fiches-techniques.destroy', ficheToDelete.value), {
+        onFinish: () => {
+            ficheToDelete.value = null;
+        }
     });
+
+    ficheToDelete.value = null;
 }
 
 function formatDate(date) {
@@ -57,7 +60,6 @@ function formatDate(date) {
         <Head title="Fiches Techniques Collectivité" />
 
         <div class="space-y-6">
-
             <!-- Header -->
             <div class="bg-gradient-to-r from-blue-600 to-purple-700 rounded-2xl p-6 text-white shadow-lg">
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">

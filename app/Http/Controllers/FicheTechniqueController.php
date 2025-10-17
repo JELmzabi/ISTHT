@@ -236,4 +236,11 @@ class FicheTechniqueController extends Controller
         });
     }
 
+
+    public function destroy(FicheTechnique $fiche)
+    {
+        $fiche->delete();
+
+        return redirect()->back();
+    }
 }
