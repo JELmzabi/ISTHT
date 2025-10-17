@@ -11,6 +11,7 @@ use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\BonReceptionController;
 use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\EntreeStockController;
+use App\Http\Controllers\FicheTechniqueController;
 use App\Http\Controllers\SortieStockController;
 use App\Http\Controllers\MouvementStockController;
 use App\Http\Controllers\UserManagementController;
@@ -184,6 +185,13 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::put('/demandes/{demande}/reject', [DemandeController::class, 'reject'])->name('demandes.reject');
     
 
+    ##### Fiches Techniques ####
+    Route::get('/fiches-techniques/collectivite', [FicheTechniqueController::class, 'collectivite'])->name('fiches-techniques.collectivite');
+    Route::get('/fiches-techniques/pedagogique', [FicheTechniqueController::class, 'pedagogique'])->name('fiches-techniques.pedagogique');
+    Route::get('/fiches-techniques/create', [FicheTechniqueController::class, 'create'])->name('fiches-techniques.create');
+    Route::post('/fiches-techniques', [FicheTechniqueController::class, 'store'])->name('fiches-techniques.store');
+
+    
     ##### Exports #####
     Route::get('fournisseurs/export', [FournisseurController::class, 'export'])->name('fournisseurs.export');
 

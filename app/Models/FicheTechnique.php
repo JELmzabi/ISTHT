@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\Enums\FicheType;
+use App\Enums\FicheType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -24,6 +24,17 @@ class FicheTechnique extends Model
     protected $casts = [
         'type' => FicheType::class,
     ];
+
+
+    public function scopeCollectivite($query)
+    {
+        return $query->where('type', FicheType::COLLECTIVITE);
+    }
+
+    public function scopePedagogique($query)
+    {
+        return $query->where('type', FicheType::PEDAGOGIQUE);
+    }
 
 
     public function etapes()
