@@ -102,7 +102,7 @@ const articleErrors = computed(() => {
 </script>
 
 <template>
-    <!-- <Modal ref="createFicheModal" size="3xl" class="overflow-y-scroll"> -->
+    <Modal ref="createFicheModal" size="3xl" class="overflow-y-scroll">
         <div class="mb-4">
             <h2 class="text-lg font-semibold">Créer une fiche technique</h2>
         </div>
@@ -271,5 +271,5 @@ const articleErrors = computed(() => {
                 Enregistrer
             </button>
         </div>
-    <!-- </Modal> -->
+    </Modal>
 </template>

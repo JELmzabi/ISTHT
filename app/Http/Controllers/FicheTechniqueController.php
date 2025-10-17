@@ -64,7 +64,7 @@ class FicheTechniqueController extends Controller
 
     public function create()
     {
-        $articles = Article::actives(['id', 'designation']);
+        $articles = Article::actives()->get(['id', 'designation']);
 
         $data = [
             'articles' => $articles,
@@ -76,7 +76,7 @@ class FicheTechniqueController extends Controller
             $data['demandeurs'] = User::where('role', 'DEMANDEUR')->get(['id', 'name']);
         }
 
-        return Inertia::modal('Fiches/CreateFicheModal', $data);
+        return Inertia::modal('Fiches/CreateFicheModal', $data)->baseUrl(url()->previous());
     }
 
     public function store(UpdateFicheTechniqueRequest $request)
