@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\FicheType;
 use App\Http\Requests\CreateFicheTechniqueRequest;
+use App\Http\Resources\ShowFicheTechniqueResource;
 use App\Models\Article;
 use App\Models\Etape;
 use App\Models\FicheTechnique;
@@ -114,5 +115,14 @@ class FicheTechniqueController extends Controller
             
         });
         
+    }
+
+    public function show(FicheTechnique $fiche)
+    {
+        $fiche->load(['etapes', 'etapes.ingredients', 'etapes.ingredients.article', 'user']);
+
+        return Inertia::modal('Fiches/ShowFicheModal', [
+            'fiche' => ShowFicheTechniqueResource::make($fiche)
+        ])->baseUrl(url()->previous());
     }
 }

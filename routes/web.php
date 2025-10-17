@@ -190,6 +190,10 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::get('/fiches-techniques/pedagogique', [FicheTechniqueController::class, 'pedagogique'])->name('fiches-techniques.pedagogique');
     Route::get('/fiches-techniques/create', [FicheTechniqueController::class, 'create'])->name('fiches-techniques.create');
     Route::post('/fiches-techniques', [FicheTechniqueController::class, 'store'])->name('fiches-techniques.store');
+    Route::get('/fiches-techniques/{fiche}', [FicheTechniqueController::class, 'show'])->name('fiches-techniques.show');
+    // Route::get('/fiches-techniques/{ficheTechnique}/edit', [FicheTechniqueController::class, 'edit'])->name('fiches-techniques.edit');
+    // Route::put('/fiches-techniques/{ficheTechnique}', [FicheTechniqueController::class, 'update'])->name('fiches-techniques.update');
+    // Route::delete('/fiches-techniques/{ficheTechnique}', [FicheTechniqueController::class, 'destroy'])->name('fiches-techniques.destroy');
 
     
     ##### Exports #####

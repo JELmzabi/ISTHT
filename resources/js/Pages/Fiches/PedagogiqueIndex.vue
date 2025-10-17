@@ -133,7 +133,9 @@ function formatDate(date) {
                             <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(fiche.created_at) }}</td>
                             <td class="px-6 py-4 text-sm font-medium">
                                 <div class="flex space-x-2">
-                                    <ModalLink class="text-blue-600 hover:text-blue-900 p-1" title="Voir détails">
+                                    <ModalLink
+                                        :href="route('fiches-techniques.show', fiche.id)" 
+                                        class="text-blue-600 hover:text-blue-900 p-1" title="Voir détails">
                                         <EyeIcon class="h-5 w-5" />
                                     </ModalLink>
 

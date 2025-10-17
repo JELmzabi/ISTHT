@@ -42,8 +42,8 @@ class FicheTechnique extends Model
         return $this->hasMany(Etape::class, 'fiche_id');
     }
 
-    public function created_by()
+    public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by', 'id');
     }
 }

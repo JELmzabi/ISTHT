@@ -102,7 +102,7 @@ const articleErrors = computed(() => {
 </script>
 
 <template>
-    <Modal ref="createFicheModal" size="3xl">
+    <Modal ref="createFicheModal" size="3xl" class="overflow-y-scroll">
         <div class="mb-4">
             <h2 class="text-lg font-semibold">Créer une fiche technique</h2>
         </div>
@@ -137,7 +137,7 @@ const articleErrors = computed(() => {
                     <!-- Nom -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">
-                            {{ form.type === 'COLLECTIVITE' ? 'Repas' : 'Nom de module' }}
+                            {{ form.type === 'collectivite' ? 'Repas' : 'Nom de module' }}
                         </label>
                         <input v-model="form.nom" type="text"
                             class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500" />
@@ -155,7 +155,7 @@ const articleErrors = computed(() => {
                     <!-- Responsable -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">
-                            {{ form.type === 'COLLECTIVITE' ? 'Chef de cuisine' : 'Formateur' }}
+                            {{ form.type === 'collectivite' ? 'Chef de cuisine' : 'Formateur' }}
                         </label>
                         <input v-model="form.responsable" type="text"
                             class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500" />

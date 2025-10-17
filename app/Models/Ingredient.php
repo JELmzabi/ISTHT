@@ -10,6 +10,8 @@ class Ingredient extends Model
     use HasFactory;
 
     protected $table = 'ingredients';
+
+    protected $append = ['total_ttc'];
     
     protected $fillable = [
         'prix_unitaire',
@@ -18,6 +20,20 @@ class Ingredient extends Model
         'article_id',
         'etape_id',
     ];
+
+    public function casts()
+    {
+        return [
+            'quantite' => 'decimal:2',
+            'prix_unitaire' => 'decimal:2',
+            'taux_tva' => 'decimal:2',
+        ];
+    }
+
+    public function getTotalTtcAttribute() {
+        $ttc = $this->prix_unitaire * $this->quantite * (1 + $this->taux_tva / 100);
+        return round($ttc, 2);
+    }
 
 
     public function article()

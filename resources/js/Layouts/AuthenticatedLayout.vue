@@ -132,7 +132,8 @@ import {
   UserIcon,
   Cog6ToothIcon,
   DocumentChartBarIcon,
-  ArrowUpCircleIcon
+  ArrowUpCircleIcon,
+  DocumentIcon
 } from '@heroicons/vue/24/outline'
 
 const isSidebarOpen = ref(false)
@@ -173,6 +174,14 @@ const sidebarSections = [
     ]
   },
   {
+    label: 'Fiches Techniques',
+    items: [
+      { name: 'Pédagogiques', href: '/fiches-techniques/pedagogique', match: '/fiches-techniques/pedagogique', icon: DocumentIcon, bgColor: 'bg-purple-100 text-purple-600' },
+      { name: 'Collectivité', href: '/fiches-techniques/collectivite', match: '/fiches-techniques/collectivite', icon: DocumentIcon, bgColor: 'bg-rose-100 text-rose-600' },
+
+    ]
+  },
+  {
     label: 'Gestion des Utilisateurs',
     items: [
       { name: 'Utilisateurs', href: '/users', match: '/users', icon: UserGroupIcon, bgColor: 'bg-blue-100 text-blue-600' },
@@ -200,6 +209,7 @@ const pageTitles = {
   '/users': 'Gestion des Utilisateurs',
   '/profile': 'Mon Profil',
   '/parametres': 'Paramètres du Système',
+  '/fiches-techniques/collectivite': 'Fiches Techniques Pédagogiques',
 }
 
 const pageDescriptions = {
