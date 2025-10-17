@@ -139,7 +139,9 @@ function formatDate(date) {
                                         <EyeIcon class="h-5 w-5" />
                                     </ModalLink>
 
-                                    <ModalLink class="text-blue-600 hover:text-blue-900 p-1" title="Modifier">
+                                    <ModalLink 
+                                        :href="route('fiches-techniques.edit', fiche.id)" 
+                                        class="text-blue-600 hover:text-blue-900 p-1" title="Modifier">
                                         <PencilIcon class="h-5 w-5" />
                                     </ModalLink>
 
