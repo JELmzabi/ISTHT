@@ -297,35 +297,20 @@ public function index(Request $request)
      */
     public function downloadPdf(EntreeStock $entreeStock)
     {
-        // try {
-        //     $entreeStock->load([
-        //         'fournisseur',
-        //         'lignesEntree.article',
-        //         'createdBy'
-        //     ]);
-
-        //     $pdf = Pdf::loadView('pdf.entree-stock', [
-        //         'entreeStock' => $entreeStock
-        //     ]);
-
-        //     return $pdf->download("entree-stock-{$entreeStock->numero_affichage}.pdf");
-
-        // } catch (\Exception $e) {
-        //     return redirect()->back()->withErrors([
-        //         'error' => 'Erreur lors de la génération du PDF: ' . $e->getMessage()
-        //     ]);
-        // }
-
+        
         $entreeStock->load([
-            'fournisseur',
-            'lignesEntree.article',
-            'createdBy'
-        ]);
+                'fournisseur',
+                'bonReception',
+                'lignesEntree.article',
+                'createdBy'
+            ]);
 
-        $fileName = "bon-reception-{$entreeStock->numero}.pdf";
+        $fileName = "entree-stock-{$entreeStock->numero}.pdf";
 
         // return view('pdf.fiche-entree');
-        return FacadesPdf::view('pdf.fiche-entree', compact('entreeStock'))->name($fileName);
+        return Pdf::view('pdf.bon-entree', [
+            'entree' => $entreeStock
+        ])->download($fileName);
     }
 
     /**

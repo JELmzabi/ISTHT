@@ -367,8 +367,9 @@
                                         </button>
 
                                         <!-- PDF -->
-                                        <Link
+                                        <a
                                             :href="route('entree-stocks.download-pdf', entree.id)"
+                                            target="_blank"
                                             class="p-2 text-purple-600 hover:text-purple-800 hover:bg-purple-100 rounded-xl transition-all duration-200 group/tooltip relative"
                                             title="Télécharger PDF"
                                         >
@@ -376,7 +377,7 @@
                                             <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap">
                                                 Télécharger PDF
                                             </div>
-                                        </Link>
+                                        </a>
 
                                         <!-- Menu contextuel -->
                                         <!-- <div class="relative">
