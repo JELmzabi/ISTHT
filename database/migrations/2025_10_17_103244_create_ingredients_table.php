@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('ingredients', function (Blueprint $table) {
             $table->id();
+            $table->decimal('prix_unitaire', 8, 2);
+            $table->decimal('quantite', 8, 2);
+            $table->decimal('taux_tva', 5, 2);
+            $table->foreignId('etape_id')->constrained('etapes')->cascadeOnDelete();
+            $table->foreignId('article_id')->constrained('articles');
             $table->timestamps();
         });
     }

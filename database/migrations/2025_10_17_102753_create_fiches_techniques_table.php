@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('fiches_techniques', function (Blueprint $table) {
             $table->id();
-            $table->string('repas');
+            $table->string('type');
+            $table->string('nom');
             $table->string('plat');
-            $table->string('chef_cuisine');
+            $table->string('responsable');
             $table->integer('effectif');
             $table->foreignId('created_by')->constrained('users', 'id');
-            $table->foreignId('etape_id')->constrained('etapes');
             $table->softDeletes();
             $table->timestamps();
         });
