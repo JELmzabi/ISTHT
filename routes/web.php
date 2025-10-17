@@ -194,6 +194,7 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::get('/fiches-techniques/{fiche}/edit', [FicheTechniqueController::class, 'edit'])->name('fiches-techniques.edit');
     Route::put('/fiches-techniques/{fiche}', [FicheTechniqueController::class, 'update'])->name('fiches-techniques.update');
     Route::delete('/fiches-techniques/{fiche}', [FicheTechniqueController::class, 'destroy'])->name('fiches-techniques.destroy');
+    Route::get('/fiches-techniques/{fiche}/export', [FicheTechniqueController::class, 'export'])->name('fiches-techniques.export');
 
     
     ##### Exports #####

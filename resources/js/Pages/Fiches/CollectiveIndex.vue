@@ -6,7 +6,8 @@ import {
     ClipboardDocumentListIcon,
     MagnifyingGlassIcon,
     PencilIcon,
-    TrashIcon
+    TrashIcon,
+    DocumentTextIcon
 } from '@heroicons/vue/24/outline';
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -147,6 +148,15 @@ function formatDate(date) {
                                         <PencilIcon class="h-5 w-5" />
                                     </ModalLink>
 
+                                    <a
+                                        :href="route('fiches-techniques.export', fiche.id)"
+                                        target="_blank"
+                                        class="text-purple-600 hover:text-purple-900 p-1"
+                                        title="Télécharger PDF"
+                                    >
+                                        <DocumentTextIcon class="h-4 w-4" />
+                                    </a>
+                                    
                                     <button @click="openDeleteModal(fiche.id)"
                                         class="text-red-600 hover:text-red-900 p-1" title="Supprimer">
                                         <TrashIcon class="h-5 w-5" />

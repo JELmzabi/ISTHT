@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Spatie\LaravelPdf\Facades\Pdf;
 
 class FicheTechniqueController extends Controller
 {
@@ -242,5 +243,19 @@ class FicheTechniqueController extends Controller
         $fiche->delete();
 
         return redirect()->back();
+    }
+
+
+    public function export(FicheTechnique $fiche)
+    {
+        $totalTtc = $fiche->etapes->sum(function ($etape) {
+            return $etape->ingredients->sum('total_ttc');
+        });
+
+        return Pdf::view('pdf.fiche-pedagogique', [
+            'fiche' => $fiche,
+            'totalTtc' => $totalTtc,
+            'total_effectif' => round($totalTtc / $fiche->effectif)
+        ])->download('fiche-pedagogique-' . $fiche->nom . '.pdf');
     }
 }
