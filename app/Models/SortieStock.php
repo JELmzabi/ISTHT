@@ -43,9 +43,9 @@ class SortieStock extends Model
 
     const TYPE_DEMANDE = 'demande';
 
-    public function client(): BelongsTo
+    public function demandeur(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(User::class, 'demandeur_id');
     }
 
     public function lignesSortie(): HasMany

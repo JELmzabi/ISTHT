@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\IndexSortieStockResource;
 use App\Models\SortieStock;
 use App\Models\LigneSortieStock;
 use App\Models\Article;
@@ -19,26 +20,14 @@ class SortieStockController extends Controller
      */
     public function index(Request $request)
     {
-        try {
-            $query = SortieStock::with([
-                'client',
+        $query = SortieStock::with([
+                'demandeur',
                 'lignesSortie.article',
-                'createdBy'
             ])->orderBy('created_at', 'desc');
-
-            // Filtrage par type de sortie
-            if ($request->filled('type_sortie')) {
-                $query->where('type_sortie', $request->type_sortie);
-            }
 
             // Filtrage par statut
             if ($request->filled('statut')) {
                 $query->where('statut', $request->statut);
-            }
-
-            // Filtrage par client
-            if ($request->filled('client_id')) {
-                $query->where('client_id', $request->client_id);
             }
 
             // Filtrage par date
@@ -56,8 +45,8 @@ class SortieStockController extends Controller
                 $query->where(function ($q) use ($search) {
                     $q->where('numero', 'like', '%' . $search . '%')
                       ->orWhere('motif', 'like', '%' . $search . '%')
-                      ->orWhereHas('client', function ($q) use ($search) {
-                          $q->where('nom', 'like', '%' . $search . '%');
+                      ->orWhereHas('demandeur', function ($q) use ($search) {
+                          $q->where('name', 'like', '%' . $search . '%');
                       });
                 });
             }
@@ -67,125 +56,17 @@ class SortieStockController extends Controller
             // Statistiques
             $stats = [
                 'total' => SortieStock::count(),
-                'total_montant' => SortieStock::with('lignesSortie')->get()->sum('total'),
-                'ce_mois' => SortieStock::whereMonth('date_sortie', now()->month)->count(),
-                'ventes' => SortieStock::where('type_sortie', SortieStock::TYPE_VENTE)->count(),
-                'pertes' => SortieStock::where('type_sortie', SortieStock::TYPE_PERTE)->count(),
+                'en_attente' => SortieStock::where('statut', 'attente_validation')->count(),
+                'validee' => SortieStock::where('statut', 'validee')->count(),
+                'annulee' => SortieStock::where('statut', 'annulee')->count(),
+
             ];
 
-            // Clients pour les filtres
-            $clients = Client::where('est_actif', true)
-                ->orderBy('nom')
-                ->get();
-
             return inertia('Stock/SortieStocks/Index', [
-                'sortieStocks' => $sortieStocks,
+                'sorties' => IndexSortieStockResource::collection($sortieStocks),
                 'stats' => $stats,
-                'clients' => $clients,
-                'filters' => $request->only(['type_sortie', 'statut', 'client_id', 'date_debut', 'date_fin', 'search'])
+                'filters' => $request->only(['statut', 'date_debut', 'date_fin', 'search'])
             ]);
-
-        } catch (\Exception $e) {
-            return redirect()->back()->withErrors([
-                'error' => 'Erreur lors du chargement des sorties de stock: ' . $e->getMessage()
-            ]);
-        }
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        try {
-            $articles = Article::where('est_actif', true)
-                ->where('quantite_stock', '>', 0)
-                ->orderBy('designation')
-                ->get();
-
-            $clients = Client::where('est_actif', true)
-                ->orderBy('nom')
-                ->get();
-
-            return inertia('Stock/SortieStocks/Create', [
-                'articles' => $articles,
-                'clients' => $clients,
-                'types_sortie' => [
-                    SortieStock::TYPE_VENTE => 'Vente',
-                    SortieStock::TYPE_TRANSFERT => 'Transfert',
-                    SortieStock::TYPE_PERTE => 'Perte/Dommage',
-                    SortieStock::TYPE_AJUSTEMENT => 'Ajustement'
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            return redirect()->back()->withErrors([
-                'error' => 'Erreur lors du chargement: ' . $e->getMessage()
-            ]);
-        }
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        try {
-            DB::beginTransaction();
-
-            $validated = $request->validate([
-                'type_sortie' => 'required|string|in:vente,transfert,perte,ajustement',
-                'client_id' => 'nullable|exists:clients,id',
-                'date_sortie' => 'required|date',
-                'motif' => 'required|string|max:500',
-                'lignes_sortie' => 'required|array|min:1',
-                'lignes_sortie.*.article_id' => 'required|exists:articles,id',
-                'lignes_sortie.*.quantite' => 'required|numeric|min:0.01',
-                'lignes_sortie.*.prix_unitaire' => 'required|numeric|min:0',
-                'notes' => 'nullable|string'
-            ]);
-
-            // Vérifier la disponibilité du stock
-            foreach ($validated['lignes_sortie'] as $ligne) {
-                $article = Article::find($ligne['article_id']);
-                if ($article->quantite_stock < $ligne['quantite']) {
-                    throw new \Exception("Stock insuffisant pour l'article {$article->designation}. Stock disponible: {$article->quantite_stock}, Quantité demandée: {$ligne['quantite']}");
-                }
-            }
-
-            // Créer la sortie de stock
-            $sortieStock = SortieStock::create([
-                'numero' => SortieStock::genererNumero(),
-                'type_sortie' => $validated['type_sortie'],
-                'client_id' => $validated['client_id'] ?? null,
-                'date_sortie' => $validated['date_sortie'],
-                'motif' => $validated['motif'],
-                'statut' => SortieStock::STATUT_VALIDE,
-                'notes' => $validated['notes'] ?? null,
-                'created_by' => Auth::id(),
-            ]);
-
-            // Créer les lignes de sortie
-            foreach ($validated['lignes_sortie'] as $ligneData) {
-                LigneSortieStock::create([
-                    'sortie_stock_id' => $sortieStock->id,
-                    'article_id' => $ligneData['article_id'],
-                    'quantite' => $ligneData['quantite'],
-                    'prix_unitaire' => $ligneData['prix_unitaire'],
-                ]);
-            }
-
-            DB::commit();
-
-            return redirect()->route('sortie-stocks.show', $sortieStock->id)
-                ->with('success', 'Sortie de stock créée avec succès');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['error' => 'Erreur lors de la création: ' . $e->getMessage()]);
-        }
     }
 
     /**
