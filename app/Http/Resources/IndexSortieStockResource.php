@@ -15,6 +15,7 @@ class IndexSortieStockResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'numero' => $this->numero,
             'type' => $this->type_sortie,
             'date' => $this->date_sortie->toDateString(),

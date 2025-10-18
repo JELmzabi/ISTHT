@@ -279,17 +279,11 @@ function cancelSortie() {
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex space-x-2">
                     <ModalLink
+                        :href="route('sortie-stocks.show', sortie.id)"
                       class="text-blue-600 hover:text-blue-900 p-1"
                       title="Voir détails"
                     >
                       <EyeIcon class="h-5 w-5" />
-                    </ModalLink>
-
-                    <ModalLink
-                      class="text-green-600 hover:text-green-900 p-1"
-                      title="Modifier"
-                    >
-                      <PencilIcon class="h-5 w-5" />
                     </ModalLink>
 
                     <Link
