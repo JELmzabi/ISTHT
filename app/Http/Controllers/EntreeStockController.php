@@ -348,7 +348,7 @@ public function valider(EntreeStock $entreeStock)
                         'type' => MouvementStock::TYPE_ENTREE,
                         'article_id' => $ligne->article_id,
                         'created_by' => auth()->id() ?? 1,
-                        'date_mouvement' => $entreeStock->date_entree,
+                        'date_mouvement' => now(),
                         'prix_unitaire' => $ligne->prix_unitaire,
                         'taux_tva' => $ligne->taux_tva,
                         'type_mouvement' => MouvementStock::TYPE_ENTREE,
