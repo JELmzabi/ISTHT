@@ -9,6 +9,7 @@ import {
     XCircleIcon,
     DocumentArrowDownIcon,
     MagnifyingGlassIcon,
+    QuestionMarkCircleIcon,
     PencilIcon,
     TrashIcon,
     CheckIcon,
@@ -52,14 +53,14 @@ function applyFilters() {
 
 function getStatutColor(statut) {
   switch (statut) {
+    case 'cree':
+      return 'bg-blue-100 text-blue-700';
     case 'en_attente':
       return 'bg-yellow-100 text-yellow-700';
-    case 'approuvee':
+    case 'livree':
       return 'bg-green-100 text-green-700';
-    case 'rejetee':
-      return 'bg-red-100 text-red-700';
     case 'annulee':
-      return 'bg-gray-100 text-gray-600';
+      return 'bg-red-100 text-red-700';
     default:
       return 'bg-gray-100 text-gray-600';
   }
@@ -67,12 +68,12 @@ function getStatutColor(statut) {
 
 function getStatutLabel(statut) {
   switch (statut) {
+    case 'cree':
+      return 'Crée';
     case 'en_attente':
-      return 'En attente';
-    case 'approuvee':
-      return 'Approuvée';
-    case 'rejetee':
-      return 'Rejetée';
+      return 'En attente de livraison';
+    case 'livree':
+      return 'Livrée';
     case 'annulee':
       return 'Annulée';
     default:
@@ -275,14 +276,14 @@ function cancelDemande() {
 
                                         <ModalLink
                                             :href="route('demandes.edit', demande.id)"
-                                            class="text-blue-600 hover:text-blue-900 p-1"
+                                            class="text-green-600 hover:text-green-900 p-1"
                                             title="Modifier"
                                         >
                                             <PencilIcon class="h-5 w-5" />
                                         </ModalLink>
 
                                         <a
-                                            class="text-blue-600 hover:text-blue-900 p-1 cursor-pointer"
+                                            class="text-purple-600 hover:text-purple-900 p-1 cursor-pointer"
                                             :class="!demande.fiche_technique ? '!cursor-not-allowed opacity-50 pointer-events-none' : ''"
                                             :style="{ pointerEvents: demande.fiche_technique ? 'auto' : 'none' }"
                                             title="Télécharger PDF"
@@ -292,33 +293,16 @@ function cancelDemande() {
                                             <DocumentTextIcon class="h-5 w-5" />
                                         </a>
 
-                                        <button
-                                            @click="openCancelModal(demande.id)"
-                                            class="text-red-600 hover:text-red-900 p-1"
-                                            title="Annuler la demande"
-                                        >
-                                            <TrashIcon class="h-5 w-5" />
-                                        </button>
-
                                         <!-- Approve -->
-<Link
-    :href="route('demandes.show.approve', demande.id)"
-    class="text-green-600 hover:text-green-900 p-1"
-    title="Approuver la demande"
-    v-if="demande.statut === 'en_attente'"
->
-    <CheckIcon class="h-5 w-5" />
-</Link>
+                                        <Link
+                                            :href="route('demandes.show.approve', demande.id)"
+                                            class="text-orange-600 hover:text-orange-900 p-1"
+                                            title="Approuver la demande"
+                                            v-if="demande.statut === 'en_attente'"
+                                        >
+                                            <QuestionMarkCircleIcon class="h-5 w-5" />
+                                        </Link>
 
-
-    <!-- <button
-      @click="openRejectModal(demande.id)"
-      class="text-yellow-600 hover:text-yellow-900 p-1"
-      title="Rejeter la demande"
-      v-if="demande.statut === 'en_attente'"
-    >
-      <XMarkIcon class="h-5 w-5" />
-    </button> -->
                                     </div>
                                 </td>
                             </tr>

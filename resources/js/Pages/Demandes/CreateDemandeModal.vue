@@ -5,7 +5,8 @@ import { useForm } from '@inertiajs/vue3';
 import Dump from '@/Components/Dump.vue';
 
 const props = defineProps({
-  articles: Array
+  articles: Array,
+  demandeurs: Array
 })
 const search = ref('');
 const createDemandeModal = ref(null)
@@ -13,6 +14,7 @@ const dropdownOpen = ref(false)
 
 
 const form = useForm({
+  demandeur: null,
   articles: [],
   fiche_technique: null,
   motif: '',
@@ -77,7 +79,17 @@ function closeIdle() {
     <!-- Body -->
     <div>
       <form @submit.prevent="submit" class="space-y-4">
-        
+        <!-- Select Demandeur -->
+        <div v-if="$page.props.auth.user.role === 'ADMIN'">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Demandeur</label>
+          <select v-model="form.demandeur"
+              class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500">
+              <option v-for="demandeur in demandeurs" :key="demandeur.id" :value="demandeur.id">{{ demandeur.name }}
+              </option>
+          </select>
+          <p v-if="form.errors.demandeur" class="text-sm text-red-600 mt-1">{{ form.errors.demandeur }}</p>
+        </div>
+
         <!-- Fiche Technique Upload -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">

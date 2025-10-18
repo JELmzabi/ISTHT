@@ -4,17 +4,24 @@ namespace App\Enums;
 
 enum DemandeStatut: string
 {
-    case EN_ATTENTE = 'en_attente';
-    case APPROUVEE = 'approuvee';
-    case REJETEE = 'rejetee';
+
+    # cree ─┬─> en_attente_livraison ─┬─> livree
+    #       │                                      
+    #       └─> annulee                            
+    
+    case CREE = 'cree';
     case ANNULEE = 'annulee';
+    // case APPROUVEE = 'approuvee';
+    case EN_ATTENTE = 'en_attente';
+    case LIVREE = 'livree';
 
     public function label(): string
     {
         return match ($this) {
-            self::EN_ATTENTE => 'En attente',
-            self::APPROUVEE => 'Approuvée',
-            self::REJETEE => 'Rejetée',
+            self::CREE => 'Crée',
+            self::EN_ATTENTE => 'En attente de livraison',
+            // self::APPROUVEE => 'Approuvée',
+            self::LIVREE => 'livrée',
             self::ANNULEE => 'Annulée',
         };
     }

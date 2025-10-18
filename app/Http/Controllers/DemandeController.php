@@ -9,10 +9,12 @@ use App\Http\Resources\ShowDemendeResource;
 use App\Models\Article;
 use App\Models\Demande;
 use App\Models\MouvementStock;
+use App\Models\User;
 use App\Rules\InStockRule;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class DemandeController extends Controller
@@ -33,7 +35,9 @@ class DemandeController extends Controller
         $demandes = Demande::query()
             ->with(['valideur'])
             ->withCount('articles')
-            ->where('demandeur_id', $user->id)
+            ->when(!$user->isAdmin(), function ($query) use ($user) {
+                $query->where('demandeur_id', $user->id);
+            })
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('numero', 'like', "%{$search}%")
@@ -60,17 +64,25 @@ class DemandeController extends Controller
 
     public function create(Request $request) {
         $this->authorize('create', Demande::class);
-
+        
         $articles = Article::all(['id', 'designation']);
-        return Inertia::render('Demandes/CreateDemandeModal', [
+
+        $data = [
             'articles' => $articles
-        ]);
+        ];
+
+        if (auth()->user()->isAdmin()) {
+            $data['demandeurs'] = User::where('role', 'DEMANDEUR')->get(['id', 'name']);
+        }
+
+        return Inertia::render('Demandes/CreateDemandeModal', $data);
     }
     
     public function store(Request $request) {
         $this->authorize('create', Demande::class);
         
         $request->validate([
+            'demandeur' => ['nullable', Rule::requiredIf(fn () => auth()->user()->isAdmin()), 'integer', 'exists:users,id'],
             'fiche_technique' => 'required|mimes:pdf,doc,docx,png,jpg,jpeg|max:5120',
             'articles' => 'required|array|min:1',
             'articles.*.article_id' => ['required', 'exists:articles,id'],
@@ -79,12 +91,14 @@ class DemandeController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-  
+            
+            $user_id = auth()->user()->isAdmin() ? $request->demandeur : auth()->user()->id;
             $demande = Demande::create([
                 'numero' => Demande::generateNumero(),
                 'demandeur_id' => auth()->user()->id,
                 'motif' => $request->input('motif'),
-                'statut' => DemandeStatut::EN_ATTENTE,
+                'statut' => DemandeStatut::CREE,
+                'user_id' => $user_id,
             ]);
             
             foreach ($request->input('articles') as $article) {
@@ -107,10 +121,17 @@ class DemandeController extends Controller
         $articles = Article::all(['id', 'designation']);
         $demande->load(['articles']);
 
-        return Inertia::modal('Demandes/EditDemandeModal', [
-            'demande' => EditDemendeResource::make($demande),
-            'articles' => $articles
-        ])->baseRoute('demandes.index');
+        $data = [
+            'articles' => $articles,
+            'demande' => EditDemendeResource::make($demande)
+        ];
+
+        if (auth()->user()->isAdmin()) {
+            $data['demandeurs'] = User::where('role', 'DEMANDEUR')->get(['id', 'name']);
+        }
+
+
+        return Inertia::modal('Demandes/EditDemandeModal', $data)->baseRoute('demandes.index');
     }
 
     public function update(Request $request, Demande $demande) {
@@ -118,6 +139,7 @@ class DemandeController extends Controller
         $this->authorize('update', $demande);
         
         $request->validate([
+            'demandeur' => ['nullable', Rule::requiredIf(fn () => auth()->user()->isAdmin()), 'integer', 'exists:users,id'],
             'fiche_technique' => 'nullable|mimes:pdf,doc,docx,png,jpg,jpeg|max:5120',
             'articles' => 'required|array|min:1',
             'articles.*.article_id' => ['required', 'exists:articles,id'],
@@ -125,10 +147,13 @@ class DemandeController extends Controller
             'motif' => 'nullable|string|max:500',
         ]);
 
+        
         DB::transaction(function () use ($request, $demande) {
-  
+
+            $user_id = auth()->user()->isAdmin() ? $request->demandeur : auth()->user()->id;
             $demande->update([
                 'motif' => $request->input('motif'),
+                'user_id' => $user_id,
             ]);
             
             foreach ($request->input('articles') as $article) {
@@ -141,6 +166,10 @@ class DemandeController extends Controller
                         'quantite_demandee' => $article['quantite'],
                     ]);
                 }
+            }
+
+            if ($request->hasFile('fiche_technique')) {
+                $demande->addMediaFromRequest('fiche_technique')->toMediaCollection('fiches_techniques');
             }
             
         });
