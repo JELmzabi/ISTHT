@@ -11,7 +11,8 @@ import {
     MagnifyingGlassIcon,
     PencilIcon,
     TrashIcon,
-    CheckIcon
+    CheckIcon,
+    DocumentTextIcon
 } from '@heroicons/vue/24/outline'
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -279,6 +280,17 @@ function cancelDemande() {
                                         >
                                             <PencilIcon class="h-5 w-5" />
                                         </ModalLink>
+
+                                        <a
+                                            class="text-blue-600 hover:text-blue-900 p-1 cursor-pointer"
+                                            :class="!demande.fiche_technique ? '!cursor-not-allowed opacity-50 pointer-events-none' : ''"
+                                            :style="{ pointerEvents: demande.fiche_technique ? 'auto' : 'none' }"
+                                            title="Télécharger PDF"
+                                            target="_blank"
+                                            :href="demande.fiche_technique"
+                                        >
+                                            <DocumentTextIcon class="h-5 w-5" />
+                                        </a>
 
                                         <button
                                             @click="openCancelModal(demande.id)"

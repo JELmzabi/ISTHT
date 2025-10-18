@@ -14,15 +14,13 @@ const dropdownOpen = ref(false)
 
 const form = useForm({
   articles: [],
+  fiche_technique: null,
   motif: '',
 })
-// const articles = [
-//   { id: 1, designation: 'Stylo Bleu' },
-//   { id: 2, designation: 'Classeur A4' },
-//   { id: 3, designation: 'Cartouche d’encre HP' },
-//   { id: 4, designation: 'Papier A4 80g' },
-//   { id: 5, designation: 'Souris sans fil' },
-// ]
+
+function handleFileUpload(event) {
+  form.fiche_technique = event.target.files[0];
+}
 
 // Filter articles not yet added
 const filteredArticles = computed(() => {
@@ -80,6 +78,27 @@ function closeIdle() {
     <div>
       <form @submit.prevent="submit" class="space-y-4">
         
+        <!-- Fiche Technique Upload -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Fiche Technique
+          </label>
+          <input
+            type="file"
+            required
+            @change="handleFileUpload"
+            class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+
+          <div v-if="form.errors.fiche_technique" class="text-red-600 text-sm mt-1">
+            {{ form.errors.fiche_technique }}
+          </div>
+
+          <p v-if="form.fiche_technique" class="text-sm text-gray-500 mt-1">
+            Fichier sélectionné : {{ form.fiche_technique.name }}
+          </p>
+        </div>
+        
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">
             Articles demandés
@@ -95,6 +114,9 @@ function closeIdle() {
               class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
 
+            <div v-if="form.errors.articles" class="text-red-600 text-sm mt-1">
+              {{ form.errors.articles }}
+            </div>
 
             <ul class="bg-red-300 text-red-900 border-red-500 border-1 rounded p-2 text-sm mt-2" v-if="articleErrors.length">
               <li v-for="error in articleErrors" :key="error">

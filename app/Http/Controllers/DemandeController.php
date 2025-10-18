@@ -29,7 +29,7 @@ class DemandeController extends Controller
         $status = $request->get('status');
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
-
+        
         $demandes = Demande::query()
             ->with(['valideur'])
             ->withCount('articles')
@@ -71,6 +71,7 @@ class DemandeController extends Controller
         $this->authorize('create', Demande::class);
         
         $request->validate([
+            'fiche_technique' => 'required|mimes:pdf,doc,docx,png,jpg,jpeg|max:5120',
             'articles' => 'required|array|min:1',
             'articles.*.article_id' => ['required', 'exists:articles,id'],
             'articles.*.quantite' => ['required', 'numeric', 'min:1', new InStockRule],
@@ -92,6 +93,8 @@ class DemandeController extends Controller
                     'quantite_demandee' => $article['quantite'],
                 ]);
             }
+
+            $demande->addMediaFromRequest('fiche_technique')->toMediaCollection('fiches_techniques');
             
         });
 
@@ -115,6 +118,7 @@ class DemandeController extends Controller
         $this->authorize('update', $demande);
         
         $request->validate([
+            'fiche_technique' => 'nullable|mimes:pdf,doc,docx,png,jpg,jpeg|max:5120',
             'articles' => 'required|array|min:1',
             'articles.*.article_id' => ['required', 'exists:articles,id'],
             'articles.*.quantite' => ['required', 'numeric', 'min:1', new InStockRule],

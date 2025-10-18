@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Demande extends Model implements HasMedia
 {
@@ -34,6 +35,13 @@ class Demande extends Model implements HasMedia
         $lastDemande = Demande::orderBy('created_at', 'desc')->first();
         $lastDemandeNumber = $lastDemande ? $lastDemande->id : 0;
         return "DE-" . ($lastDemandeNumber + 1);
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this
+            ->addMediaCollection('fiche-technique')
+            ->singleFile();
     }
 
     public function demandeur()
