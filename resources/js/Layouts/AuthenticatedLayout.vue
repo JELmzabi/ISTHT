@@ -163,8 +163,8 @@ const sidebarSections = [
     label: 'Gestion du Stock',
     items: [
       { name: 'Entrées Stock', href: '/stock/entrees', match: '/stock/entrees', icon: ArrowPathIcon, bgColor: 'bg-green-100 text-green-600' },
-      { name: 'Inventaire', href: '/inventaire', match: '/inventaire', icon: ClipboardDocumentListIcon, bgColor: 'bg-indigo-100 text-indigo-600' },
-      { name: 'Mouvements', href: '/mouvements', match: '/mouvements', icon: ArrowPathIcon, bgColor: 'bg-amber-100 text-amber-600' },
+      // { name: 'Inventaire', href: '/inventaire', match: '/inventaire', icon: ClipboardDocumentListIcon, bgColor: 'bg-indigo-100 text-indigo-600' },
+      { name: 'Sorties Stock', href: '/stock/sorties', match: '/stock/sorties', icon: ArrowPathIcon, bgColor: 'bg-amber-100 text-amber-600' },
     ]
   },
   {
@@ -203,8 +203,8 @@ const pageTitles = {
   '/achats/fournisseurs': 'Gestion des Fournisseurs',
   '/achats/bon-commandes': 'Bons de Commande',
   '/achats/bon-receptions': 'Bons de Réception',
-  '/inventaire': 'Inventaire du Stock',
-  '/mouvements': 'Mouvements de Stock',
+  // '/inventaire': 'Inventaire du Stock',
+  '/stock/sorties': 'Sorties de Stock',
   '/demandes': 'Mes Demandes',
   '/users': 'Gestion des Utilisateurs',
   '/profile': 'Mon Profil',
@@ -218,8 +218,8 @@ const pageDescriptions = {
   '/achats/fournisseurs': 'Gérez vos partenaires fournisseurs et leurs informations',
   '/achats/bon-commandes': 'Créez et suivez vos bons de commande',
   '/achats/bon-receptions': 'Enregistrez et validez les réceptions de marchandises',
-  '/inventaire': 'Consultez et gérez les niveaux de stock',
-  '/mouvements': 'Historique des entrées et sorties de stock',
+  // '/inventaire': 'Consultez et gérez les niveaux de stock',
+  '/stock/sorties': 'suivez vos sorties de stock',
   '/users': 'Gérez les utilisateurs de l\'application',
   '/profile': 'Gérez vos informations personnelles',
   '/parametres': 'Configurez les paramètres de l\'application'
