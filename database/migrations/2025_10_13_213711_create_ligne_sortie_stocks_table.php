@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->decimal('quantite', 10, 2);
             $table->decimal('prix_unitaire', 10, 2);
-            $table->decimal('taux_tva', 5, 2)->default(0);
+            $table->decimal('taux_tva', 5, 2);
             $table->foreignId('sortie_stock_id')->constrained('sortie_stocks');
             $table->foreignId('article_id')->constrained('articles');
             $table->timestamps();

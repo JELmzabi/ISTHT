@@ -13,11 +13,13 @@ class LigneSortieStock extends Model
         'article_id',
         'quantite',
         'prix_unitaire',
+        'taux_tva',
     ];
 
     protected $casts = [
         'quantite' => 'decimal:2',
         'prix_unitaire' => 'decimal:2',
+        'taux_tva' => 'decimal:2',
     ];
 
     public function sortieStock(): BelongsTo
