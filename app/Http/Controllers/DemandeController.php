@@ -9,6 +9,7 @@ use App\Http\Resources\ShowDemendeResource;
 use App\Models\Article;
 use App\Models\Demande;
 use App\Models\MouvementStock;
+use App\Models\SortieStock;
 use App\Models\User;
 use App\Rules\InStockRule;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -214,47 +215,36 @@ class DemandeController extends Controller
         DB::transaction(function () use ($demande, $request) {
             
             $demande->update([
-                'statut' => DemandeStatut::APPROUVEE,
+                'statut' => DemandeStatut::EN_ATTENTE,
                 'commentaire_validation' => $request->input('commentaire_validation'),
                 'date_validation' => now(),
             ]);
 
+            $sortieStock = SortieStock::create([
+                'numero' => SortieStock::genererNumero(),
+                'type_sortie' => SortieStock::TYPE_DEMANDE,
+                'demandeur_id' => $demande->demandeur_id,
+                'date_sortie' => now(),
+                'motif' => "Cette sortie est générée automatiquement à partir de la demande n° {$demande->numero}",
+                'statut' => SortieStock::STATUT_ATTENTE_VALIDATION,
+            ]);
+            
             foreach ($demande->articles as $articleLine) {
 
-                $articleLine->article->decrement('quantite_stock', $articleLine->quantite_demandee);
-
-                $nouvelleQuantiteActuelle = $articleLine->article->quantite_stock;
-
-                # How can we get the article price ? and where ?
-
-                // dsd($articleLine->article);
-                // dsd([
-                //     'type' => MouvementStock::TYPE_SORTIE,
-                //         'article_id' => $articleLine->article_id,
-                //         'created_by' => $demande->demandeur_id,
-                //         'date_mouvement' => now(),
-                //         'prix_unitaire' => $articleLine->article->prix_unitaire,
-                //         'prix_ht' => $articleLine->article->prix_unitaire,
-                //         'type_mouvement' => MouvementStock::M_TYPE_INRENAL,
-                //         'quantite_entree' => $articleLine->quantite_demandee,
-                //         'quantite_actuelle' => $nouvelleQuantiteActuelle,
-                //         'motif' => 'demande ' . $demande->numero,
-                // ]);
+                # Article line from the last entree stock
+                $lastEntreeArticle = MouvementStock::entrees()->where('article_id', $articleLine->article_id)
+                                    ->orderBy('date_mouvement', 'desc')
+                                    ->orderBy('id', 'desc')
+                                    ->first();
                 
-                // MouvementStock::create([
-                //     'type' => MouvementStock::TYPE_SORTIE,
-                //         'article_id' => $articleLine->article_id,
-                //         'created_by' => $demande->demandeur_id,
-                //         'date_mouvement' => now(),
-                //         'prix_unitaire' => $articleLine->article->prix_unitaire,
-                //         'prix_ht' => $articleLine->article->prix_unitaire,
-                //         'type_mouvement' => MouvementStock::M_TYPE_INRENAL,
-                //         'quantite_entree' => $articleLine->quantite_demandee,
-                //         'quantite_actuelle' => $nouvelleQuantiteActuelle,
-                //         'motif' => 'demande ' . $demande->numero,
-                // ]);
+                $sortieStock->lignesSortie()->create([
+                    'article_id' => $articleLine->article_id,
+                    'quantite' => $articleLine->quantite_demandee,
+                    'prix_unitaire' => $lastEntreeArticle->prix_unitaire,
+                    'taux_tva' => $lastEntreeArticle->taux_tva
+                ]);
             }
-        
+            
         });
         
         return redirect()->back();
@@ -269,7 +259,7 @@ class DemandeController extends Controller
         ]);
 
         $demande->update([
-            'statut' => DemandeStatut::REJETEE,
+            'statut' => DemandeStatut::ANNULEE,
             'commentaire_validation' => $request->input('commentaire_validation'),
             'date_validation' => now(),
         ]);

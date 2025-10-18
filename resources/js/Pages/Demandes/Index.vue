@@ -298,7 +298,7 @@ function cancelDemande() {
                                             :href="route('demandes.show.approve', demande.id)"
                                             class="text-orange-600 hover:text-orange-900 p-1"
                                             title="Approuver la demande"
-                                            v-if="demande.statut === 'en_attente'"
+                                            v-if="demande.statut === 'cree'"
                                         >
                                             <QuestionMarkCircleIcon class="h-5 w-5" />
                                         </Link>

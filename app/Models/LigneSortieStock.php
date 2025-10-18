@@ -13,13 +13,11 @@ class LigneSortieStock extends Model
         'article_id',
         'quantite',
         'prix_unitaire',
-        'prix_total'
     ];
 
     protected $casts = [
         'quantite' => 'decimal:2',
         'prix_unitaire' => 'decimal:2',
-        'prix_total' => 'decimal:2',
     ];
 
     public function sortieStock(): BelongsTo
@@ -32,23 +30,4 @@ class LigneSortieStock extends Model
         return $this->belongsTo(Article::class);
     }
 
-    // Calcul automatique des montants
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::saving(function ($ligne) {
-            $ligne->prix_total = $ligne->quantite * $ligne->prix_unitaire;
-        });
-
-        // Après création, mettre à jour le stock
-        static::created(function ($ligne) {
-            $ligne->article->decrement('quantite_stock', $ligne->quantite);
-        });
-
-        // Après suppression, ajuster le stock
-        static::deleted(function ($ligne) {
-            $ligne->article->increment('quantite_stock', $ligne->quantite);
-        });
-    }
 }

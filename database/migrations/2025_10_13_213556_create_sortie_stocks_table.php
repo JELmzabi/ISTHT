@@ -18,10 +18,10 @@ return new class extends Migration
             $table->date('date_sortie');
             $table->text('motif');
             $table->text('notes')->nullable();
-            $table->string('statut')->default('valide');
+            $table->string('statut');
             # what the client_id should be 
-            // $table->bigInteger('client_id')->nullable();
-            $table->foreignId('created_by')->constrained('users', 'id');
+            $table->foreignId('demandeur_id')->nullable()->constrained('users', 'id');
+            $table->foreignId('created_by')->nullable()->constrained('users', 'id');
             $table->softDeletes();
             $table->timestamps();
         });

@@ -15,7 +15,7 @@ class SortieStock extends Model
     protected $fillable = [
         'numero',
         'type_sortie',
-        'client_id',
+        'demandeur_id',
         'date_sortie',
         'motif',
         'notes',
@@ -37,6 +37,7 @@ class SortieStock extends Model
     const TYPE_AJUSTEMENT = 'ajustement';
 
     // Statuts
+    const STATUT_ATTENTE_VALIDATION = 'attente_validation';
     const STATUT_VALIDE = 'valide';
     const STATUT_ANNULE = 'annule';
 
@@ -60,7 +61,7 @@ class SortieStock extends Model
     // Accessor pour le numéro d'affichage
     public function getNumeroAffichageAttribute(): string
     {
-        return 'SORT-' . str_pad($this->numero, 6, '0', STR_PAD_LEFT);
+        return 'SORT-' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
     }
 
     // Méthode pour calculer le total
@@ -70,29 +71,12 @@ class SortieStock extends Model
     }
 
     // Méthode pour générer le numéro automatique
-    public static function genererNumero(): string
+    public static function genererNumero() // Retourne un int au lieu de string
     {
-        $lastNumber = self::withTrashed()->max('numero');
-        return ($lastNumber ? $lastNumber + 1 : 1);
+        $lastNumber = (int) self::withTrashed()->max('id');
+        return 'SORT-' . str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
     }
 
-    // Événements pour gérer les mouvements de stock
-    protected static function boot()
-    {
-        // parent::boot();
-
-        // static::created(function ($sortieStock) {
-        //     foreach ($sortieStock->lignesSortie as $ligne) {
-        //         MouvementStock::creerDepuisSortie($ligne);
-        //     }
-        // });
-
-        // static::updated(function ($sortieStock) {
-        //     if ($sortieStock->isDirty('statut') && $sortieStock->statut === self::STATUT_ANNULE) {
-        //         $sortieStock->annulerMouvements();
-        //     }
-        // });
-    }
 
     // Annuler les mouvements associés
     public function annulerMouvements(): void
