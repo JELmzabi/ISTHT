@@ -20,6 +20,7 @@ import { ref } from 'vue';
 import { ModalLink } from '@inertiaui/modal-vue';
 import Dump from '@/Components/Dump.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import { getDemandeStatutInfo } from '@/Utils/labels.js';
 
 const props = defineProps({
     demandes: Object,
@@ -50,37 +51,6 @@ function applyFilters() {
   router.get(route('demandes.mes-demandes'), filters.value)
 }
 
-
-function getStatutColor(statut) {
-  switch (statut) {
-    case 'cree':
-      return 'bg-blue-100 text-blue-700';
-    case 'en_attente':
-      return 'bg-yellow-100 text-yellow-700';
-    case 'livree':
-      return 'bg-green-100 text-green-700';
-    case 'annulee':
-      return 'bg-red-100 text-red-700';
-    default:
-      return 'bg-gray-100 text-gray-600';
-  }
-}
-
-function getStatutLabel(statut) {
-  switch (statut) {
-    case 'cree':
-      return 'Crée';
-    case 'en_attente':
-      return 'En attente de livraison';
-    case 'livree':
-      return 'Livrée';
-    case 'annulee':
-      return 'Annulée';
-    default:
-      return statut;
-  }
-}
-
 const showCancelModal = ref(false)
 const demandeIdToCancel = ref(null)
 
@@ -99,6 +69,9 @@ function cancelDemande() {
     }
   })
 }
+
+const getDemandeStatutColor = (statut) => getDemandeStatutInfo(statut).color;
+const getDemandeStatutLabel = (statut) => getDemandeStatutInfo(statut).label;
 </script>
 
 <template>
@@ -238,10 +211,10 @@ function cancelDemande() {
                                     <span
                                         :class="[
                                         'px-2 py-1 text-xs font-medium rounded-full',
-                                        getStatutColor(demande.statut)
+                                        getDemandeStatutColor(demande.statut)
                                         ]"
                                     >
-                                        {{ getStatutLabel(demande.statut) }}
+                                        {{ getDemandeStatutLabel(demande.statut) }}
                                     </span>
                                 </td>
 

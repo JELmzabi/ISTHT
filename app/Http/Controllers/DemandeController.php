@@ -215,7 +215,7 @@ class DemandeController extends Controller
         DB::transaction(function () use ($demande, $request) {
             
             $demande->update([
-                'statut' => DemandeStatut::EN_ATTENTE,
+                'statut' => DemandeStatut::EN_ATTENTE_LIVRAISON,
                 'commentaire_validation' => $request->input('commentaire_validation'),
                 'date_validation' => now(),
             ]);
@@ -226,7 +226,7 @@ class DemandeController extends Controller
                 'demandeur_id' => $demande->demandeur_id,
                 'date_sortie' => now(),
                 'motif' => "Cette sortie est générée automatiquement à partir de la demande n° {$demande->numero}",
-                'statut' => SortieStock::STATUT_ATTENTE_VALIDATION,
+                'statut' => SortieStock::STATUT_ATTENTE_LIVRAISON,
             ]);
             
             foreach ($demande->articles as $articleLine) {

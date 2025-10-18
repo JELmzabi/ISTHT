@@ -12,14 +12,14 @@ enum DemandeStatut: string
     case CREE = 'cree';
     case ANNULEE = 'annulee';
     // case APPROUVEE = 'approuvee';
-    case EN_ATTENTE = 'en_attente';
+    case EN_ATTENTE_LIVRAISON = 'en_attente_livraison';
     case LIVREE = 'livree';
 
     public function label(): string
     {
         return match ($this) {
             self::CREE => 'Crée',
-            self::EN_ATTENTE => 'En attente de livraison',
+            self::EN_ATTENTE_LIVRAISON => 'En attente de livraison',
             // self::APPROUVEE => 'Approuvée',
             self::LIVREE => 'livrée',
             self::ANNULEE => 'Annulée',

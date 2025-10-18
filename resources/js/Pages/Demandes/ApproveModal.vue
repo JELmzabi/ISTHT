@@ -9,6 +9,7 @@ import {
     XCircleIcon
 } from '@heroicons/vue/24/outline';
 import Dump from '@/Components/Dump.vue';
+import { getDemandeStatutInfo } from '@/Utils/labels.js';
 
 const props = defineProps({
     demande: Object // passed from controller with relations: articles
@@ -70,6 +71,9 @@ const reject = () => {
         },
     });
 }
+
+const statusInfo = ref(getDemandeStatutInfo(props.demande.statut));
+
 </script>
 
 <template>
@@ -95,9 +99,9 @@ const reject = () => {
                 </div>
                 <div>
                     <span
-                        :class="['px-3 py-1 rounded-full text-sm font-medium', statusClasses]"
+                        :class="['px-3 py-1 rounded-full text-sm font-medium', statusInfo.color]"
                     >
-                        {{ statusLabel }}
+                        {{ statusInfo.label }}
                     </span>
                 </div>
             </div>
