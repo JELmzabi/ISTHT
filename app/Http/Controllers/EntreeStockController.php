@@ -458,7 +458,6 @@ public function annuler(EntreeStock $entreeStock)
 
         return Pdf::view('pdf.fiche-entree', 
                     compact('articles', 'startDate', 'endDate')
-                );
-        return Excel::download(new EntreeExport($data), 'entree_stock.xlsx');
+                )->download('fiche-entree.pdf');
     }
 }

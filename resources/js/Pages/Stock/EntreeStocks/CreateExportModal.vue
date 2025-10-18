@@ -9,7 +9,7 @@
     </div>
 
     <!-- Form -->
-    <form @submit.prevent="submit">
+    <div>
       <div class="grid gap-4 mt-4">
         <!-- Start date -->
         <div>
@@ -48,11 +48,11 @@
           Annuler
         </button>
 
-        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50" @click="exportPdf">
           Exporter
         </button>
       </div>
-    </form>
+    </div>
   </Modal>
 </template>
 
@@ -78,18 +78,7 @@ function close() {
 }
 
 // Submit form
-function submit() {
-  exportForm.get(route('entree-stocks.export'), {
-    preserveScroll: true,
-    onSuccess: () => {
-        close();
-          window.location.href = route('entree-stocks.export', {
-            'start_date': exportForm.start_date,
-            'end_date': exportForm.end_date,
-          });
-    
-        exportForm.reset();
-    },
-  })
+function exportPdf() {
+  window.open(route('entree-stocks.export', exportForm.data()), '_blank')
 }
 </script>
