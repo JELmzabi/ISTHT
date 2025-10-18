@@ -15,6 +15,7 @@
         "laravel/tinker": "^2.10.1",
         "maatwebsite/excel": "^3.1",
         "phiki/phiki": "^2.0",
+        "spatie/laravel-medialibrary": "^11.15",
         "spatie/laravel-pdf": "^1.8",
         "tightenco/ziggy": "^2.0"
     },
