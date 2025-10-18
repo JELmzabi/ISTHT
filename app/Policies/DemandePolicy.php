@@ -11,33 +11,39 @@ class DemandePolicy
 
     public function list(User $user): bool
     {
-        return $user->isAdmin() || $user->isMagasinier();
+        return true;
+        // return $user->isAdmin() || $user->isMagasinier();
     }
 
     public function create(User $user): bool
     {
-        return $user->isDemandeur();
+        return true;
+        // return $user->isDemandeur();
     }
 
     public function show(User $user, Demande $demande): bool
     {
-        return $user->id == $demande->demandeur_id;
+        return true;
+        // return $user->id == $demande->demandeur_id;
     }
 
     public function update(User $user, Demande $demande): bool
     {
-        return $user->id == $demande->demandeur_id && $demande->statut == DemandeStatut::EN_ATTENTE->value;
+        return true;
+        // return $user->id == $demande->demandeur_id && $demande->statut == DemandeStatut::EN_ATTENTE->value;
     }
 
     public function cancel(User $user, Demande $demande): bool
     {
-        return $user->id == $demande->demandeur_id && $demande->statut == DemandeStatut::EN_ATTENTE->value;
+        return true;
+        // return $user->id == $demande->demandeur_id && $demande->statut == DemandeStatut::EN_ATTENTE->value;
     }
 
 
     public function approve(User $user, Demande $demande): bool
     {
-        return $demande->statut == DemandeStatut::EN_ATTENTE->value && $user->isAdmin();
+        return true;
+        // return $demande->statut == DemandeStatut::EN_ATTENTE->value && $user->isAdmin();
     }
 
 }
