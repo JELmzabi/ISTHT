@@ -82,12 +82,12 @@ function delivredSortie() {
             <p class="text-blue-100 text-lg opacity-90">Suivez et gérez toutes les sorties de stock</p>
           </div>
           <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-            <Link
+            <!-- <Link
               class="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-400 flex items-center justify-center gap-3 font-semibold border border-blue-400 transition-all"
             >
               <DocumentArrowDownIcon class="h-5 w-5" />
               Exporter
-            </Link>
+            </Link> -->
           </div>
         </div>
       </div>
