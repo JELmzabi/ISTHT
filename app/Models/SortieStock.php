@@ -20,6 +20,7 @@ class SortieStock extends Model
         'motif',
         'notes',
         'statut',
+        'demande_id',
         'created_by'
     ];
 
@@ -38,10 +39,17 @@ class SortieStock extends Model
 
     // Statuts
     const STATUT_ATTENTE_VALIDATION = 'attente_validation';
+    const STATUT_ATTENTE_LIVRAISON = 'attente_livraison';
+    const STATUT_LIVREE = 'livree';
     const STATUT_VALIDE = 'valide';
     const STATUT_ANNULE = 'annule';
 
     const TYPE_DEMANDE = 'demande';
+
+    public function demande(): BelongsTo
+    {
+        return $this->belongsTo(Demande::class, 'demande_id');
+    }
 
     public function demandeur(): BelongsTo
     {

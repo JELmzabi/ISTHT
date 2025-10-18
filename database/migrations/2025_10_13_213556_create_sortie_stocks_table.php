@@ -19,9 +19,14 @@ return new class extends Migration
             $table->text('motif');
             $table->text('notes')->nullable();
             $table->string('statut');
+            $table->foreignId('demande_id')->nullable()->constrained('demandes');
             # what the client_id should be 
             $table->foreignId('demandeur_id')->nullable()->constrained('users', 'id');
             $table->foreignId('created_by')->nullable()->constrained('users', 'id');
+
+            $table->timestamp('date_validation')->nullable();
+            $table->foreignId('valide_par')->nullable()->constrained('users')->nullOnDelete();
+            $table->text('commentaire_validation')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

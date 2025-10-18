@@ -29,6 +29,7 @@ class ShowSortieStockResource extends JsonResource
                     'quantite' => $ligne->quantite,
                     'taux_tva' => "" . $ligne->taux_tva,
                     'prix_unitaire' => $ligne->prix_unitaire,
+                    'quantite_stock' => $ligne->article->quantite_stock
                 ];
             }),
             'statut' => $this->statut,

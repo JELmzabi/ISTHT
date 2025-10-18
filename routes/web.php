@@ -196,6 +196,11 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::delete('/fiches-techniques/{fiche}', [FicheTechniqueController::class, 'destroy'])->name('fiches-techniques.destroy');
     Route::get('/fiches-techniques/{fiche}/export', [FicheTechniqueController::class, 'export'])->name('fiches-techniques.export');
 
+    ##### Sortie Stock #####
+    Route::get('/sorties/{sortieStock}/approve', [SortieStockController::class, 'showApprove'])->name('sortie-stocks.show.approve');
+    Route::put('/sorties/{sortieStock}/approve', [SortieStockController::class, 'approve'])->name('sortie-stocks.approve');
+    Route::put('/sorties/{sortieStock}/reject', [SortieStockController::class, 'reject'])->name('sortie-stocks.reject');
+    Route::put('/sorties/{sortieStock}/livrer', [SortieStockController::class, 'livrer'])->name('sortie-stocks.livrer');
     
     ##### Exports #####
     Route::get('fournisseurs/export', [FournisseurController::class, 'export'])->name('fournisseurs.export');

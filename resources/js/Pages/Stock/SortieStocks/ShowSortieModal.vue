@@ -1,4 +1,5 @@
 <script setup>
+import { getSortieStatutInfo } from '@/Utils/labels';
 import {
   ClipboardDocumentListIcon,
   ClockIcon,
@@ -84,12 +85,8 @@ const statutLabels = {
         </div>
         <div>
           <p class="text-gray-500 text-sm">Statut</p>
-          <p class="text-lg font-semibold" :class="{
-            'text-green-600': sortie.statut === 'valide',
-            'text-yellow-600': sortie.statut === 'attente_validation',
-            'text-red-600': sortie.statut === 'annule',
-          }">
-            {{ statutLabels[sortie.statut] }}
+          <p class="text-lg font-semibold px-3 rounded" :class="getSortieStatutInfo(sortie.statut).color">
+            {{ getSortieStatutInfo(sortie.statut).label }}
           </p>
         </div>
       </div>

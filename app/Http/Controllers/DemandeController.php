@@ -225,6 +225,7 @@ class DemandeController extends Controller
                 'type_sortie' => SortieStock::TYPE_DEMANDE,
                 'demandeur_id' => $demande->demandeur_id,
                 'date_sortie' => now(),
+                'demande_id' => $demande->id,
                 'motif' => "Cette sortie est générée automatiquement à partir de la demande n° {$demande->numero}",
                 'statut' => SortieStock::STATUT_ATTENTE_LIVRAISON,
             ]);

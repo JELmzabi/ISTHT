@@ -11,12 +11,14 @@ import {
   XCircleIcon,
   CheckCircleIcon,
   ClockIcon,
+  CheckBadgeIcon,
 } from '@heroicons/vue/24/outline'
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { ModalLink } from '@inertiaui/modal-vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import Dump from '@/Components/Dump.vue';
+import { getSortieStatutInfo, getSortieTypeInfo } from '@/Utils/labels';
 
 const props = defineProps({
   sorties: Object,
@@ -48,61 +50,28 @@ function applyFilters() {
   router.get(route('sortie-stocks.index'), filters.value)
 }
 
-const getStatutInfo = (statut) => {
-    console.log('status', statut);
-    
-  switch (statut) {
-    case 'cree':
-      return { label: 'Créé', color: 'bg-gray-100 text-gray-800' }
-    case 'attente_validation':
-      return { label: 'En attente de validation', color: 'bg-yellow-100 text-yellow-800' }
-    case 'valide':
-      return { label: 'Validé', color: 'bg-green-100 text-green-800' }
-    case 'annule':
-      return { label: 'Annulé', color: 'bg-red-100 text-red-800' }
-    default:
-      return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
-  }
+const showDelivredModal = ref(false)
+const sortieIdToDelivred = ref(null)
+
+function openDelivredModal(id) {
+  showDelivredModal.value = true
+  sortieIdToDelivred.value = id
 }
 
-const getTypeInfo = (type) => {
-  switch (type) {
-    case 'vente':
-      return { label: 'Vente', color: 'bg-green-100 text-green-800' }
-    case 'transfert':
-      return { label: 'Transfert', color: 'bg-blue-100 text-blue-800' }
-    case 'perte':
-      return { label: 'Perte', color: 'bg-red-100 text-red-800' }
-    case 'ajustement':
-      return { label: 'Ajustement', color: 'bg-yellow-100 text-yellow-800' }
-    case 'demande':
-      return { label: 'Demande', color: 'bg-purple-100 text-purple-800' }
-    default:
-      return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
-  }
-}
-
-const showCancelModal = ref(false)
-const sortieIdToCancel = ref(null)
-
-function openCancelModal(id) {
-  sortieIdToCancel.value = id
-  showCancelModal.value = true
-}
-
-function cancelSortie() {
-  router.delete(route('sorties.cancel', sortieIdToCancel.value), {
-    onSuccess: () => alert('Sortie annulée avec succès !'),
-    onError: (e) => alert('Erreur lors de l’annulation : ' + e.message),
+function delivredSortie() {
+  const sortieStock = sortieIdToDelivred.value;
+  router.put(route('sortie-stocks.livrer', sortieStock), {
+    onSuccess: () => alert('Sortie Delevrée avec succès !'),
+    onError: (e) => alert('Erreur lors de la livraison : ' + e.message),
   })
 }
+
 </script>
 
 <template>
   <AuthenticatedLayout>
     <Head title="Sorties de Stock" />
     
-    <!-- <Dump :data="sorties" /> -->
 
     <div class="space-y-6">
       <!-- Header -->
@@ -263,16 +232,16 @@ function cancelSortie() {
               <tr v-for="sortie in sorties.data" :key="sortie.id" class="hover:bg-gray-50">
                 <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ sortie.numero }}</td>
                 <td class="px-6 py-4 text-sm text-gray-600">
-                    <span :class="`px-2 py-1 rounded text-xs font-medium ${getTypeInfo(sortie.type).color}`">
-                        {{ getTypeInfo(sortie.type).label }}
+                    <span :class="`px-2 py-1 rounded text-xs font-medium ${getSortieTypeInfo(sortie.type).color}`">
+                        {{ getSortieTypeInfo(sortie.type).label }}
                     </span>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-600">{{ sortie.demandeur }}</td>
                 <td class="px-6 py-4 text-sm text-gray-600">{{ sortie.date }}</td>
                 <td class="px-6 py-4 text-sm text-gray-600">{{ sortie.notes || '-' }}</td>
                 <td class="px-6 py-4">
-                    <span :class="`px-2 py-1 rounded text-xs font-medium ${getStatutInfo(sortie.statut).color}`" >
-                        {{ getStatutInfo(sortie.statut).label }}
+                    <span :class="`px-2 py-1 rounded text-xs font-medium ${getSortieStatutInfo(sortie.statut).color}`" >
+                        {{ getSortieStatutInfo(sortie.statut).label }}
                     </span>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-600">{{ sortie.created_by }}</td>
@@ -285,11 +254,21 @@ function cancelSortie() {
                     >
                       <EyeIcon class="h-5 w-5" />
                     </ModalLink>
+                  
+                    <button
+                      @click="openDelivredModal(sortie.id)"
+                      class="text-green-600 hover:text-green-900 p-1"
+                      title="Livrer la sortie"
+                      v-if="sortie.statut === 'attente_livraison'"
+                    >
+                      <CheckBadgeIcon class="h-5 w-5" />
+                    </button>
 
                     <Link
+                      :href="route('sortie-stocks.show.approve', sortie.id)"
                       class="text-orange-600 hover:text-orange-900 p-1"
                       title="Approuver la sortie"
-                      v-if="sortie.statut === 'cree'"
+                      v-if="sortie.statut === 'attente_validation'"
                     >
                       <QuestionMarkCircleIcon class="h-5 w-5" />
                     </Link>
@@ -341,11 +320,13 @@ function cancelSortie() {
     </div>
 
     <ConfirmationModal
-      :show="showCancelModal"
-      title="Annuler la sortie"
-      message="Êtes-vous sûr de vouloir annuler cette sortie ?"
-      :onConfirm="cancelSortie"
-      @close="showCancelModal = false"
+      type="info"
+      :show="showDelivredModal"
+      title="Livrer la sortie"
+      message="Êtes-vous sûr de vouloir livrer cette sortie ?"
+      :onConfirm="delivredSortie"
+      @close="showDelivredModal = false"
     />
+
   </AuthenticatedLayout>
 </template>
