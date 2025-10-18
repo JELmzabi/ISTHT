@@ -257,7 +257,7 @@ class FicheTechniqueController extends Controller
         return Pdf::view('pdf.' . $template, [
             'fiche' => $fiche,
             'totalTtc' => $totalTtc,
-            'total_effectif' => round($totalTtc / $fiche->effectif)
+            'total_effectif' => round($totalTtc / $fiche->effectif, 2)
         ])->download($template . '-' . $fiche->nom . '.pdf');
     }
 }
