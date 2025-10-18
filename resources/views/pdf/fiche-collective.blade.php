@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Fiche technique pédagogique </title>
+    <title>Fiche technique de collectivité  </title>
     @vite(['resources/css/app.css'])
 </head>
 
@@ -16,12 +16,12 @@
 
         <!-- TITLE -->
         <div class="text-center font-bold text-2xl uppercase underline mb-4">
-            Fiche technique pédagogique
+            Fiche technique de collectivité
         </div>
         <div class="text-left mt-8">
-            <p><span class="font-bold">Module de formation:</span> {{ $fiche->nom }}</p>
+            <p><span class="font-bold">Repas:</span> {{ $fiche->nom }}</p>
             <p><span class="font-bold">Plat:</span> {{ $fiche->plat }}</p>
-            <p><span class="font-bold">Nom du formateur:</span> {{ $fiche->responsable }}</p>
+            <p><span class="font-bold">Nom de chef de cuisine:</span> {{ $fiche->responsable }}</p>
             <p><span class="font-bold">Nombre d'effectif:</span> {{ $fiche->effectif }}</p>
         </div>
 
@@ -81,7 +81,7 @@
         <!-- Signatures -->
         <div class="flex justify-evenly" style="margin-top: 36px;">
             <div class="font-bold text-base">Tanger, le .............</div>
-            <div class="font-bold text-base">Le formateur </div>
+            <div class="font-bold text-base">Le chef de cuisine </div>
         </div>
 
     </div>

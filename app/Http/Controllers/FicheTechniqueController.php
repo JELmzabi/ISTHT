@@ -252,10 +252,12 @@ class FicheTechniqueController extends Controller
             return $etape->ingredients->sum('total_ttc');
         });
 
-        return Pdf::view('pdf.fiche-pedagogique', [
+        $template = $fiche->type == FicheType::PEDAGOGIQUE ? 'fiche-pedagogique' : 'fiche-collective';
+
+        return Pdf::view('pdf.' . $template, [
             'fiche' => $fiche,
             'totalTtc' => $totalTtc,
             'total_effectif' => round($totalTtc / $fiche->effectif)
-        ])->download('fiche-pedagogique-' . $fiche->nom . '.pdf');
+        ])->download($template . '-' . $fiche->nom . '.pdf');
     }
 }
