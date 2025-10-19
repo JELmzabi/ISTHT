@@ -234,7 +234,9 @@ class SortieStockController extends Controller
                         'type_mouvement' => MouvementStock::TYPE_SORTIE,
                         'quantite_entree' => $ligne->quantite,
                         'quantite_actuelle' => $nouvelleQuantiteActuelle,
-                        'motif' => 'Entrée de stock validée',
+                        'motif' => 'Sortie de stock validée',
+                        'sourceable_id' => $sortieStock->id,
+                        'sourceable_type' => SortieStock::class
                     ]);
                 }
             }
