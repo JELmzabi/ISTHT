@@ -49,7 +49,7 @@ class BonCommandeController extends Controller
     }
 
     if ($request->has('date_limite') && $request->date_limite) {
-        $query->where('date_limite_reception', '<=', $request->date_limite);
+        $query->where('date_limite_reception', '>=', $request->date_limite);
     }
 
     if ($request->has('reference') && $request->reference) {
