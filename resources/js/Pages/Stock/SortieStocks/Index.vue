@@ -37,12 +37,12 @@ function formatDate(date) {
 const filters = ref({
   search: props.filters.search || '',
   statut: props.filters.statut || '',
-  start_date: props.filters.start_date || '',
-  end_date: props.filters.end_date || '',
+  date_debut: props.filters.date_debut || '',
+  date_fin: props.filters.date_fin || '',
 })
 
 function resetFilters() {
-  filters.value = { search: '', statut: '', start_date: '', end_date: '' }
+  filters.value = { search: '', statut: '', date_debut: '', date_fin: '' }
   router.get(route('sortie-stocks.index'))
 }
 
@@ -118,8 +118,9 @@ function delivredSortie() {
             >
               <option value="">Tous</option>
               <option value="cree">Créée</option>
-              <option value="en_attente">En attente</option>
-              <option value="validee">Validée</option>
+              <option value="attente_validation">En attente validation</option>
+              <option value="attente_livraison">En attente livraison</option>
+              <option value="livree">Livée</option>
               <option value="annulee">Annulée</option>
             </select>
           </div>
@@ -127,7 +128,7 @@ function delivredSortie() {
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Date début</label>
             <input
-              v-model="filters.start_date"
+              v-model="filters.date_debut"
               type="date"
               class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500"
             />
@@ -136,7 +137,7 @@ function delivredSortie() {
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Date fin</label>
             <input
-              v-model="filters.end_date"
+              v-model="filters.date_fin"
               type="date"
               class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500"
             />
