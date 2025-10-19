@@ -16,6 +16,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class DemandeController extends Controller
@@ -209,6 +210,22 @@ class DemandeController extends Controller
         $request->validate([
             'commentaire_validation' => 'nullable|string|max:500',
         ]);
+
+        $errors = [];
+
+        foreach ($demande->articles as $ligne) {
+
+            if ($ligne->article->quantite_stock < $ligne->quantite_demandee) {
+                $errors[] = "La quantité demandée pour l'article « {$ligne->article->designation} » ({$ligne->quantite_demandee}) dépasse le stock disponible ({$ligne->article->quantite_stock}).";
+            }
+
+        }
+
+        if (!empty($errors)) {
+            throw ValidationException::withMessages([
+                'articlesError' => [$errors],
+            ]);
+        }
 
 
         

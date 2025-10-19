@@ -130,6 +130,12 @@ const statusInfo = ref(getDemandeStatutInfo(props.demande.statut));
             </div>
         </div>
 
+        <template v-if="$page.props.errors.articlesError">
+            <p  v-for="error in $page.props.errors.articlesError" :key="error" class="text-sm text-red-600 mb-3">
+                {{ error }}
+            </p>
+        </template>
+        
         <!-- Articles Table -->
         <div class="bg-white p-6 rounded-lg shadow-sm border">
             <h2 class="text-lg font-semibold mb-4">Articles demandés</h2>

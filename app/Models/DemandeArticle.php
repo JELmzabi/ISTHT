@@ -16,6 +16,13 @@ class DemandeArticle extends Model
         'remarque',
     ];
 
+    public function casts() 
+    {
+        return [
+            'quantite_demandee' => 'decimal:2',
+        ];
+    }
+
     public function demande()
     {
         return $this->belongsTo(Demande::class);
