@@ -770,9 +770,9 @@ public function updateFournisseurLogo(Request $request, Fournisseur $fournisseur
         $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
         
         if ($request->end_date) {
-            $data = $query->whereBetween('date_mise_ligne', [$startDate, $endDate])->get();
+            $data = $query->whereBetween('created_at', [$startDate, $endDate])->get();
         } else {
-            $data = $query->whereDate('date_mise_ligne', '>=', $startDate)->get();
+            $data = $query->whereDate('created_at', '>=', $startDate)->get();
         }
 
         $data = ListBonCommandesExport::collection($data)->toArray($request);
