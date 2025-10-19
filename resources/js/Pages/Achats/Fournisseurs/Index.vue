@@ -323,7 +323,7 @@
                                             <PencilIcon class="h-4 w-4" />
                                         </button>
                                         <button
-                                            @click="toggleStatut(fournisseur)"
+                                            @click="openToggleModal(fournisseur.id)"
                                             :class="[
                                                 'p-1 rounded-lg transition-colors',
                                                 fournisseur.est_actif 
@@ -439,6 +439,15 @@
                 </div>
             </div>
         </transition>
+
+        <ConfirmationModal
+            type="danger"
+            :show="showToggleModal"
+            title="Modifier le statut"
+            message="Êtes-vous sûr de vouloir modifier le statut ?"
+            :onConfirm="toggleStatut"
+            @close="showToggleModal = false"
+        />
     </AuthenticatedLayout>
 </template>
 
@@ -463,6 +472,7 @@ import {
     CheckCircleIcon,
     EyeIcon
 } from '@heroicons/vue/24/outline';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
 // Props
 const props = defineProps({
@@ -639,24 +649,17 @@ const submitFournisseurForm = () => {
     });
 };
 
-const toggleStatut = (fournisseur) => {
-    if (!confirm(`Êtes-vous sûr de vouloir ${fournisseur.est_actif ? 'désactiver' : 'activer'} ce fournisseur ?`)) {
-        return;
-    }
 
-    router.patch(route('fournisseurs.toggle-statut', fournisseur.id), {}, {
-        onSuccess: () => {
-            showToast(
-                fournisseur.est_actif 
-                    ? 'Fournisseur désactivé avec succès' 
-                    : 'Fournisseur activé avec succès', 
-                3000
-            );
-        },
-        onError: () => {
-            showToast('Erreur lors de la modification du statut', 3000);
-        }
-    });
+const showToggleModal = ref(false)
+const fourniseeurIdToToggle = ref(null)
+
+function openToggleModal(id) {
+  showToggleModal.value = true
+  fourniseeurIdToToggle.value = id
+}
+
+const toggleStatut = () => {
+    router.patch(route('fournisseurs.toggle-statut', fourniseeurIdToToggle.value));
 };
 
 const confirmDelete = (fournisseur) => {

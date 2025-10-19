@@ -231,26 +231,13 @@ class FournisseurController extends Controller
     /**
      * Toggle the status of the specified resource.
      */
-    public function toggleStatut(Fournisseur $fournisseur): JsonResponse
+    public function toggleStatut(Fournisseur $fournisseur)
     {
-        try {
-            $fournisseur->update([
-                'est_actif' => !$fournisseur->est_actif
-            ]);
+        $fournisseur->update([
+            'est_actif' => !$fournisseur->est_actif
+        ]);
 
-            return response()->json([
-                'message' => $fournisseur->est_actif 
-                    ? 'Fournisseur activé avec succès' 
-                    : 'Fournisseur désactivé avec succès',
-                'fournisseur' => $fournisseur->fresh()
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Erreur lors du changement de statut',
-                'message' => $e->getMessage()
-            ], 500);
-        }
+        return redirect()->back();
     }
 
     /**
