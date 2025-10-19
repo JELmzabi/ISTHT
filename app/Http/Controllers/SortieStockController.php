@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class SortieStockController extends Controller
@@ -106,6 +107,21 @@ class SortieStockController extends Controller
         ]);
 
 
+        $errors = [];
+
+        foreach ($sortieStock->lignesSortie as $ligne) {
+
+            if ($ligne->article->quantite_stock < $ligne->quantite) {
+                $errors[] = "La quantité demandée pour l'article « {$ligne->article->designation} » ({$ligne->quantite}) dépasse le stock disponible ({$ligne->article->quantite_stock}).";
+            }
+            
+        }
+
+        if (!empty($errors)) {
+            throw ValidationException::withMessages([
+                'lignesSortie' => [$errors],
+            ]);
+        }
         
         DB::transaction(function () use ($sortieStock, $request) {
             
@@ -169,6 +185,22 @@ class SortieStockController extends Controller
 
     public function livrer(Request $request, SortieStock $sortieStock) {
         // $this->authorize('approve', $sortieStock);
+
+        $errors = [];
+
+        foreach ($sortieStock->lignesSortie as $ligne) {
+
+            if ($ligne->article->quantite_stock < $ligne->quantite) {
+                $errors[] = "La quantité demandée pour l'article « {$ligne->article->designation} » ({$ligne->quantite}) dépasse le stock disponible ({$ligne->article->quantite_stock}).";
+            }
+            
+        }
+
+        if (!empty($errors)) {
+            throw ValidationException::withMessages([
+                'lignesSortie' => [$errors],
+            ]);
+        }
 
         DB::transaction(function () use ($sortieStock, $request) {
             

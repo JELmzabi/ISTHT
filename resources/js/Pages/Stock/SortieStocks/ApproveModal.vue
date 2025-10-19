@@ -122,6 +122,13 @@ const demandeType = props.sortie.demande ? getDemandeTypeInfo(props.sortie.deman
             <!-- Articles Table -->
             <div class="bg-white p-6 rounded-lg shadow-sm border">
                 <h2 class="text-lg font-semibold mb-4">Articles</h2>
+
+                <template v-if="$page.props.errors.lignesSortie">
+                    <p  v-for="error in $page.props.errors.lignesSortie" :key="error" class="text-sm text-red-600 mb-3">
+                        {{ error }}
+                    </p>
+                </template>
+
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 text-sm">
                         <thead class="bg-gray-50">
