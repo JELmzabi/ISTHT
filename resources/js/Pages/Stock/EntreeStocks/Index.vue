@@ -339,7 +339,7 @@
                                         </button>
 
                                         <!-- Valider -->
-                                        <Link
+                                        <!-- <Link
                                             v-if="entree.statut === 'attente_validation'"
                                             :href="route('entree-stocks.valider', entree.id)"
                                             class="p-2 text-green-600 hover:text-green-800 hover:bg-green-100 rounded-xl transition-all duration-200 group/tooltip relative"
@@ -351,12 +351,25 @@
                                             <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap">
                                                 Valider
                                             </div>
-                                        </Link>
+                                        </Link> -->
+
+                                         <!-- Annuler -->
+                                        <button
+                                            v-if="entree.statut === 'attente_validation'"
+                                            @click="openConfirmationModal(entree.id)"
+                                            class="p-2 text-green-600 hover:text-green-800 hover:bg-green-100 rounded-xl transition-all duration-200 group/tooltip relative"
+                                            title="Valider l'entrée"
+                                        >
+                                            <CheckIcon class="h-5 w-5" />
+                                            <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                                                Valider
+                                            </div>
+                                        </button>
 
                                         <!-- Annuler -->
                                         <button
                                             v-if="entree.statut === 'attente_validation'"
-                                            @click="openAnnulationModal(entree)"
+                                            @click="openAnnulationModal(entree.id)"
                                             class="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-xl transition-all duration-200 group/tooltip relative"
                                             title="Annuler l'entrée"
                                         >
@@ -554,13 +567,24 @@
             </div>
         </div>
 
-        <Modal :show="showValidationModal" @close="closeValidationModal">
-            <!-- Contenu du modal de validation -->
-        </Modal>
+        <ConfirmationModal
+            type="danger"
+            :show="showAnnulationModal"
+            title="Annuler L'entrée"
+            message="Êtes-vous sûr de vouloir annuler cette entrée ?"
+            :onConfirm="annuler"
+            @close="showAnnulationModal = false"
+        />
 
-        <Modal :show="showAnnulationModal" @close="closeAnnulationModal">
-            <!-- Contenu du modal d'annulation -->
-        </Modal>
+        <ConfirmationModal
+            type="info"
+            :show="showConfirmModal"
+            title="Confirmer L'entrée"
+            message="Êtes-vous sûr de vouloir confirmer cette entrée ?"
+            :onConfirm="confirm"
+            @close="showConfirmModal = false"
+        />
+
     </AuthenticatedLayout>
 </template>
 
@@ -595,6 +619,7 @@ import {
     CheckCircleIcon
 } from '@heroicons/vue/24/outline';
 import Dump from '@/Components/Dump.vue';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
 // Props
 const props = defineProps({
@@ -611,6 +636,37 @@ const props = defineProps({
         default: () => ({})
     },
 });
+
+const showAnnulationModal = ref(false)
+const entreeIdToAnnule = ref(null)
+
+function openAnnulationModal(id) {
+  showAnnulationModal.value = true
+  entreeIdToAnnule.value = id
+}
+
+
+function annuler() {
+  const entreeId = entreeIdToAnnule.value;
+  
+  router.post(route('entree-stocks.annuler', entreeId));
+}
+
+const showConfirmModal = ref(false)
+const entreeIdToConfirm = ref(null)
+
+
+function openConfirmationModal(id) {
+  showConfirmModal.value = true
+  entreeIdToConfirm.value = id
+}
+
+
+function confirm() {
+  const entreeId = entreeIdToConfirm.value;
+  
+  router.post(route('entree-stocks.valider', entreeId));
+}
 
 const calculateTotalMontantTtc = (entree) => {
     if (!entree.lignes_entree) return 0;
@@ -629,7 +685,6 @@ const itemsPerPage = ref(10);
 const contextMenuId = ref(null);
 const showDetailModal = ref(false);
 const showValidationModal = ref(false);
-const showAnnulationModal = ref(false);
 const selectedEntree = ref(null);
 
 // Computed
@@ -774,11 +829,6 @@ const closeValidationModal = () => {
     showValidationModal.value = false;
 };
 
-const openAnnulationModal = (entree) => {
-    selectedEntree.value = entree;
-    showAnnulationModal.value = true;
-    contextMenuId.value = null;
-};
 
 const closeAnnulationModal = () => {
     showAnnulationModal.value = false;
