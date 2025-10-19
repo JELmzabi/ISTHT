@@ -3,12 +3,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BonCommande extends Model
 {
+    use HasFactory;
+    
     protected $fillable = [
         'reference', 'objet', 'description', 'categorie_principale_id',
         'nature_prestation_id', 'fournisseur_id', 'statut', 
