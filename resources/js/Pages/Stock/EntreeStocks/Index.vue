@@ -250,7 +250,7 @@
                                         </div>
                                         <div>
                                             <div class="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
-                                                {{ entree.numero_affichage }}
+                                                {{ entree.numero }}
                                             </div>
                                             <div v-if="entree.bon_reception" class="text-sm text-blue-600 flex items-center gap-1">
                                                 <DocumentIcon class="h-3 w-3" />

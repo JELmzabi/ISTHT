@@ -355,6 +355,8 @@ public function valider(EntreeStock $entreeStock)
                         'quantite_entree' => $ligne->quantite,
                         'quantite_actuelle' => $nouvelleQuantiteActuelle,
                         'motif' => 'Entrée de stock validée',
+                        'sourceable_id' => $entreeStock->id,
+                        'sourceable_type' => EntreeStock::class
                     ]);
                 }
             }
@@ -441,7 +443,8 @@ public function annuler(EntreeStock $entreeStock)
         $startDate = Carbon::parse($request->start_date)->startOfDay();
 
         $query = MouvementStock::entrees()->with([
-            'article'
+            'article',
+            'sourceable.bonReception',
         ]);
 
         $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;

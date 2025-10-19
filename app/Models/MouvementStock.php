@@ -24,6 +24,8 @@ class MouvementStock extends Model
         'quantite_actuelle',
         'referenceable',
         'motif',
+        'sourceable_id',
+        'sourceable_type',
     ];
 
     protected $casts = [
@@ -56,7 +58,7 @@ class MouvementStock extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function source()
+    public function sourceable()
     {
         return $this->morphTo();
     }

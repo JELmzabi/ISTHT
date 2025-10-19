@@ -31,7 +31,7 @@ return new class extends Migration
             // Références
             $table->text('motif')->nullable();
             
-            $table->nullableMorphs('referenceable'); // SorieStock or EntreeStock
+            $table->nullableMorphs('sourceable'); // SorieStock or EntreeStock
             $table->foreignId('article_id')->constrained('articles');
             $table->foreignId('created_by')->nullable()->constrained('users', 'id');
             $table->timestamps();

@@ -48,9 +48,17 @@
           Annuler
         </button>
 
-        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50" @click="exportPdf">
+        <!-- <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50" @click="exportPdf">
           Exporter
-        </button>
+        </button> -->
+
+        <a
+        :href="route('entree-stocks.export', exportForm.data())" 
+        target="_blank"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50" @click="exportPdf">
+          Exporter
+        </a>
+        
       </div>
     </div>
   </Modal>
