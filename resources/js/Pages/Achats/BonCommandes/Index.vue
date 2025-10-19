@@ -10,13 +10,27 @@
                     <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Bons de Commande</h1>
                     <p class="text-gray-600">Gestion des commandes fournisseurs</p>
                 </div>
-                <button
-                    @click="openBonCommandeForm()"
-                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-                >
-                    <PlusIcon class="h-5 w-5" />
-                    Nouveau bon de commande
-                </button>
+                <div class="flex items-center gap-4">
+
+                    <ModalLink
+                        as="button"
+                        href="#export-modal"
+                        class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-400 flex items-center justify-center gap-2 "
+                    >
+                        <DocumentArrowDownIcon class="h-5 w-5" />
+                        Exporter
+                    </ModalLink>
+                    <CreateExportModal name="export-modal" />
+
+                    <button
+                        @click="openBonCommandeForm()"
+                        class="bg-blue-600 text-white  px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                    >
+                        <PlusIcon class="h-5 w-5" />
+                        Nouveau bon de commande
+                    </button>
+                    
+                </div>
             </div>
 
             <!-- Stats -->
@@ -699,10 +713,14 @@ import {
     ExclamationTriangleIcon,
     ClockIcon,
     CheckCircleIcon,
-    BanknotesIcon
+    BanknotesIcon,
+    DocumentArrowDownIcon
 }
 from '@heroicons/vue/24/outline';
+import { ModalLink } from '@inertiaui/modal-vue';
+
 import InputError from '@/Components/InputError.vue';
+import CreateExportModal from './CreateExportModal.vue';
 
 // Props avec valeurs par défaut pour éviter les erreurs
 const props = defineProps({

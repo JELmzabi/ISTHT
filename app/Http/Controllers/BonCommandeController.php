@@ -2,6 +2,7 @@
 // app/Http/Controllers/BonCommandeController.php
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ListBonCommandesExport;
 use App\Http\Resources\ShowBonCommandeResource;
 use App\Models\BonCommande;
 use App\Models\Fournisseur;
@@ -11,8 +12,9 @@ use App\Models\Article;
 use App\Models\HistoriqueStatutBc;
 use App\Models\BonCommandeArticle; 
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Inertia\Inertia;
-use PDF;
+use Spatie\LaravelPdf\Facades\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
@@ -750,6 +752,38 @@ public function updateFournisseurLogo(Request $request, Fournisseur $fournisseur
         $fileName = "bon-commande-{$cleanReference}.pdf";
         
         return FacadesPdf::view('pdf.bon-commande', $data)->download($fileName);
+    }
+
+
+    function export(Request $request) 
+    {
+        
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date',
+        ]);
+
+        $startDate = Carbon::parse($request->start_date)->startOfDay();
+
+        $query = BonCommande::with(['categoriePrincipale', 'naturePrestation', 'fournisseur'])->orderBy('created_at', 'desc');
+
+        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
+        
+        if ($request->end_date) {
+            $data = $query->whereBetween('date_mise_ligne', [$startDate, $endDate])->get();
+        } else {
+            $data = $query->whereDate('date_mise_ligne', '>=', $startDate)->get();
+        }
+
+        $data = ListBonCommandesExport::collection($data)->toArray($request);
+        
+        return Pdf::view('pdf.list-bon-commandes', [
+            'bonCommandes' => $data,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+        ])->format('a4')
+            ->margins(10,0,10,0)
+            ->download('list-bon-commandes.pdf');
     }
  
 }
