@@ -2,8 +2,8 @@
   <div class="min-h-screen bg-gray-100 flex flex-col">
     <!-- Navbar -->
     <nav class="bg-white shadow-sm border-b">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16 items-center">
+      <div class="">
+        <div class="flex justify-between h-16 items-center px-4">
           <!-- Left side -->
           <div class="flex items-center space-x-3">
             <!-- Sidebar toggle (mobile) -->
@@ -29,11 +29,9 @@
             <!-- User info -->
             <div class="flex items-center space-x-2">
               <span class="text-sm text-gray-700">{{ $page.props.auth.user.name }}</span>
-              <img
-                class="h-8 w-8 rounded-full object-cover border"
-                :src="$page.props.auth.user.profile_photo_url"
-                :alt="$page.props.auth.user.name"
-              />
+              <div class="h-8 w-8 bg-blue-100 border border-blue-200 text-blue-800 rounded-full object-cover border flex items-center justify-center font-semibold">
+                {{ $page.props.auth.user.name.charAt(0) }}
+              </div>
             </div>
           </div>
         </div>
@@ -44,7 +42,7 @@
       <!-- Sidebar -->
       <aside
         :class="[
-          'bg-white shadow-sm w-64 fixed md:static inset-y-0 left-0 transform transition-transform duration-300 ease-in-out',
+          'bg-white shadow-sm w-64 fixed md:static inset-y-0 left-0 transform transition-transform duration-300 ease-in-out z-10',
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         ]"
         class="sidebar-scrollbar"

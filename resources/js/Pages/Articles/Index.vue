@@ -478,7 +478,7 @@ const toggleCategoriesList = () => {
 
     <div class="space-y-6">
         <!-- En-tête -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 px-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Référentiel Articles</h1>
                 <p class="text-gray-600">Gestion du catalogue des articles en stock</p>

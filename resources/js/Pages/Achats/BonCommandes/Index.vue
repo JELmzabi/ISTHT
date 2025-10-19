@@ -5,7 +5,7 @@
 
         <div class="space-y-6">
             <!-- En-tête -->
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between pt-4 px-4">
                 <div>
                     <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Bons de Commande</h1>
                     <p class="text-gray-600">Gestion des commandes fournisseurs</p>
