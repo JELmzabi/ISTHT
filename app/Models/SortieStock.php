@@ -81,7 +81,7 @@ class SortieStock extends Model
     // Méthode pour générer le numéro automatique
     public static function genererNumero() // Retourne un int au lieu de string
     {
-        $lastNumber = (int) self::withTrashed()->max('id');
+        $lastNumber = (int) self::withTrashed()->max('id') ?? 0;
         return 'SORT-' . str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
     }
 

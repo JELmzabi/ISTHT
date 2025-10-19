@@ -33,9 +33,9 @@ class Demande extends Model implements HasMedia
 
     public static function generateNumero(): string
     {
-        $lastDemande = Demande::orderBy('created_at', 'desc')->first();
-        $lastDemandeNumber = $lastDemande ? $lastDemande->id : 0;
-        return "DE-" . ($lastDemandeNumber + 1);
+        $lastNumber = self::max('id') ?? 0;
+        $numero = 'DE-' . str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        return $numero;
     }
 
     public function registerMediaConversions(?Media $media = null): void

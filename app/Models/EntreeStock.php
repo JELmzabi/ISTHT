@@ -198,17 +198,17 @@ public function getPeutEtreAnnuleAttribute(): bool
         return $query->where('statut', self::STATUT_ANNULE);
     }
 
-        public static function genererNumero(): int // Retourne un int au lieu de string
+        public static function genererNumero() // Retourne un int au lieu de string
     {
-        $lastNumber = (int) self::withTrashed()->max('numero');
-        return $lastNumber + 1;
+        $lastNumber = (int) self::withTrashed()->max('id') ?? 0;
+        $numero = 'ENTR-' . str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        return $numero;
     }
 
     // Accessor pour le numéro d'affichage - CORRIGÉ
     public function getNumeroAffichageAttribute(): string
     {
-        // CORRECTION : Vérifier que $this->numero est bien un nombre
-        $numero = is_numeric($this->numero) ? $this->numero : 0;
-        return 'BR-' . str_pad($numero, 6, '0', STR_PAD_LEFT);
+        return $this->numero;
+        
     }
 }
