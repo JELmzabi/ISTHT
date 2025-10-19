@@ -307,6 +307,14 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex space-x-2">
+                                        <Link
+                                            :href="route('fournisseurs.show', fournisseur.id)"
+                                            class="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-xl transition-all duration-200 group/tooltip relative"
+                                            title="Voir détails complets"
+                                        >
+                                            <EyeIcon class="h-5 w-5" />
+                                        </Link>
+                                        
                                         <button
                                             @click="editFournisseur(fournisseur)"
                                             class="text-blue-600 hover:text-blue-900 p-1 rounded-lg hover:bg-blue-50 transition-colors"
@@ -452,7 +460,8 @@ import {
     XCircleIcon,
     MagnifyingGlassIcon,
     ExclamationTriangleIcon,
-    CheckCircleIcon
+    CheckCircleIcon,
+    EyeIcon
 } from '@heroicons/vue/24/outline';
 
 // Props

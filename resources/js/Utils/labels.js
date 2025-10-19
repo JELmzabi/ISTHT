@@ -69,5 +69,21 @@ const getSortieTypeInfo = (type) => {
   }
 }
 
+const getBonCommandeStatutInfo = (statut) => {
+  switch (statut) {
+    case 'cree':
+      return { label: 'Créé', color: 'bg-purple-100 text-purple-800' }
+    case 'attente_livraison':
+      return { label: 'En attente de livraison', color: 'bg-yellow-100 text-yellow-800' }
+    case 'livre_completement':
+      return { label: 'Livrée complètement', color: 'bg-green-100 text-green-800' }
+    case 'livre_partiellement':
+      return { label: 'Livrée partiellement', color: 'bg-blue-100 text-blue-800' }
+    case 'annule':
+      return { label: 'Annulé', color: 'bg-red-100 text-red-800' }
+    default:
+      return { label: 'Inconnu', color: 'bg-gray-100 text-gray-800' }
+  }
+}
 
-export { getDemandeStatutInfo, getDemandeTypeInfo, getSortieStatutInfo, getSortieTypeInfo }
+export { getDemandeStatutInfo, getDemandeTypeInfo, getSortieStatutInfo, getSortieTypeInfo, getBonCommandeStatutInfo }

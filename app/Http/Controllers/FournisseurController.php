@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\FournisseursExport;
+use App\Http\Resources\ShowFournisseurResource;
 use App\Models\Fournisseur;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -127,20 +128,13 @@ class FournisseurController extends Controller
      */
     public function show(Fournisseur $fournisseur)
     {
-        try {
-            $fournisseur->load(['bonCommandes' => function ($query) {
-                $query->orderBy('created_at', 'desc')->limit(10);
-            }])->loadCount('bonCommandes');
+        $fournisseur->load(['bonCommandes' => function ($query) {
+            $query->orderBy('created_at', 'desc')->limit(10);
+        }])->loadCount('bonCommandes');
 
-            return inertia('Achats/Fournisseurs/Show', [
-                'fournisseur' => $fournisseur
-            ]);
-
-        } catch (\Exception $e) {
-            return redirect()->back()->withErrors([
-                'error' => 'Erreur lors du chargement: ' . $e->getMessage()
-            ]);
-        }
+        return inertia('Achats/Fournisseurs/Show', [
+            'fournisseur' => ShowFournisseurResource::make($fournisseur)
+        ]);
     }
 
     /**
