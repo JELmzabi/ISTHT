@@ -249,6 +249,7 @@
                                 <input v-model="bonCommandeForm.reference" type="text" required
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                                     placeholder="BC-2024-001">
+                                <InputError :message="bonCommandeForm.errors.reference" />
                             </div>
                             
                             <div>
@@ -256,6 +257,7 @@
                                 <input v-model="bonCommandeForm.objet" type="text" required
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                                     placeholder="Objet de la commande">
+                                <InputError :message="bonCommandeForm.errors.objet" />
                             </div>
                             
                             <div>
@@ -263,6 +265,7 @@
                                 <textarea v-model="bonCommandeForm.description" rows="3"
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                                     placeholder="Description détaillée de la commande..."></textarea>
+                                <InputError :message="bonCommandeForm.errors.description" />
                             </div>
 
                             <!-- Dans le template, modifiez le gestionnaire de fichiers -->
@@ -307,6 +310,7 @@
                                         {{ catPrinc.nom }}
                                     </option>
                                 </select>
+                                <InputError :message="bonCommandeForm.errors.categorie_principale_id" />
                             </div>
 
                             <div>
@@ -318,12 +322,14 @@
                                         {{ nature.nom }}
                                     </option>
                                 </select>
+                                <InputError :message="bonCommandeForm.errors.nature_prestation_id" />
                             </div>
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Date mise en ligne *</label>
                                 <input v-model="bonCommandeForm.date_mise_ligne" type="date" required
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                <InputError :message="bonCommandeForm.errors.date_mise_ligne" />
                             </div>
 
                             <div>
@@ -331,6 +337,7 @@
                                 <input v-model="bonCommandeForm.date_limite_reception" type="date" required
                                     :min="bonCommandeForm.date_mise_ligne"
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                <InputError :message="bonCommandeForm.errors.date_limite_reception" />
                             </div>
                         </div>
                     </div>
@@ -695,6 +702,7 @@ import {
     BanknotesIcon
 }
 from '@heroicons/vue/24/outline';
+import InputError from '@/Components/InputError.vue';
 
 // Props avec valeurs par défaut pour éviter les erreurs
 const props = defineProps({
