@@ -247,7 +247,7 @@ function delivredSortie() {
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-600">{{ sortie.created_by }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div class="flex space-x-2">
+                  <div class="flex items-center space-x-2">
                     <ModalLink
                         :href="route('sortie-stocks.show', sortie.id)"
                       class="text-blue-600 hover:text-blue-900 p-1"
@@ -256,6 +256,18 @@ function delivredSortie() {
                       <EyeIcon class="h-5 w-5" />
                     </ModalLink>
                   
+                    <a
+                      :href="route('sortie-stocks.download-pdf', sortie.id)"
+                      target="_blank"
+                      class="p-2 text-purple-600 hover:text-purple-800 hover:bg-purple-100 rounded-xl transition-all duration-200 group/tooltip relative"
+                      title="Télécharger Bon de Sortie"
+                    >
+                      <DocumentArrowDownIcon class="h-5 w-5" />
+                      <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                          Télécharger Bon de Sortie
+                      </div>
+                    </a>
+                    
                     <button
                       @click="openDelivredModal(sortie.id)"
                       class="text-green-600 hover:text-green-900 p-1"

@@ -15,9 +15,9 @@ use App\Models\MouvementStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Spatie\LaravelPdf\Facades\Pdf;
 
 class SortieStockController extends Controller
 {
@@ -247,4 +247,17 @@ class SortieStockController extends Controller
         return redirect()->back();
     } 
     
+    /**
+     * Download Bon Sorie
+     */
+    public function downloadPdf(SortieStock $sortieStock)
+    {
+        $sortieStock->load([
+            'lignesSortie.article',
+        ]);
+
+        return Pdf::view('pdf.bon-sortie', [
+            'sortieStock' => $sortieStock
+        ])->download("bon-sortie-{$sortieStock->numero}.pdf");
+    }
 }
