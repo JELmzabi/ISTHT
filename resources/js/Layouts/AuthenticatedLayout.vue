@@ -194,33 +194,38 @@ const sidebarSections = [
   },
 ]
 
-// Dynamic page titles and descriptions
+// Dynamic page titles
 const pageTitles = {
   '/dashboard': 'Tableau de Bord',
   '/articles': 'Référentiel des Articles',
   '/achats/fournisseurs': 'Gestion des Fournisseurs',
   '/achats/bon-commandes': 'Bons de Commande',
   '/achats/bon-receptions': 'Bons de Réception',
-  // '/inventaire': 'Inventaire du Stock',
+  '/stock/entrees': 'Entrées de Stock',
   '/stock/sorties': 'Sorties de Stock',
   '/demandes': 'Mes Demandes',
   '/users': 'Gestion des Utilisateurs',
   '/profile': 'Mon Profil',
   '/parametres': 'Paramètres du Système',
-  '/fiches-techniques/collectivite': 'Fiches Techniques Pédagogiques',
+  '/fiches-techniques/pedagogique': 'Fiches Techniques Pédagogiques',
+  '/fiches-techniques/collectivite': 'Fiches Techniques Collectivité',
 }
 
+// Dynamic page descriptions
 const pageDescriptions = {
   '/dashboard': 'Vue d\'ensemble de votre activité et statistiques',
   '/articles': 'Gestion du catalogue et des références articles',
   '/achats/fournisseurs': 'Gérez vos partenaires fournisseurs et leurs informations',
   '/achats/bon-commandes': 'Créez et suivez vos bons de commande',
   '/achats/bon-receptions': 'Enregistrez et validez les réceptions de marchandises',
-  // '/inventaire': 'Consultez et gérez les niveaux de stock',
-  '/stock/sorties': 'suivez vos sorties de stock',
+  '/stock/entrees': 'Suivez vos entrées de stock',
+  '/stock/sorties': 'Suivez vos sorties de stock',
+  '/demandes': 'Gérez et suivez vos demandes d\'articles',
   '/users': 'Gérez les utilisateurs de l\'application',
   '/profile': 'Gérez vos informations personnelles',
-  '/parametres': 'Configurez les paramètres de l\'application'
+  '/parametres': 'Configurez les paramètres de l\'application',
+  '/fiches-techniques/pedagogique': 'Consultez les fiches techniques pédagogiques',
+  '/fiches-techniques/collectivite': 'Consultez les fiches techniques collectivité',
 }
 
 const currentPageTitle = computed(() => {
