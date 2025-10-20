@@ -17,6 +17,7 @@
 
         <!-- Bouton PDF -->
         <a
+          v-if="bonCommande.statut !== 'cree' && bonCommande.statut !== 'annule'"
           :href="route('bon-commandes.pdf', bonCommande.id)"
           target="_blank"
           class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2 transition-colors"

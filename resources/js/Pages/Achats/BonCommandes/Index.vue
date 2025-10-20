@@ -176,14 +176,15 @@
             <ArrowPathIcon class="h-4 w-4" />
         </button>
         <!-- Bouton PDF - N'apparaît que pour les statuts différents de "cree" et "annule" -->
-        <button
+        <a
             v-if="bonCommande.statut !== 'cree' && bonCommande.statut !== 'annule'"
-            @click="downloadPdf(bonCommande)"
+            :href="route('bon-commandes.pdf', bonCommande.id)"
+            target="_blank"
             class="text-purple-600 hover:text-purple-900 p-1"
             title="Télécharger PDF"
         >
             <DocumentTextIcon class="h-4 w-4" />
-        </button>
+        </a>
     </div>
 </td>
                             </tr>
