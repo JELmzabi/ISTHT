@@ -232,7 +232,7 @@ class SortieStockController extends Controller
                         'prix_unitaire' => $ligne->prix_unitaire,
                         'taux_tva' => $ligne->taux_tva,
                         'type_mouvement' => MouvementStock::TYPE_SORTIE,
-                        'quantite_entree' => $ligne->quantite,
+                        'quantite_sortie' => $ligne->quantite,
                         'quantite_actuelle' => $nouvelleQuantiteActuelle,
                         'motif' => 'Sortie de stock validée',
                         'sourceable_id' => $sortieStock->id,
