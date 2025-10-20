@@ -1,3 +1,3 @@
-<div class="w-full mb-4">
-    <img src="{{ public_path('images/footer.png') }}" style="width: 100;">
+<div style="max-width: 550px; margin: auto">
+    <img src="{{ public_path('images/footer.png') }}" >
 </div>

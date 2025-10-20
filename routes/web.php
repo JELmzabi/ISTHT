@@ -9,6 +9,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\BonCommandeController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\BonReceptionController;
+use App\Http\Controllers\CardexController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\EntreeStockController;
@@ -208,6 +209,9 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
 
     Route::get('entree-stocks/export/create', [EntreeStockController::class, 'createExport'])->name('entree-stocks.export.create');
     Route::get('entree-stocks/export', [EntreeStockController::class, 'export'])->name('entree-stocks.export');
+
+    Route::get('cardex/{article}', [CardexController::class, 'index'])->name('cardex.index');
+    
 });
 
 require __DIR__.'/auth.php';
