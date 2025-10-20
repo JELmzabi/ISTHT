@@ -46,6 +46,16 @@ class Article extends Model
         return $this->belongsTo(NaturePrestation::class, 'nature_prestation_id');
     }
 
+    public function lignesEntreeStock()
+    {
+        return $this->hasMany(LigneEntreeStock::class, 'article_id', 'id');
+    }
+
+    public function mouvementsStock()
+    {
+        return $this->hasMany(MouvementStock::class, 'article_id', 'id');
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(ArticleImage::class);

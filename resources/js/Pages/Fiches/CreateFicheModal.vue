@@ -62,7 +62,9 @@ function selectArticle(index, article) {
     const selected = {
         article_id: article.id,
         designation: article.designation,
-        quantite: 1
+        quantite: 1,
+        unite_mesure: article.unite_mesure,
+        prix_unitaire: article.prix_unitaire,
     }
     form.etapes[index].articles.push(selected)
     search.value[index] = ''
@@ -172,6 +174,8 @@ const articleErrors = computed(() => {
                     </div>
                 </div>
 
+<!-- <Dump :data="articles" /> -->
+
                 <!-- Etapes -->
                 <div class="space-y-6">
                     <h3 class="text-md font-semibold">Etapes</h3>
@@ -215,12 +219,16 @@ const articleErrors = computed(() => {
                                     </li>
                                 </ul>
                             </div>
+
+                            <!-- <Dump :data="articles" /> -->
                             
                             <!-- Selected Articles Table -->
                             <table class="w-full border border-gray-200 text-sm rounded-lg overflow-hidden">
                                 <thead class="bg-gray-50 text-gray-700">
                                     <tr>
                                         <th class="p-2 text-left">Article</th>
+                                        <th class="p-2 text-left">Unité</th>
+                                        <th class="p-2 text-left">Prix</th>
                                         <th class="p-2 text-center w-32">Quantité</th>
                                         <th class="p-2 w-10"></th>
                                     </tr>
@@ -228,6 +236,8 @@ const articleErrors = computed(() => {
                                 <tbody>
                                     <tr v-for="(item, aIndex) in form.etapes[index].articles" :key="aIndex" class="border-t">
                                         <td class="p-2">{{ item.designation }}</td>
+                                        <td class="p-2">{{ item.unite_mesure }}</td>
+                                        <td class="p-2">{{ item.prix_unitaire }}</td>
                                         <td class="p-2 text-center">
                                             <input
                                             type="number"
@@ -244,7 +254,7 @@ const articleErrors = computed(() => {
                                         </td>
                                     </tr>
                                     <tr v-if="form.etapes[index].articles.length === 0">
-                                        <td colspan="3" class="text-center text-gray-400 p-3">Aucun article ajouté</td>
+                                        <td colspan="5" class="text-center text-gray-400 p-3">Aucun article ajouté</td>
                                     </tr>
                                 </tbody>
                             </table>

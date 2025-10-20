@@ -65,7 +65,24 @@ class FicheTechniqueController extends Controller
 
     public function create()
     {
-        $articles = Article::actives()->get(['id', 'designation']);
+        // $articles = Article::actives()->get(['id', 'designation', 'unite_mesure']);
+
+        $articles = Article::actives()
+        ->with(['mouvementsStock' => function ( $query) {
+            $query->where('type', MouvementStock::TYPE_ENTREE)->latest('date_mouvement')->limit(1); // latest livree entry
+        }])
+        ->get(['id', 'designation', 'unite_mesure']);
+
+
+        $articles = $articles->map(function ($article) {
+            return [
+                'id' => $article->id,
+                'designation' => $article->designation,
+                'unite_mesure' => $article->unite_mesure,
+                'prix_unitaire' => $article->mouvementsStock?->first()->prix_unitaire ?? 'Prix indisponible'
+            ];
+        });
+
 
         $data = [
             'articles' => $articles,
