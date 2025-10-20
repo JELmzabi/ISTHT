@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Spatie\LaravelPdf\Facades\Pdf;
 
 class DashboardController extends Controller
 {
@@ -22,6 +23,7 @@ class DashboardController extends Controller
         $totalBCs = BonCommande::count();
         $pendingDemandes = Demande::where('statut', 'en_attente_validation')->count();
 
+        
         // Example stock value (sum of quantite_stock * prix_unitaire)
         // $totalStockValue = Article::sum(DB::raw('quantite_stock * prix_unitaire'));
 
@@ -34,11 +36,13 @@ class DashboardController extends Controller
         $topArticles = Article::orderByDesc('quantite_stock')
             ->take(5)
             ->get(['designation', 'quantite_stock']);
+        
 
         // ---- Low Stock Articles ----
         $lowStockArticles = Article::whereColumn('quantite_stock', '<', 'seuil_minimal')
             ->get(['reference', 'designation', 'quantite_stock', 'seuil_minimal']);
 
+        
         // ---- Recent Demandes ----
         $recentDemandes = Demande::latest()
             ->take(5)
@@ -51,11 +55,17 @@ class DashboardController extends Controller
                 'date' => $d->created_at->format('Y-m-d')
             ]);
 
-        // ---- Fournisseur Spending (sum bon commande total) ----
-        $fournisseurSpending = Fournisseur::withSum('bonCommandes as total_spent', 'montant_ttc')
+
+        $fournisseurSpending = Fournisseur::select('fournisseurs.id', 'fournisseurs.nom')
+            ->leftJoin('entree_stocks', 'entree_stocks.fournisseur_id', '=', 'fournisseurs.id')
+            ->leftJoin('ligne_entree_stocks', 'ligne_entree_stocks.entree_stock_id', '=', 'entree_stocks.id')
+            ->selectRaw('ROUND(COALESCE(SUM(ligne_entree_stocks.prix_total * (1 + (ligne_entree_stocks.taux_tva / 100))), 0), 2) as total_spent')
+            ->groupBy('fournisseurs.id', 'fournisseurs.nom')
             ->orderByDesc('total_spent')
-            ->take(4)
-            ->get(['nom', 'total_spent']);
+            ->take(5)
+            ->get();
+
+        
 
         return Inertia::render('Dashboard', [
             'stats' => [
@@ -64,7 +74,7 @@ class DashboardController extends Controller
                 'totalArticles' => $totalArticles,
                 'totalBCs' => $totalBCs,
                 'pendingDemandes' => $pendingDemandes,
-                'totalStockValue' => $totalStockValue,
+                // 'totalStockValue' => $totalStockValue,
             ],
             'bonCommandeStatus' => $bonCommandeStatus,
             'topArticles' => $topArticles,

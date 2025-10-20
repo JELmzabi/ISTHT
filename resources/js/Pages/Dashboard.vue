@@ -1,174 +1,192 @@
 <template>
-  <div class="p-6 space-y-6">
+  <AuthenticatedLayout>
+    <Head title="Tableau de bord" />
 
-    <!-- Top KPI Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      <div class="bg-white shadow rounded-lg p-4">
-        <h3 class="text-gray-500 text-sm">Total Users</h3>
-        <p class="text-2xl font-bold">{{ totalUsers }}</p>
-      </div>
-      <div class="bg-white shadow rounded-lg p-4">
-        <h3 class="text-gray-500 text-sm">Active Fournisseurs</h3>
-        <p class="text-2xl font-bold">{{ activeFournisseurs }}</p>
-      </div>
-      <div class="bg-white shadow rounded-lg p-4">
-        <h3 class="text-gray-500 text-sm">Articles in Stock</h3>
-        <p class="text-2xl font-bold">{{ totalArticles }}</p>
-      </div>
-      <div class="bg-white shadow rounded-lg p-4">
-        <h3 class="text-gray-500 text-sm">Total Bon Commandes</h3>
-        <p class="text-2xl font-bold">{{ totalBCs }}</p>
-      </div>
-      <div class="bg-white shadow rounded-lg p-4">
-        <h3 class="text-gray-500 text-sm">Pending Demandes</h3>
-        <p class="text-2xl font-bold">{{ pendingDemandes }}</p>
-      </div>
-      <div class="bg-white shadow rounded-lg p-4">
-        <h3 class="text-gray-500 text-sm">Stock Value</h3>
-        <p class="text-2xl font-bold">{{ totalStockValue }} €</p>
-      </div>
+  <div class="min-h-screen bg-gray-50 p-6 space-y-8">
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <KpiCard
+        title="Utilisateurs"
+        :value="stats.totalUsers"
+        icon="UserGroupIcon"
+        color="blue"
+      />
+      <KpiCard
+        title="Fournisseurs actifs"
+        :value="stats.activeFournisseurs"
+        icon="TruckIcon"
+        color="green"
+      />
+      <KpiCard
+        title="Articles"
+        :value="stats.totalArticles"
+        icon="ArchiveBoxIcon"
+        color="orange"
+      />
+      <KpiCard
+        title="Bons de commande"
+        :value="stats.totalBCs"
+        icon="DocumentTextIcon"
+        color="purple"
+      />
+      <KpiCard
+        title="Demandes en attente"
+        :value="stats.pendingDemandes"
+        icon="ClockIcon"
+        color="red"
+      />
     </div>
 
-    <!-- Charts Row -->
+    <!-- Charts -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Bon Commande Status Pie -->
-      <div class="bg-white p-4 shadow rounded-lg">
-        <h3 class="font-semibold mb-4">Bon Commande Status</h3>
-        <apexchart type="donut" :options="bcChartOptions" :series="bcChartSeries"></apexchart>
+      <!-- Bon Commande Status -->
+      <div class="bg-white rounded-2xl shadow-sm p-4">
+        <h2 class="text-lg font-semibold mb-4">Statuts des bons de commande</h2>
+        <apexchart type="pie" height="300" :options="commandeChartOptions" :series="commandeChartSeries" />
       </div>
 
-      <!-- Articles in Stock Bar -->
-      <div class="bg-white p-4 shadow rounded-lg">
-        <h3 class="font-semibold mb-4">Top Articles in Stock</h3>
-        <apexchart type="bar" :options="articlesChartOptions" :series="articlesChartSeries"></apexchart>
+      <!-- Top Fournisseurs -->
+      <div class="bg-white rounded-2xl shadow-sm p-4">
+        <h2 class="text-lg font-semibold mb-4">Top Fournisseurs (dépenses)</h2>
+        <apexchart type="bar" height="300" :options="fournisseurChartOptions" :series="fournisseurChartSeries" />
       </div>
     </div>
 
-    <!-- Low Stock Table -->
-    <div class="bg-white shadow rounded-lg p-4">
-      <h3 class="font-semibold mb-4 text-red-600">Low Stock Alerts</h3>
-      <table class="w-full table-auto border-collapse border border-gray-200 text-sm">
-        <thead>
-          <tr class="bg-red-100">
-            <th class="border p-2">Article</th>
-            <th class="border p-2">Stock</th>
-            <th class="border p-2">Seuil Minimal</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="article in lowStockArticles" :key="article.reference">
-            <td class="border p-2">{{ article.designation }}</td>
-            <td class="border p-2">{{ article.quantite_stock }}</td>
-            <td class="border p-2">{{ article.seuil_minimal }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Low Stock + Recent Demandes -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Low Stock -->
+      <div class="bg-white rounded-2xl shadow-sm p-4">
+        <h2 class="text-lg font-semibold mb-4">Articles en stock faible</h2>
+        <table class="w-full text-sm border border-gray-200 rounded-md">
+          <thead class="bg-gray-100 text-gray-600">
+            <tr>
+              <th class="p-2 text-left">Référence</th>
+              <th class="p-2 text-left">Désignation</th>
+              <th class="p-2 text-center">Stock</th>
+              <th class="p-2 text-center">Seuil</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="a in lowStockArticles"
+              :key="a.reference"
+              class="border-t text-gray-700"
+            >
+              <td class="p-2">{{ a.reference }}</td>
+              <td class="p-2">{{ a.designation }}</td>
+              <td class="p-2 text-center">{{ a.quantite_stock }} <span class="text-red-600">(-{{ a.seuil_minimal - a.quantite_stock }})</span></td>
+              <td class="p-2 text-center text-green-600 font-semibold">{{ a.seuil_minimal }}</td>
+            </tr>
+            <tr v-if="!lowStockArticles.length">
+              <td colspan="4" class="p-2 text-center text-gray-400">
+                Aucun article en stock faible
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Recent Demandes -->
+      <div class="bg-white rounded-2xl shadow-sm p-4">
+        <h2 class="text-lg font-semibold mb-4">Dernières demandes</h2>
+
+        <template v-if="recentDemandes.length">
+          <ul class="divide-y">
+            <li
+              v-for="d in recentDemandes"
+              :key="d.numero"
+              class="py-3 flex justify-between text-sm"
+            >
+              <div>
+                <p class="font-medium">{{ d.numero }} — {{ d.demandeur }}</p>
+                <p class="text-gray-500">{{ d.motif }}</p>
+              </div>
+              <span class="text-gray-700 text-xs">{{ d.date }}</span>
+            </li>
+          </ul>
+        </template>
+
+        <template v-else>
+          <div class="flex flex-col items-center justify-center py-6 text-gray-500">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-10 w-10 text-gray-400 mb-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"
+              />
+            </svg>
+            <p class="text-sm">Aucune demande récente</p>
+          </div>
+        </template>
+      </div>
     </div>
 
-    <!-- Recent Demandes Table -->
-    <div class="bg-white shadow rounded-lg p-4">
-      <h3 class="font-semibold mb-4">Recent Demandes</h3>
-      <table class="w-full table-auto border-collapse border border-gray-200 text-sm">
-        <thead>
-          <tr class="bg-gray-100">
-            <th class="border p-2">Numero</th>
-            <th class="border p-2">Demandeur</th>
-            <th class="border p-2">Motif</th>
-            <th class="border p-2">Statut</th>
-            <th class="border p-2">Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="demande in recentDemandes" :key="demande.numero">
-            <td class="border p-2">{{ demande.numero }}</td>
-            <td class="border p-2">{{ demande.demandeur }}</td>
-            <td class="border p-2">{{ demande.motif }}</td>
-            <td class="border p-2">
-              <span
-                :class="{
-                  'bg-yellow-100 text-yellow-800 px-2 py-1 rounded': demande.statut === 'pending',
-                  'bg-green-100 text-green-800 px-2 py-1 rounded': demande.statut === 'approved',
-                  'bg-red-100 text-red-800 px-2 py-1 rounded': demande.statut === 'rejected'
-                }"
-              >
-                {{ demande.statut }}
-              </span>
-            </td>
-            <td class="border p-2">{{ demande.date }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Top Articles -->
+    <div class="bg-white rounded-2xl shadow-sm p-4">
+      <h2 class="text-lg font-semibold mb-4">Top 5 Articles en stock</h2>
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div
+          v-for="a in topArticles"
+          :key="a.designation"
+          class="p-3 rounded-lg bg-gray-50 text-center"
+        >
+          <p class="font-semibold text-gray-800">{{ a.designation }}</p>
+          <p class="text-sm text-gray-600">{{ a.quantite_stock }} unités</p>
+        </div>
+      </div>
     </div>
-
-    <!-- Fournisseur Spending Chart -->
-    <div class="bg-white p-4 shadow rounded-lg">
-      <h3 class="font-semibold mb-4">Fournisseur Spending</h3>
-      <apexchart type="bar" :options="fournisseurChartOptions" :series="fournisseurChartSeries"></apexchart>
-    </div>
-    
   </div>
+  </AuthenticatedLayout>  
 </template>
 
 <script setup>
-import VueApexCharts from "vue3-apexcharts";
+import { computed } from 'vue'
+import ApexChart from 'vue3-apexcharts'
+import * as HeroIcons from '@heroicons/vue/24/outline'
+import KpiCard from '@/Components/KpiCard.vue'
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import { Head } from '@inertiajs/vue3'
 
-// Dummy data
-const totalUsers = 120;
-const activeFournisseurs = 15;
-const totalArticles = 250;
-const totalBCs = 80;
-const pendingDemandes = 12;
-const totalStockValue = 45000;
+const props = defineProps({
+  stats: Object,
+  bonCommandeStatus: Object,
+  topArticles: Array,
+  lowStockArticles: Array,
+  recentDemandes: Array,
+  fournisseurSpending: Array,
+})
 
-// Bon Commande Status
-const bcChartSeries = [20, 15, 30, 15];
-const bcChartOptions = {
-  labels: ['Cree', 'Attente Livraison', 'Livre Partiel', 'Livre Complet'],
+// --- Bon Commande Chart ---
+const commandeChartOptions = computed(() => ({
+  chart: { type: 'pie' },
+  labels: Object.keys(props.bonCommandeStatus),
   legend: { position: 'bottom' },
-  colors: ['#7F3DFF','#FBBF24','#F87171','#34D399']
-};
+  colors: ['#60A5FA', '#FACC15', '#34D399', '#F87171', '#A78BFA'],
+}))
 
-// Articles in stock
-const articlesChartSeries = [{
-  name: 'Quantité',
-  data: [120, 95, 60, 45, 30]
-}];
-const articlesChartOptions = {
-  chart: { id: 'articles-stock' },
-  xaxis: { categories: ['Article A','Article B','Article C','Article D','Article E'] },
-  colors: ['#3B82F6']
-};
+const commandeChartSeries = computed(() => Object.values(props.bonCommandeStatus))
 
-// Recent demandes
-const recentDemandes = [
-  { numero: 'DEM-2025-001', demandeur: 'John Doe', motif: 'Besoin urgent', statut: 'pending', date: '2025-10-15' },
-  { numero: 'DEM-2025-002', demandeur: 'Jane Doe', motif: 'Stock faible', statut: 'approved', date: '2025-10-14' },
-  { numero: 'DEM-2025-003', demandeur: 'Ali Mohamed', motif: 'Réapprovisionnement', statut: 'rejected', date: '2025-10-13' }
-];
+// --- Fournisseur Spending Chart ---
+const fournisseurChartOptions = computed(() => ({
+  chart: { type: 'bar', toolbar: { show: false } },
+  xaxis: { categories: props.fournisseurSpending.map(f => f.nom) },
+  plotOptions: { bar: { borderRadius: 6, horizontal: false } },
+  colors: ['#6366F1'],
+  dataLabels: { enabled: false },
+}))
 
-// Low Stock Articles
-const lowStockArticles = [
-  { reference: 'ART-001', designation: 'Article A', quantite_stock: 5, seuil_minimal: 10 },
-  { reference: 'ART-002', designation: 'Article B', quantite_stock: 2, seuil_minimal: 15 },
-  { reference: 'ART-003', designation: 'Article C', quantite_stock: 8, seuil_minimal: 12 }
-];
-
-// Fournisseur Spending
-const fournisseurChartSeries = [{
-  name: 'Montant TTC (€)',
-  data: [15000, 12000, 8000, 5000]
-}];
-const fournisseurChartOptions = {
-  chart: { id: 'fournisseur-spending' },
-  xaxis: { categories: ['Fournisseur A','Fournisseur B','Fournisseur C','Fournisseur D'] },
-  colors: ['#FBBF24']
-};
-</script>
-
-<script>
-export default {
-  components: {
-    apexchart: VueApexCharts
-  }
-};
+const fournisseurChartSeries = computed(() => [
+  {
+    name: 'Dépenses (MAD)',
+    data: props.fournisseurSpending.map(f => parseFloat(f.total_spent)),
+  },
+])
 </script>
