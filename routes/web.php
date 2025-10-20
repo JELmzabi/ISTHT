@@ -17,6 +17,19 @@ use App\Http\Controllers\FicheTechniqueController;
 use App\Http\Controllers\SortieStockController;
 use App\Http\Controllers\MouvementStockController;
 use App\Http\Controllers\UserManagementController;
+use Spatie\LaravelPdf\Enums\Format;
+use Spatie\LaravelPdf\Facades\Pdf;
+
+Route::get('/test', function () {
+
+    $chunks = \App\Models\Fournisseur::all()->chunk(20);
+
+    return Pdf::view('pdf.test', ['chunks' => $chunks])
+    ->headerView('pdf.H')
+    ->footerView('pdf.F')
+    // ->format(Format::A4);
+    ;
+});
 
 Route::get('/', function () {
     if (auth()->check()) {
