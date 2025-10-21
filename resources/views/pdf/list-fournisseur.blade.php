@@ -4,24 +4,24 @@
     <meta charset="utf-8">
     <title>Les fournisseurs </title>
     @vite(['resources/css/app.css'])
+    
 </head>
 
 <body class="m-0 p-0 text-black text-sm leading-snug relative min-h-screen flex flex-col">
 
-    <!-- Main Content -->
-    <div class="flex-1 p-5">
+@foreach($chunks as $chunk)
+        @php $fournisseurs = $chunk @endphp
 
-        <!-- HEADER -->
-        @include('pdf.header')
+    <!-- Main Content -->
+    <div class="flex-1 p-5 mt-[135px]">
 
         <!-- TITLE -->
         <div class="text-center font-bold text-4xl uppercase underline mb-4">
             Liste des fournisseurs
         </div>
-
-
+        
         <!-- ARTICLES TABLE -->
-        <div class="overflow-x-auto mb-4">
+        <div class=" mb-4">
             <table class="w-full border border-black border-collapse text-[10px]">
                 <thead class="bg-gray-200 font-bold">
                     <tr>
@@ -57,8 +57,10 @@
 
     </div>
 
-    <!-- FOOTER -->
-    @include('pdf.footer')
+    @unless($loop->last)
+        @pageBreak
+    @endunless
+@endforeach
 
 </body>
 </html>

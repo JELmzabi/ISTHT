@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Facades\Pdf;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -345,11 +346,16 @@ class FournisseurController extends Controller
 
     public function export() 
     {
-        $fournisseurs = Fournisseur::all();
-        return Pdf::view('pdf.list-fournisseur', [
-            'fournisseurs' => $fournisseurs
-        ])
-            ->format('a4')
-            ->margins(10,0,10,0)->download('fournisseurs.pdf');
+        $chunks = Fournisseur::all()->chunk(18);
+
+        return Pdf::view('pdf.list-fournisseur', ['chunks' => $chunks])
+        // ->headerHtml("<h1>Header</h1>")
+        ->headerView('pdf.H')
+        ->footerView('pdf.F')
+        ->margins(10,0,10,0)
+        ->format(Format::A4)
+        ->download('fournisseurs.pdf')
+    ;
+        
     }
 }

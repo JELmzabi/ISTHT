@@ -10,7 +10,7 @@
     }
 </style>
 <header >
-    @php $logo = public_path('images/small_header.png'); @endphp
+    @php $logo = public_path('images/small_header.webp'); @endphp
     @inlinedImage($logo)
 
     <!-- <h1>Hello Header test</h1> -->
