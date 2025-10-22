@@ -23,7 +23,7 @@
 </style>
 <footer >
     <div class="img">
-        @php $logo = public_path('images/footer.png'); @endphp
+        @php $logo = public_path('images/small_footer.webp'); @endphp
         @inlinedImage($logo)
     </div>
     <!-- <h1>Hello footer test</h1> -->
