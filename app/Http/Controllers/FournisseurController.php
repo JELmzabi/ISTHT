@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\LaravelPdf\Enums\Format;
+use Spatie\LaravelPdf\Enums\Orientation;
 use Spatie\LaravelPdf\Facades\Pdf;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -354,6 +355,7 @@ class FournisseurController extends Controller
         ->footerView('pdf.F')
         ->margins(10,0,10,0)
         ->format(Format::A4)
+        ->orientation(Orientation::Landscape)
         ->download('fournisseurs.pdf')
     ;
         
