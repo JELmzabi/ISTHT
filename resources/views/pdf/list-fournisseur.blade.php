@@ -22,30 +22,30 @@
             <table class="w-full border border-black border-collapse text-[8pt]">
                 <thead class="bg-gray-200 font-bold">
                     <tr>
-                        <th class="border border-black p-1">Nom</th>
-                        <th class="border border-black p-1">Contact</th>
-                        <th class="border border-black p-1">Telephone</th>
-                        <th class="border border-black p-1">Email</th>
-                        <th class="border border-black p-1">Ville</th>
-                        <th class="border border-black p-1">Raison sociale</th>
-                        <th class="border border-black p-1">ICE</th>
-                        <th class="border border-black p-1">Est actif</th>
-                        <th class="border border-black p-1">Ajouté à</th>
+                        <th class="border border-black">Nom</th>
+                        <th class="border border-black">Contact</th>
+                        <th class="border border-black">Telephone</th>
+                        <th class="border border-black">Email</th>
+                        <th class="border border-black">Ville</th>
+                        <th class="border border-black">Raison sociale</th>
+                        <th class="border border-black">ICE</th>
+                        <th class="border border-black">Est actif</th>
+                        <th class="border border-black">Ajouté à</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     @foreach($fournisseurs as $fournisseur)
                         <tr>
-                            <td class="border border-black text-center p-1">{{ $fournisseur->nom }}</td>
-                            <td class="border border-black text-center p-1">{{ $fournisseur->contact ?? '-----' }}</td>
-                            <td class="border border-black text-center p-1">{{ $fournisseur->telephone ?? '-----' }}</td>
-                            <td class="border border-black text-center p-1">{{ $fournisseur->email ?? '-----' }}</td>
-                            <td class="border border-black text-center p-1">{{ $fournisseur->ville ?? '-----' }}</td>
-                            <td class="border border-black text-center p-1">{{ $fournisseur->raison_sociale ?? '-----' }}</td>
-                            <td class="border border-black text-center p-1">{{ $fournisseur->ice ?? '-----' }}</td>
-                            <td class="border border-black text-center p-1">{{ $fournisseur->est_actif ? 'Oui' : 'Non' }}</td>
-                            <td class="border border-black text-center p-1">{{ $fournisseur->created_at->toDateString() }}</td>
+                            <td class="border border-black text-center">{{ $fournisseur->nom }}</td>
+                            <td class="border border-black text-center">{{ $fournisseur->contact ?? '-----' }}</td>
+                            <td class="border border-black text-center">{{ $fournisseur->telephone ?? '-----' }}</td>
+                            <td class="border border-black text-center">{{ $fournisseur->email ?? '-----' }}</td>
+                            <td class="border border-black text-center">{{ $fournisseur->ville ?? '-----' }}</td>
+                            <td class="border border-black text-center">{{ $fournisseur->raison_sociale ?? '-----' }}</td>
+                            <td class="border border-black text-center">{{ $fournisseur->ice ?? '-----' }}</td>
+                            <td class="border border-black text-center">{{ $fournisseur->est_actif ? 'Oui' : 'Non' }}</td>
+                            <td class="border border-black text-center">{{ $fournisseur->created_at->toDateString() }}</td>
                         </tr>
                     @endforeach
                 </tbody>
