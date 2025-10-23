@@ -9,20 +9,17 @@
 
 <body class="m-0 p-0 text-black text-sm leading-snug relative min-h-screen flex flex-col">
 
-@foreach($chunks as $chunk)
-        @php $fournisseurs = $chunk @endphp
-
     <!-- Main Content -->
-    <div class="flex-1 p-5 mt-[100px]">
+    <div class="flex-1">
 
         <!-- TITLE -->
-        <div class="text-center font-bold text-4xl uppercase underline mb-4">
+        <div class="text-center font-bold text-[12pt] uppercase underline mb-4">
             Liste des fournisseurs
         </div>
         
         <!-- ARTICLES TABLE -->
         <div class=" mb-4">
-            <table class="w-full border border-black border-collapse text-[10px]">
+            <table class="w-full border border-black border-collapse text-[8pt]">
                 <thead class="bg-gray-200 font-bold">
                     <tr>
                         <th class="border border-black p-1">Nom</th>
@@ -56,11 +53,6 @@
         </div>
 
     </div>
-
-    @unless($loop->last)
-        @pageBreak
-    @endunless
-@endforeach
 
 </body>
 </html>

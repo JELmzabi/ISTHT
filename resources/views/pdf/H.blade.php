@@ -2,7 +2,7 @@
     header {
         width: 550px;
         height: 128px;
-        margin: auto;
+        margin: 0 auto;
     }
 
     header img {

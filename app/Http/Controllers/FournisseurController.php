@@ -347,16 +347,17 @@ class FournisseurController extends Controller
 
     public function export() 
     {
-        $chunks = Fournisseur::all()->chunk(18);
+        $chunks = Fournisseur::all();
 
-        return Pdf::view('pdf.list-fournisseur', ['chunks' => $chunks])
+        // return view('pdf.list-fournisseur', ['chunks' => $chunks]);
+        return Pdf::view('pdf.list-fournisseur', ['fournisseurs' => $chunks])
         // ->headerHtml("<h1>Header</h1>")
         ->headerView('pdf.H')
         ->footerView('pdf.F')
-        ->margins(10,0,10,0)
+        ->margins(45, 5, 40,5)
         ->format(Format::A4)
         ->orientation(Orientation::Landscape)
-        ->download('fournisseurs.pdf')
+        // ->download('fournisseurs.pdf')
     ;
         
     }
