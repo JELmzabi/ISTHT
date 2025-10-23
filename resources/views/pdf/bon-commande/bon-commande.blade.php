@@ -9,10 +9,7 @@
 <body class="m-0 p-0 text-black text-sm leading-snug relative min-h-screen flex flex-col">
 
     <!-- Main Content -->
-    <div class="flex-1 p-5">
-
-        <!-- HEADER -->
-        @include('pdf.header')
+    <div class="page">
 
         <!-- TITLE -->
         <div class="text-center font-bold text-lg uppercase underline mb-4">
@@ -61,9 +58,9 @@
                             $totalTTC += $montantTTC;
                         @endphp
                         <tr>
-                            <td class="border border-black p-1">{{ $article->article->reference ?? 'N/A' }}</td>
-                            <td class="border border-black p-1">{{ $article->article->designation ?? 'N/A' }}</td>
-                            <td class="border border-black p-1">{{ $article->article->unite_mesure ?? 'N/A' }}</td>
+                            <td class="border border-black p-1 text-center">{{ $article->article->reference ?? 'N/A' }}</td>
+                            <td class="border border-black p-1 text-center">{{ $article->article->designation ?? 'N/A' }}</td>
+                            <td class="border border-black p-1 text-center">{{ $article->article->unite_mesure ?? 'N/A' }}</td>
                             <td class="border border-black p-1 text-center">{{ number_format($quantite, 2) }}</td>
                             <td class="border border-black p-1 text-right">{{ number_format($prixHT, 2, ',', ' ') }} DH</td>
                             <td class="border border-black p-1 text-center">{{ $tauxTVA }}%</td>
@@ -99,28 +96,17 @@
             Arrêtée la présente commande à la somme de : {{ number_format($totalTTC, 2, ',', ' ') }} Dirhams
         </div>
 
-
-
         <!-- Signatures -->
-        <div class="grid grid-cols-3 gap-8 text-center" style="margin-top: 36px;">
-            <div>
-                <div class="font-bold text-base">Le magasinier</div>
-                <div class="border-t border-black h-10 mt-8"></div>
-            </div>
-            <div>
-                <div class="font-bold text-base">L'économe</div>
-                <div class="border-t border-black h-10 mt-8"></div>
-            </div>
-            <div>
-                <div class="font-bold text-base">Le directeur</div>
-                <div class="border-t border-black h-10 mt-8"></div>
+        <div class="grid grid-cols-3 gap-8 text-center px-16" style="margin-top: 36px;">
+            <div class="text-base border-dashed border-b border-black pb-8">Le magasinier</div>
+            <div class="text-base border-dashed border-b border-black pb-8">L'économe</div>
+            <div class="text-base border-dashed border-b border-black pb-8">Le directeur</div>
             </div>
         </div>
 
-    </div>
 
-    <!-- FOOTER -->
-    @include('pdf.footer')
+
+    </div>
 
 </body>
 </html>

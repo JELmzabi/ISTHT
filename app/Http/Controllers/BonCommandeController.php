@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 
 
 use Illuminate\Support\Facades\Log;
+use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Facades\Pdf as FacadesPdf;
 
 class BonCommandeController extends Controller
@@ -751,7 +752,15 @@ public function updateFournisseurLogo(Request $request, Fournisseur $fournisseur
         $cleanReference = preg_replace('/[\/\\\\]/', '-', $bonCommande->reference);
         $fileName = "bon-commande-{$cleanReference}.pdf";
         
-        return FacadesPdf::view('pdf.bon-commande', $data)->download($fileName);
+        // return view('pdf.bon-commande.bon-commande', $data);
+
+        return FacadesPdf::view('pdf.bon-commande.bon-commande', $data)
+            ->headerView('pdf.H')
+            ->footerView('pdf.bon-commande.bon-commande-footer')
+            ->margins(45, 5, 40,5)
+            ->format(Format::A4)
+        // ->download($fileName);
+        ;
     }
 
 
@@ -783,7 +792,8 @@ public function updateFournisseurLogo(Request $request, Fournisseur $fournisseur
             'endDate' => $endDate,
         ])->format('a4')
             ->margins(10,0,10,0)
-            ->download('list-bon-commandes.pdf');
+            // ->download('list-bon-commandes.pdf')
+            ;
     }
  
 }
