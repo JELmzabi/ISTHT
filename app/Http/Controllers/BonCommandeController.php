@@ -784,6 +784,8 @@ public function updateFournisseurLogo(Request $request, Fournisseur $fournisseur
         }
 
         $data = ListBonCommandesExport::collection($data)->toArray($request);
+
+        dd($data);
         
         return Pdf::view('pdf.list-bon-commandes', [
             'bonCommandes' => $data,
