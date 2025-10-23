@@ -759,8 +759,7 @@ public function updateFournisseurLogo(Request $request, Fournisseur $fournisseur
             ->footerView('pdf.bon-commande.bon-commande-footer')
             ->margins(45, 5, 40,5)
             ->format(Format::A4)
-        // ->download($fileName);
-        ;
+            ->download($fileName);
     }
 
 
@@ -790,8 +789,10 @@ public function updateFournisseurLogo(Request $request, Fournisseur $fournisseur
             'bonCommandes' => $data,
             'startDate' => $startDate,
             'endDate' => $endDate,
-        ])->format('a4')
-            ->margins(10,0,10,0)
+        ])->format(Format::A4)
+            ->headerView('pdf.H')
+            ->footerView('pdf.F')
+            ->margins(45, 5, 35, 5)
             // ->download('list-bon-commandes.pdf')
             ;
     }
