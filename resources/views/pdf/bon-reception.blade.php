@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>Bon de Réception {{ $bonReception->numero }}</title>
-    @vite(['resources/css/app.css'])
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="m-0 p-0 text-black text-sm leading-snug relative min-h-screen flex flex-col">
 
