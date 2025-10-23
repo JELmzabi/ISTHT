@@ -16,6 +16,7 @@ use App\Http\Controllers\EntreeStockController;
 use App\Http\Controllers\FicheTechniqueController;
 use App\Http\Controllers\SortieStockController;
 use App\Http\Controllers\MouvementStockController;
+use App\Http\Controllers\RapportsController;
 use App\Http\Controllers\UserManagementController;
 use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Facades\Pdf;
@@ -215,6 +216,10 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::put('/sorties/{sortieStock}/reject', [SortieStockController::class, 'reject'])->name('sortie-stocks.reject');
     Route::put('/sorties/{sortieStock}/livrer', [SortieStockController::class, 'livrer'])->name('sortie-stocks.livrer');
     
+    Route::get('/rapports', [RapportsController::class, 'index'])->name('rapports.index');
+
+    Route::get('/cardex/create', [CardexController::class, 'create'])->name('cardex.create');
+    
     ##### Exports #####
     Route::get('fournisseurs/export', [FournisseurController::class, 'export'])->name('fournisseurs.export');
 
@@ -223,7 +228,7 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::get('entree-stocks/export/create', [EntreeStockController::class, 'createExport'])->name('entree-stocks.export.create');
     Route::get('entree-stocks/export', [EntreeStockController::class, 'export'])->name('entree-stocks.export');
 
-    Route::get('cardex/{article}', [CardexController::class, 'index'])->name('cardex.index');
+    Route::get('cardex/{article}', [CardexController::class, 'export'])->name('cardex.export');
     
 });
 

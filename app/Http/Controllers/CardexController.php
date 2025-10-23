@@ -6,13 +6,20 @@ use App\Models\Article;
 use App\Models\MouvementStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Inertia\Inertia;
 use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Enums\Orientation;
 use Spatie\LaravelPdf\Facades\Pdf;
 
 class CardexController extends Controller
 {
-    public function index(Request $request, Article $article)
+
+    public function create(Request $request) {
+        $articles = Article::all(['id', 'designation']);
+        return Inertia::render('Cardex/Create', ['articles' => $articles]);
+    }
+
+    public function export(Request $request, Article $article)
     {
         $year = $request->input('year', now()->year);
 

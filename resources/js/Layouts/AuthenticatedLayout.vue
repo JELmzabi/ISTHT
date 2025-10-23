@@ -131,7 +131,8 @@ import {
   Cog6ToothIcon,
   DocumentChartBarIcon,
   ArrowUpCircleIcon,
-  DocumentIcon
+  DocumentIcon,
+  ChartBarIcon
 } from '@heroicons/vue/24/outline'
 
 const isSidebarOpen = ref(false)
@@ -186,6 +187,12 @@ const sidebarSections = [
     ]
   },
   {
+    label: 'Rapports',
+    items: [
+      { name: 'Les Rapports', href: '/rapports', match: '/rapports', icon: ChartBarIcon, bgColor: 'bg-indigo-100 text-indigo-600' },
+    ]
+  },
+  {
     label: 'Administration',
     items: [
       { name: 'Profil', href: '/profile', match: '/profile', icon: UserIcon, bgColor: 'bg-gray-100 text-gray-600' },
@@ -205,6 +212,7 @@ const pageTitles = {
   '/stock/sorties': 'Sorties de Stock',
   '/demandes': 'Mes Demandes',
   '/users': 'Gestion des Utilisateurs',
+  '/rapports': 'Rapports',
   '/profile': 'Mon Profil',
   '/parametres': 'Paramètres du Système',
   '/fiches-techniques/pedagogique': 'Fiches Techniques Pédagogiques',
@@ -222,6 +230,7 @@ const pageDescriptions = {
   '/stock/sorties': 'Suivez vos sorties de stock',
   '/demandes': 'Gérez et suivez vos demandes d\'articles',
   '/users': 'Gérez les utilisateurs de l\'application',
+  '/rapports': 'Consultez les rapports',
   '/profile': 'Gérez vos informations personnelles',
   '/parametres': 'Configurez les paramètres de l\'application',
   '/fiches-techniques/pedagogique': 'Consultez les fiches techniques pédagogiques',
