@@ -3,10 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>Cardex</title>
-    @vite(['resources/css/app.css'])
-    <style>
-        .page-break { page-break-after: always; }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="m-0 p-0 text-black text-sm leading-snug relative min-h-screen flex flex-col">
