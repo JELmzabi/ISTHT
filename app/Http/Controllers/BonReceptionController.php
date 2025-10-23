@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Facades\Pdf;
 
 class BonReceptionController extends Controller
@@ -589,6 +590,7 @@ public function downloadPdf(BonReception $bonReception)
             ->headerView('pdf.H')
             ->footerView('pdf.F')
             ->margins(45, 5, 40,5)
+            ->format(Format::A4)
             ->download();
             ;
 }
