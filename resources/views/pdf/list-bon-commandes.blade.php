@@ -4,6 +4,11 @@
     <meta charset="utf-8">
     <title>Les Bons de Commande </title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            font-family: 'sans-serif';
+        }
+    </style>
 </head>
 
 <body class="m-0 p-0 text-black text-sm leading-snug relative min-h-screen flex flex-col">
