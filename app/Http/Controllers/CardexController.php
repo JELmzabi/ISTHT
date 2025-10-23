@@ -121,7 +121,7 @@ class CardexController extends Controller
             ->footerView('pdf.F')
             ->format(Format::A4)
             ->orientation(Orientation::Landscape)
-            ->margins(0, 5, 0, 5);
-        // ->download($fileName);
+            ->margins(0, 5, 0, 5)
+            ->download($fileName);
     }
 }
