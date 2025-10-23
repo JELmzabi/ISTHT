@@ -794,7 +794,7 @@ public function updateFournisseurLogo(Request $request, Fournisseur $fournisseur
             ->headerView('pdf.H')
             ->footerView('pdf.F')
             ->margins(45, 5, 35, 5)
-            // ->download('list-bon-commandes.pdf')
+            ->download('list-bon-commandes.pdf')
             ;
     }
  
