@@ -557,7 +557,6 @@ public function downloadFacture(BonReception $bonReception)
  */
 public function downloadPdf(BonReception $bonReception)
 {
-    try {
         // Charger les relations nécessaires SANS les relations circulaires
         $bonReception->load([
             'bonCommande:id,reference,date_mise_ligne,statut', // Seulement les champs nécessaires
@@ -578,22 +577,6 @@ public function downloadPdf(BonReception $bonReception)
         // Calculer les totaux
         $totaux = $this->calculerTotaux($bonReception);
 
-        // Utiliser une vue simplifiée pour éviter les problèmes
-        // $pdf = PDF::loadView('pdf.bon-reception', [
-        //     'bonReception' => $bonReception,
-        //     'totaux' => $totaux
-        // ]);
-
-        // // Options du PDF avec gestion de mémoire
-        // $pdf->setPaper('A4', 'portrait');
-        // $pdf->setOptions([
-        //     'isHtml5ParserEnabled' => true,
-        //     'isRemoteEnabled' => false, // Désactiver le remote pour éviter les problèmes
-        //     'defaultFont' => 'dejavu sans',
-        //     'dpi' => 96,
-        //     'isPhpEnabled' => false,
-        //     'isJavascriptEnabled' => false,
-        // ]);
 
         $fileName = "bon-reception-{$bonReception->numero}.pdf";
 
@@ -603,16 +586,11 @@ public function downloadPdf(BonReception $bonReception)
         ]);
 
         return Pdf::view('pdf.bon-reception', compact('bonReception'))->name($fileName)
+            ->headerView('pdf.H')
+            ->footerView('pdf.F')
+            ->margins(45, 5, 40,5)
             ->download();
-
-    } catch (\Exception $e) {
-        Log::error('Error generating PDF for bon reception: ' . $e->getMessage(), [
-            'bon_reception_id' => $bonReception->id,
-            'trace' => $e->getTraceAsString()
-        ]);
-        
-        return redirect()->back()->with('error', 'Erreur lors de la génération du PDF: ' . $e->getMessage());
-    }
+            ;
 }
 
 /**

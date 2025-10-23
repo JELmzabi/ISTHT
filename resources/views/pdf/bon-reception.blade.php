@@ -8,14 +8,11 @@
 <body class="m-0 p-0 text-black text-sm leading-snug relative min-h-screen flex flex-col">
 
     <!-- Main Content -->
-    <div class="flex-1 p-5">
-
-        <!-- HEADER -->
-        @include('pdf.header')
+    <div class="page">
 
         <!-- DOCUMENT INFO -->
         <div class="mb-6">
-            <div class="text-center font-bold text-lg underline uppercase py-2">Bon de réception N° {{ $bonReception->numero }}</div>
+            <div class="text-center font-bold text-lg underline uppercase mb-4">Bon de réception N° {{ $bonReception->numero }}</div>
         </div>
 
         <!-- Fournisseur -->
@@ -28,7 +25,7 @@
 
         <!-- Articles Table -->
         <div class="overflow-x-auto mb-6">
-            <table class="w-full border border-black border-collapse text-sm">
+            <table class="w-full border border-black border-collapse text-xs">
                 <thead>
                     <tr class="bg-gray-200 text-center font-bold">
                         <th class=" border border-black p-1">Code d'article</th>
@@ -74,25 +71,16 @@
         </div>
 
         <!-- Signatures -->
-        <div class="grid grid-cols-3 gap-8 text-center mt-8">
-            <div>
-                <div class="font-bold text-base">Le magasinier</div>
-                <div class="border-t border-black h-10 mt-4"></div>
-            </div>
-            <div>
-                <div class="font-bold text-base">L'économe</div>
-                <div class="border-t border-black h-10 mt-4"></div>
-            </div>
-            <div>
-                <div class="font-bold text-base">Le directeur</div>
-                <div class="border-t border-black h-10 mt-4"></div>
+        <div class="grid grid-cols-3 gap-8 text-center px-16" style="margin-top: 36px;">
+            <div class="text-base border-dashed border-b border-black pb-8">Le magasinier</div>
+            <div class="text-base border-dashed border-b border-black pb-8">L'économe</div>
+            <div class="text-base border-dashed border-b border-black pb-8">Le directeur</div>
             </div>
         </div>
 
     </div>
 
     <!-- FOOTER -->
-    @include('pdf.footer')
 
 </body>
 </html>
