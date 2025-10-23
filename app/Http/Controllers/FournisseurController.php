@@ -357,7 +357,7 @@ class FournisseurController extends Controller
         ->margins(45, 5, 40,5)
         ->format(Format::A4)
         ->orientation(Orientation::Landscape)
-        // ->download('fournisseurs.pdf')
+        ->download('fournisseurs.pdf')
     ;
         
     }
