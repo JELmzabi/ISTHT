@@ -349,7 +349,7 @@ class FournisseurController extends Controller
     {
         $chunks = Fournisseur::all();
 
-        // return view('pdf.list-fournisseur', ['chunks' => $chunks]);
+        return view('pdf.list-fournisseur', ['chunks' => $chunks]);
         return Pdf::view('pdf.list-fournisseur', ['fournisseurs' => $chunks])
         // ->headerHtml("<h1>Header</h1>")
         ->headerView('pdf.H')
