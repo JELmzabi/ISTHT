@@ -12,9 +12,12 @@ use App\Models\Article;
 use App\Models\Client;
 use App\Models\Demande;
 use App\Models\MouvementStock;
+use App\Models\User;
+use App\Notifications\LowStockAlertNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Spatie\LaravelPdf\Facades\Pdf;
@@ -221,6 +224,10 @@ class SortieStockController extends Controller
                 if ($ligne->article) {
                     
                     $ligne->article->decrement('quantite_stock', $ligne->quantite);
+
+                    if ($ligne->article->quantite_stock <= $ligne->article->seuil_minimal) {
+                        Notification::send(User::magasiniers()->get(), new LowStockAlertNotification($ligne->article));
+                    }
                     
                     $nouvelleQuantiteActuelle = $ligne->article->quantite_stock;
                     

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -34,6 +35,14 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            // 'notifications' => [
+            //     'count' => $request->user()->unreadNotifications()->count(),
+            //     'data' => Inertia::scroll(fn () => $request->user()->notifications()->paginate()),
+            // ],
+
+            'notifications' => $request->user() ? Inertia::scroll(fn () => $request->user()->notifications()->paginate(8)) : null,
+            'notifications_count' => $request->user()?->unreadNotifications()->count(),
+            // 'notifications' => $request->user()->notifications,
         ];
     }
 }

@@ -26,6 +26,10 @@
               {{ currentPageTitle }}
             </span>
 
+            <div>
+              <Notifications />
+            </div>
+
             <!-- User info -->
             <div class="flex items-center space-x-2">
               <span class="text-sm text-gray-700">{{ $page.props.auth.user.name }}</span>
@@ -133,6 +137,7 @@ import {
   ArrowUpCircleIcon,
   DocumentIcon
 } from '@heroicons/vue/24/outline'
+import Notifications from '@/Components/Notifications.vue'
 
 const isSidebarOpen = ref(false)
 const page = usePage()

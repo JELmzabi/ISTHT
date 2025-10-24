@@ -16,20 +16,11 @@ use App\Http\Controllers\EntreeStockController;
 use App\Http\Controllers\FicheTechniqueController;
 use App\Http\Controllers\SortieStockController;
 use App\Http\Controllers\MouvementStockController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserManagementController;
 use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Facades\Pdf;
 
-Route::get('/test', function () {
-
-    $chunks = \App\Models\Fournisseur::all()->chunk(20);
-
-    return Pdf::view('pdf.test', ['chunks' => $chunks])
-    ->headerView('pdf.H')
-    ->footerView('pdf.F')
-    // ->format(Format::A4);
-    ;
-});
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -214,6 +205,9 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::put('/sorties/{sortieStock}/approve', [SortieStockController::class, 'approve'])->name('sortie-stocks.approve');
     Route::put('/sorties/{sortieStock}/reject', [SortieStockController::class, 'reject'])->name('sortie-stocks.reject');
     Route::put('/sorties/{sortieStock}/livrer', [SortieStockController::class, 'livrer'])->name('sortie-stocks.livrer');
+
+
+    Route::get('/notification/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
     
     ##### Exports #####
     Route::get('fournisseurs/export', [FournisseurController::class, 'export'])->name('fournisseurs.export');
