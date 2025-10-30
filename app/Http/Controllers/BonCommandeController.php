@@ -10,7 +10,8 @@ use App\Models\CategoriePrincipale;
 use App\Models\NaturePrestation;
 use App\Models\Article;
 use App\Models\HistoriqueStatutBc;
-use App\Models\BonCommandeArticle; 
+use App\Models\BonCommandeArticle;
+use App\Models\Categorie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
@@ -79,8 +80,9 @@ class BonCommandeController extends Controller
         ->get();
 
     return Inertia::render('Achats/BonCommandes/Index', [
-        'bonCommandes' => $bonCommandes,
+        'marches' => $bonCommandes,
         'categoriesPrincipales' => CategoriePrincipale::where('est_actif', true)->get(),
+        'categories' => Categorie::where('est_actif', true)->get(),
         'naturesPrestation' => NaturePrestation::where('est_actif', true)->get(),
         'articles' => $articles,
         'articlesGroupes' => $articles->groupBy('categorie_principale_id'),
@@ -179,8 +181,9 @@ private function getStats()
         $request->validate([
             'reference' => 'required|unique:bon_commandes',
             'objet' => 'required|string|max:255',
-            'categorie_principale_id' => 'required|exists:categorie_principales,id',
-            'nature_prestation_id' => 'required|exists:nature_prestations,id',
+            'date_debut' => 'required|date',
+            'date_fin' => 'required|date|after_or_equal:date_debut',
+            'categorie_id' => 'required|exists:categories,id',
             'date_mise_ligne' => 'required|date',
             'date_limite_reception' => 'required|date|after_or_equal:date_mise_ligne',
             'articles' => 'required|array|min:1',
@@ -202,9 +205,12 @@ private function getStats()
                 'reference' => $request->reference,
                 'objet' => $request->objet,
                 'description' => $request->description,
-                'categorie_principale_id' => $request->categorie_principale_id,
-                'nature_prestation_id' => $request->nature_prestation_id,
+                'categorie_principale_id' => 1,
+                'nature_prestation_id' => 1,
+                'date_debut' => $request->date_debut,
+                'date_fin' => $request->date_fin,
                 'date_mise_ligne' => $request->date_mise_ligne,
+                'categorie_id' => $request->categorie_id,
                 'date_limite_reception' => $request->date_limite_reception,
                 'pieces_jointes' => $piecesJointes,
                 'notes' => $request->notes,
@@ -435,7 +441,7 @@ public function show(BonCommande $bonCommande)
     ]);
 
     return Inertia::render('Achats/BonCommandes/Show', [
-        'bonCommande' => ShowBonCommandeResource::make($bonCommande),
+        'marche' => ShowBonCommandeResource::make($bonCommande),
         'fournisseurs' => Fournisseur::where('est_actif', true)->get(),
     ]);
 }

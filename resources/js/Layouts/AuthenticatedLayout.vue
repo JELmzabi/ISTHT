@@ -153,7 +153,7 @@ const sidebarSections = [
   {
     label: 'Gestion des Achats',
     items: [
-      { name: 'Bons de Commande', href: '/achats/bon-commandes', match: '/achats/bon-commandes', icon: ClipboardDocumentListIcon, bgColor: 'bg-purple-100 text-purple-600' },
+      { name: 'Marchés', href: '/achats/marches', match: '/achats/marches', icon: ClipboardDocumentListIcon, bgColor: 'bg-purple-100 text-purple-600' },
       { name: 'Fournisseurs', href: '/achats/fournisseurs', match: '/achats/fournisseurs', icon: TruckIcon, bgColor: 'bg-orange-100 text-orange-600', badge: true },
       { name: 'Bons de Réception', href: '/achats/bon-receptions', match: '/achats/bon-receptions', icon: DocumentChartBarIcon, bgColor: 'bg-teal-100 text-teal-600' },
     ]
@@ -206,7 +206,7 @@ const pageTitles = {
   '/dashboard': 'Tableau de Bord',
   '/articles': 'Référentiel des Articles',
   '/achats/fournisseurs': 'Gestion des Fournisseurs',
-  '/achats/bon-commandes': 'Bons de Commande',
+  '/achats/marches': 'Les Marchés',
   '/achats/bon-receptions': 'Bons de Réception',
   '/stock/entrees': 'Entrées de Stock',
   '/stock/sorties': 'Sorties de Stock',
@@ -224,7 +224,7 @@ const pageDescriptions = {
   '/dashboard': 'Vue d\'ensemble de votre activité et statistiques',
   '/articles': 'Gestion du catalogue et des références articles',
   '/achats/fournisseurs': 'Gérez vos partenaires fournisseurs et leurs informations',
-  '/achats/bon-commandes': 'Créez et suivez vos bons de commande',
+  '/achats/marches': 'Créez et suivez vos Marchés',
   '/achats/bon-receptions': 'Enregistrez et validez les réceptions de marchandises',
   '/stock/entrees': 'Suivez vos entrées de stock',
   '/stock/sorties': 'Suivez vos sorties de stock',

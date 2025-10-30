@@ -14,9 +14,9 @@ class BonCommande extends Model
     
     protected $fillable = [
         'reference', 'objet', 'description', 'categorie_principale_id',
-        'nature_prestation_id', 'fournisseur_id', 'statut', 
+        'nature_prestation_id', 'fournisseur_id', 'statut', 'categorie_id',
         'date_mise_ligne', 'date_limite_reception',
-        'notes', 'created_by', 'pieces_jointes'
+        'notes', 'created_by', 'pieces_jointes', 'date_debut', 'date_fin',
     ];
 
     protected $casts = [
@@ -31,6 +31,11 @@ class BonCommande extends Model
     const STATUT_LIVRE_COMPLETEMENT = 'livre_completement';
     const STATUT_LIVRE_PARTIELLEMENT = 'livre_partiellement';
     const STATUT_ANNULE = 'annule';
+
+    public function categorie(): BelongsTo
+    {
+        return $this->belongsTo(Categorie::class, 'categorie_id', 'id');
+    }
 
     public function categoriePrincipale(): BelongsTo
     {

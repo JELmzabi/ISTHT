@@ -17,11 +17,14 @@ return new class extends Migration
             $table->string('reference')->unique();
             $table->string('objet');
             $table->text('description')->nullable();
+            $table->date('date_debut');
+            $table->date('date_fin');
             $table->date('date_mise_ligne')->default(DB::raw('CURDATE()'));
             $table->date('date_limite_reception')->default(DB::raw('DATE_ADD(CURDATE(), INTERVAL 15 DAY)'));
             $table->string('statut')->nullable();
             $table->longText('pieces_jointes')->nullable();
             $table->text('notes')->nullable();
+            $table->foreignId('categorie_id')->constrained('categories');
             $table->foreignId('categorie_principale_id')->constrained('categorie_principales');
             $table->foreignId('nature_prestation_id')->constrained('nature_prestations');
             $table->foreignId('fournisseur_id')->nullable()->constrained('fournisseurs');

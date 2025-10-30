@@ -1,7 +1,7 @@
 <!-- resources/js/Pages/BonsCommande/Show.vue -->
 <template>
   <AuthenticatedLayout>
-    <Head :title="`Bon de Commande - ${bonCommande.reference}`" />
+    <Head :title="`Bon de Commande - ${marche.reference}`" />
     <div class="bg-white rounded-lg shadow-lg border border-gray-200 w-full mx-auto">
     <!-- En-tête -->
     <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
@@ -17,8 +17,8 @@
 
         <!-- Bouton PDF -->
         <a
-          v-if="bonCommande.statut !== 'cree' && bonCommande.statut !== 'annule'"
-          :href="route('bon-commandes.pdf', bonCommande.id)"
+          v-if="marche.statut !== 'cree' && marche.statut !== 'annule'"
+          :href="route('bon-commandes.pdf', marche.id)"
           target="_blank"
           class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2 transition-colors"
         >
@@ -30,14 +30,14 @@
       <div class="flex justify-between items-start">
         <div>
             <p class="flex items-center">
-                <h1 class="text-2xl font-bold text-gray-900">BON DE COMMANDE</h1>
-                <span class="ms-4 px-2 py-1 text-xs rounded-full" :class="getStatutBadgeClass(bonCommande.statut)">{{ getStatutLabel(bonCommande.statut)}}</span>
+                <h1 class="text-2xl font-bold text-gray-900">Marché</h1>
+                <span class="ms-4 px-2 py-1 text-xs rounded-full" :class="getStatutBadgeClass(marche.statut)">{{ getStatutLabel(marche.statut)}}</span>
             </p>
-          <p class="text-gray-600 mt-1">Référence: {{ bonCommande.reference }}</p>
+          <p class="text-gray-600 mt-1">Référence: {{ marche.reference }}</p>
         </div>
         <div class="text-right">
           <p class="text-sm text-gray-600">Date de création</p>
-          <p class="font-semibold text-gray-900">{{ formatDate(bonCommande.created_at) }}</p>
+          <p class="font-semibold text-gray-900">{{ formatDate(marche.created_at) }}</p>
         </div>
       </div>
     </div>
@@ -48,23 +48,25 @@
         <div>
           <h3 class="text-lg font-semibold text-gray-900 mb-2">Fournisseur</h3>
           <div class="space-y-1">
-            <p class="text-gray-700"><span class="font-medium">Nom:</span> {{ bonCommande.fournisseur?.nom || 'Non spécifié' }}</p>
-            <p class="text-gray-700"><span class="font-medium">Contact:</span> {{ bonCommande.fournisseur?.contact || 'N/A' }}</p>
+            <p class="text-gray-700"><span class="font-medium">Nom:</span> {{ marche.fournisseur?.nom || 'Non spécifié' }}</p>
+            <p class="text-gray-700"><span class="font-medium">Contact:</span> {{ marche.fournisseur?.contact || 'N/A' }}</p>
           </div>
         </div>
         <div>
           <h3 class="text-lg font-semibold text-gray-900 mb-2">Informations</h3>
           <div class="space-y-1">
-            <p class="text-gray-700"><span class="font-medium">Catégorie:</span> {{ bonCommande.categorie_principale }}</p>
-            <p class="text-gray-700"><span class="font-medium">Commande pour le:</span> {{ formatDate(bonCommande.date_mise_ligne) }}</p>
-            <p class="text-gray-700"><span class="font-medium">Date limite réception:</span> {{ formatDate(bonCommande.date_limite_reception) }}</p>
+            <p class="text-gray-700"><span class="font-medium">Catégorie:</span> {{ marche.categorie }}</p>
+            <p class="text-gray-700"><span class="font-medium">Date de debut:</span> {{ formatDate(marche.date_debut) }}</p>
+            <p class="text-gray-700"><span class="font-medium">Date de fin:</span> {{ formatDate(marche.date_fin) }}</p>
+            <p class="text-gray-700"><span class="font-medium">Commande pour le:</span> {{ formatDate(marche.date_mise_ligne) }}</p>
+            <p class="text-gray-700"><span class="font-medium">Date limite réception:</span> {{ formatDate(marche.date_limite_reception) }}</p>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Tableau des articles -->
-    <div class="px-6 py-4" v-if="bonCommande.statut == 'livre_completement' || bonCommande.statut == 'livre_partiellement' || bonCommande.statut == 'attente_livraison'">
+    <div class="px-6 py-4" v-if="marche.statut == 'livre_completement' || marche.statut == 'livre_partiellement' || marche.statut == 'attente_livraison'">
       <h3 class="text-lg font-semibold text-gray-900 mb-4">Articles Commandés</h3>
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
@@ -81,7 +83,7 @@
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <tr 
-              v-for="(ligne, index) in bonCommande.lignes" 
+              v-for="(ligne, index) in marche.lignes" 
               :key="index"
               class="hover:bg-gray-50 transition-colors duration-150"
             >
@@ -114,7 +116,7 @@
                 Total HT:
               </td>
               <td class="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                {{ formatMoney(bonCommande.totalHt) }}
+                {{ formatMoney(marche.totalHt) }}
               </td>
             </tr>
             <tr>
@@ -122,7 +124,7 @@
                 Total TVA:
               </td>
               <td class="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                {{ formatMoney(bonCommande.totalTVA) }}
+                {{ formatMoney(marche.totalTVA) }}
               </td>
             </tr>
             <tr>
@@ -130,7 +132,7 @@
                 Total TTC:
               </td>
               <td class="px-4 py-3 text-sm font-bold text-gray-900 text-right">
-                {{ formatMoney(bonCommande.totalTTC) }}
+                {{ formatMoney(marche.totalTTC) }}
               </td>
             </tr>
           </tfoot>
@@ -142,7 +144,7 @@
                         <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
                         </svg>
-                        <h4 class="text-red-800 font-semibold">Ce bon de commande a été annulé ou vient d’être créé.</h4>
+                        <h4 class="text-red-800 font-semibold">Ce Marché a été annulé ou vient d’être créé.</h4>
                     </div>
                 </div>
     </div>
@@ -157,11 +159,12 @@ import { ArrowLeftIcon, DocumentArrowDownIcon } from '@heroicons/vue/24/outline'
 
 // Props
 const props = defineProps({
-  bonCommande: {
+  marche: {
     type: Object,
     required: true
   }
 });
+
 const getStatutLabel = (statut) => {
     const labels = {
         cree: 'Créé',
@@ -186,9 +189,9 @@ const getStatutBadgeClass = (statut) => {
 };
 
 const parsedPiecesJointes = computed(() => {
-  if (!props.bonCommande.pieces_jointes) return [];
+  if (!props.marche.pieces_jointes) return [];
   try {
-    return JSON.parse(props.bonCommande.pieces_jointes);
+    return JSON.parse(props.marche.pieces_jointes);
   } catch {
     return [];
   }
@@ -219,6 +222,6 @@ const generatePDF = () => {
   // Implémentation de la génération PDF
   throw new Error("Not Implemented yet");
   
-//   window.open(route('bons-commande.pdf', props.bonCommande.id), '_blank');
+//   window.open(route('bons-commande.pdf', props.marche.id), '_blank');
 };
 </script>

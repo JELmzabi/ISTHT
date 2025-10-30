@@ -80,11 +80,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Module Achats
     Route::prefix('achats')->group(function () {
         // Bons de commande
-        Route::resource('bon-commandes', BonCommandeController::class);
-        Route::post('bon-commandes/{bonCommande}/statut', [BonCommandeController::class, 'updateStatut'])->name('bon-commandes.statut');
-        Route::post('bon-commandes/fournisseurs/store', [BonCommandeController::class, 'storeFournisseur'])->name('bon-commandes.fournisseurs.store');
-        Route::get('bon-commandes/{bonCommande}/pdf', [BonCommandeController::class, 'generatePdf'])->name('bon-commandes.pdf');
-        Route::get('/bon-commandes/{bonCommande}/debug', [BonCommandeController::class, 'debugBonCommande'])->name('bon-commandes.debug');
+        Route::resource('marches', BonCommandeController::class)
+        ->parameters(['marches' => 'bonCommande'])
+        ->names([
+            'index' => 'bon-commandes.index',
+            'create' => 'bon-commandes.create',
+            'show' => 'bon-commandes.show',
+            'store' => 'bon-commandes.store',
+            'edit' => 'bon-commandes.edit',
+            'update' => 'bon-commandes.update',
+            'destroy' => 'bon-commandes.destroy',
+        ]);
+        Route::post('marches/{bonCommande}/statut', [BonCommandeController::class, 'updateStatut'])->name('bon-commandes.statut');
+        Route::post('marches/fournisseurs/store', [BonCommandeController::class, 'storeFournisseur'])->name('bon-commandes.fournisseurs.store');
+        Route::get('marches/{bonCommande}/pdf', [BonCommandeController::class, 'generatePdf'])->name('bon-commandes.pdf');
+        Route::get('/marches/{bonCommande}/debug', [BonCommandeController::class, 'debugBonCommande'])->name('bon-commandes.debug');
 
       // Routes pour les bons de réception
 Route::resource('bon-receptions', BonReceptionController::class);
@@ -104,7 +114,7 @@ Route::get('bon-receptions/commande-details/{id}', [BonReceptionController::clas
     
 
     Route::get('/debug-commande/{id}', function ($id) {
-    $commande = \App\Models\BonCommande::with(['articles.article'])->find($id);
+    $commande = \Marche::with(['articles.article'])->find($id);
     
     if (!$commande) {
         return response()->json(['error' => 'Commande non trouvée'], 404);
@@ -223,7 +233,7 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     ##### Exports #####
     Route::get('fournisseurs/export', [FournisseurController::class, 'export'])->name('fournisseurs.export');
 
-    Route::get('bon-commandes/export', [BonCommandeController::class, 'export'])->name('bon-commandes.export');
+    Route::get('marches/export', [BonCommandeController::class, 'export'])->name('bon-commandes.export');
 
     Route::get('entree-stocks/export/create', [EntreeStockController::class, 'createExport'])->name('entree-stocks.export.create');
     Route::get('entree-stocks/export', [EntreeStockController::class, 'export'])->name('entree-stocks.export');

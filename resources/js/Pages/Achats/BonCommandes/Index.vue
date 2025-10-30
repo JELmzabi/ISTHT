@@ -1,14 +1,14 @@
-<!-- resources/js/Pages/Achats/BonCommandes/Index.vue -->
+<!-- resources/js/Pages/Achats/Marches/Index.vue -->
 <template>
     <AuthenticatedLayout>
-        <Head title="Gestion des bons de commande" />
+        <Head title="Gestion des Marchés" />
 
         <div class="space-y-6">
             <!-- En-tête -->
             <div class="flex items-center justify-between pt-4 px-4">
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Bons de Commande</h1>
-                    <p class="text-gray-600">Gestion des commandes fournisseurs</p>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Les Marchés</h1>
+                    <p class="text-gray-600">Gestion des marchés</p>
                 </div>
                 <div class="flex items-center gap-4">
 
@@ -23,11 +23,11 @@
                     <CreateExportModal name="export-modal" />
 
                     <button
-                        @click="openBonCommandeForm()"
+                        @click="openMarcheForm()"
                         class="bg-blue-600 text-white  px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center gap-2"
                     >
                         <PlusIcon class="h-5 w-5" />
-                        Nouveau bon de commande
+                        Nouveau Marché
                     </button>
                     
                 </div>
@@ -36,7 +36,7 @@
             <!-- Stats -->
             <section class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white p-5 rounded-lg shadow-sm border">
-                    <div class="text-gray-500">Bons Créés</div>
+                    <div class="text-gray-500">Marchés Créés</div>
                     <div class="mt-2 flex items-center justify-between">
                         <div class="text-3xl font-bold text-gray-800">{{ stats?.cree || 0 }}</div>
                         <DocumentTextIcon class="w-6 h-6 text-gray-600" />
@@ -126,59 +126,59 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <tr v-for="bonCommande in bonCommandes.data" :key="bonCommande.id" class="hover:bg-gray-50">
+                            <tr v-for="marche in marches.data" :key="marche.id" class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ bonCommande.reference }}</div>
+                                    <div class="text-sm font-medium text-gray-900">{{ marche.reference }}</div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900">{{ bonCommande.objet }}</div>
-                                    <div v-if="bonCommande.description" class="text-sm text-gray-500 truncate max-w-xs">
-                                        {{ bonCommande.description }}
+                                    <div class="text-sm text-gray-900">{{ marche.objet }}</div>
+                                    <div v-if="marche.description" class="text-sm text-gray-500 truncate max-w-xs">
+                                        {{ marche.description }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ bonCommande.categorie_principale?.nom || 'N/A' }}</div>
+                                    <div class="text-sm text-gray-900">{{ marche.categorie_principale?.nom || 'N/A' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ formatDate(bonCommande.date_mise_ligne) }}</div>
+                                    <div class="text-sm text-gray-900">{{ formatDate(marche.date_mise_ligne) }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ formatDate(bonCommande.date_limite_reception) }}</div>
+                                    <div class="text-sm text-gray-900">{{ formatDate(marche.date_limite_reception) }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ bonCommande.fournisseur?.nom || 'Non attribué' }}</div>
+                                    <div class="text-sm text-gray-900">{{ marche.fournisseur?.nom || 'Non attribué' }}</div>
                                 </td>
                               <td class="px-6 py-4 whitespace-nowrap">
-    <div class="text-sm font-medium" :class="getMontantTtcClass(bonCommande)">
-        {{ getMontantTtcDisplay(bonCommande) }}
+    <div class="text-sm font-medium" :class="getMontantTtcClass(marche)">
+        {{ getMontantTtcDisplay(marche) }}
     </div>
 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span :class="getStatutBadgeClass(bonCommande.statut)" class="px-2 py-1 text-xs font-medium rounded-full">
-                                        {{ getStatutLabel(bonCommande.statut) }}
+                                    <span :class="getStatutBadgeClass(marche.statut)" class="px-2 py-1 text-xs font-medium rounded-full">
+                                        {{ getStatutLabel(marche.statut) }}
                                     </span>
                                 </td>
                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
     <div class="flex space-x-2">
         <Link
-            :href="route('bon-commandes.show', bonCommande.id)"
+            :href="route('bon-commandes.show', marche.id)"
             class="text-blue-600 hover:text-blue-900 p-1"
             title="Voir détails"
         >
             <EyeIcon class="h-4 w-4" />
         </Link>
         <button
-            @click="openUpdateStatutForm(bonCommande)"
+            @click="openUpdateStatutForm(marche)"
             class="text-green-600 hover:text-green-900 p-1"
             title="Modifier statut"
-            v-if="bonCommande.statut === 'cree'"
+            v-if="marche.statut === 'cree'"
         >
             <ArrowPathIcon class="h-4 w-4" />
         </button>
         <!-- Bouton PDF - N'apparaît que pour les statuts différents de "cree" et "annule" -->
         <a
-            v-if="bonCommande.statut !== 'cree' && bonCommande.statut !== 'annule'"
-            :href="route('bon-commandes.pdf', bonCommande.id)"
+            v-if="marche.statut !== 'cree' && marche.statut !== 'annule'"
+            :href="route('bon-commandes.pdf', marche.id)"
             target="_blank"
             class="text-purple-600 hover:text-purple-900 p-1"
             title="Télécharger PDF"
@@ -193,33 +193,33 @@
                 </div>
 
                 <!-- Message vide -->
-                <div v-if="bonCommandes.data.length === 0" class="text-center py-12">
+                <div v-if="marches.data.length === 0" class="text-center py-12">
                     <div class="text-gray-500">
                         <DocumentTextIcon class="mx-auto h-12 w-12" />
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun bon de commande trouvé</h3>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun marché trouvé</h3>
                         <p class="mt-1 text-sm text-gray-500">
-                            Commencez par créer votre premier bon de commande.
+                            Commencez par créer votre premier marché.
                         </p>
                         <div class="mt-6">
                             <button 
-                                @click="openBonCommandeForm()"
+                                @click="openMarcheForm()"
                                 class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                             >
                                 <PlusIcon class="h-4 w-4 mr-2" />
-                                Nouveau bon de commande
+                                Nouveau marché
                             </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Pagination -->
-                <div v-if="bonCommandes.links && bonCommandes.links.length > 1" class="bg-white px-6 py-3 border-t border-gray-200">
+                <div v-if="marches.links && marches.links.length > 1" class="bg-white px-6 py-3 border-t border-gray-200">
                     <div class="flex justify-between items-center">
                         <div class="text-sm text-gray-700">
-                            Affichage de {{ bonCommandes.from }} à {{ bonCommandes.to }} sur {{ bonCommandes.total }} résultats
+                            Affichage de {{ marches.from }} à {{ marches.to }} sur {{ marches.total }} résultats
                         </div>
                         <div class="flex space-x-2">
-                            <template v-for="link in bonCommandes.links" :key="link.label">
+                            <template v-for="link in marches.links" :key="link.label">
                                 <Link
                                     v-if="link.url"
                                     :href="link.url"
@@ -246,41 +246,41 @@
         </div>
 
         <!-- Modal Création Bon de Commande - SANS PRIX -->
-        <div v-if="showBonCommandeForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div v-if="showMarcheForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div class="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
                 <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">Nouveau bon de commande</h3>
+                    <h3 class="text-lg font-semibold">Nouveau marché</h3>
                     <button @click="closeAllForms" class="text-gray-400 hover:text-gray-600">
                         <XMarkIcon class="h-6 w-6" />
                     </button>
                 </div>
                 
-                <form @submit.prevent="submitBonCommandeForm" class="p-6 space-y-6" enctype="multipart/form-data">
+                <form @submit.prevent="submitMarcheForm" class="p-6 space-y-6" enctype="multipart/form-data">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Colonne gauche -->
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Référence *</label>
-                                <input v-model="bonCommandeForm.reference" type="text" required
+                                <input v-model="marcheForm.reference" type="text" required
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                                    placeholder="BC-2024-001">
-                                <InputError :message="bonCommandeForm.errors.reference" />
+                                    placeholder="MR-2024-001">
+                                <InputError :message="marcheForm.errors.reference" />
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Objet *</label>
-                                <input v-model="bonCommandeForm.objet" type="text" required
+                                <input v-model="marcheForm.objet" type="text" required
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                                     placeholder="Objet de la commande">
-                                <InputError :message="bonCommandeForm.errors.objet" />
+                                <InputError :message="marcheForm.errors.objet" />
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Description</label>
-                                <textarea v-model="bonCommandeForm.description" rows="3"
+                                <textarea v-model="marcheForm.description" rows="3"
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                                     placeholder="Description détaillée de la commande..."></textarea>
-                                <InputError :message="bonCommandeForm.errors.description" />
+                                <InputError :message="marcheForm.errors.description" />
                             </div>
 
                             <!-- Dans le template, modifiez le gestionnaire de fichiers -->
@@ -296,10 +296,10 @@
     <p class="text-xs text-gray-500 mt-1">
         Formats acceptés: PDF, Word, Excel, JPG, PNG (max 10MB par fichier)
     </p>
-    <div v-if="bonCommandeForm.pieces_jointes.length > 0" class="mt-2">
+    <div v-if="marcheForm.pieces_jointes.length > 0" class="mt-2">
         <p class="text-sm text-gray-600">Fichiers sélectionnés:</p>
         <ul class="text-xs text-gray-500">
-            <li v-for="(file, index) in bonCommandeForm.pieces_jointes" :key="index" class="flex justify-between items-center">
+            <li v-for="(file, index) in marcheForm.pieces_jointes" :key="index" class="flex justify-between items-center">
                 {{ file.name }} ({{ formatFileSize(file.size) }})
                 <button 
                     type="button" 
@@ -316,43 +316,70 @@
                         
                         <!-- Colonne droite -->
                         <div class="space-y-4">
-                            <div>
+                            <!-- <div>
                                 <label class="block text-sm font-medium text-gray-700">Catégorie principale *</label>
-                                <select v-model="bonCommandeForm.categorie_principale_id" required
+                                <select v-model="marcheForm.categorie_principale_id" required
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                                     <option value="">Sélectionnez...</option>
                                     <option v-for="catPrinc in categoriesPrincipales" :key="catPrinc.id" :value="catPrinc.id">
                                         {{ catPrinc.nom }}
                                     </option>
                                 </select>
-                                <InputError :message="bonCommandeForm.errors.categorie_principale_id" />
+                                <InputError :message="marcheForm.errors.categorie_principale_id" />
                             </div>
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Nature de prestation *</label>
-                                <select v-model="bonCommandeForm.nature_prestation_id" required
+                                <select v-model="marcheForm.nature_prestation_id" required
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                                     <option value="">Sélectionnez...</option>
                                     <option v-for="nature in naturesPrestation" :key="nature.id" :value="nature.id">
                                         {{ nature.nom }}
                                     </option>
                                 </select>
-                                <InputError :message="bonCommandeForm.errors.nature_prestation_id" />
+                                <InputError :message="marcheForm.errors.nature_prestation_id" />
+                            </div> -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Date debut</label>
+                                <input v-model="marcheForm.date_debut" type="date" required
+                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                <InputError :message="marcheForm.errors.date_debut" />
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Date mise en ligne *</label>
-                                <input v-model="bonCommandeForm.date_mise_ligne" type="date" required
+                                <label class="block text-sm font-medium text-gray-700">Date fin</label>
+                                <input v-model="marcheForm.date_fin" type="date" required
+                                    :min="marcheForm.date_debut"
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                <InputError :message="bonCommandeForm.errors.date_mise_ligne" />
+                                <InputError :message="marcheForm.errors.date_fin" />
+                            </div>
+                            
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Date mise en ligne *</label>
+                                <input v-model="marcheForm.date_mise_ligne" type="date" required
+                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                <InputError :message="marcheForm.errors.date_mise_ligne" />
                             </div>
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Date limite réception devis *</label>
-                                <input v-model="bonCommandeForm.date_limite_reception" type="date" required
-                                    :min="bonCommandeForm.date_mise_ligne"
+                                <input v-model="marcheForm.date_limite_reception" type="date" required
+                                    :min="marcheForm.date_mise_ligne"
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                <InputError :message="bonCommandeForm.errors.date_limite_reception" />
+                                <InputError :message="marcheForm.errors.date_limite_reception" />
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Catégorie *</label>
+                                <select v-model="marcheForm.categorie_id" required
+                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                    <option value="">Sélectionnez...</option>
+                                    <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                                        {{ cat.nom }}
+                                    </option>
+                                </select>
+                                <InputError :message="marcheForm.errors.categorie_id" />
                             </div>
                         </div>
                     </div>
@@ -378,7 +405,7 @@
                             </div>
                         </div>
 
-                        <div v-for="(article, index) in bonCommandeForm.articles" :key="index" class="border rounded-lg p-4 mb-4">
+                        <div v-for="(article, index) in marcheForm.articles" :key="index" class="border rounded-lg p-4 mb-4">
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Article *</label>
@@ -421,10 +448,10 @@
                             </div>
                         </div>
 
-                        <div v-if="bonCommandeForm.articles.length === 0" class="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                        <div v-if="marcheForm.articles.length === 0" class="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
                             <DocumentTextIcon class="mx-auto h-12 w-12 text-gray-400" />
                             <p class="text-gray-500 mt-2">Aucun article sélectionné</p>
-                            <p class="text-gray-400 text-sm mt-1">Ajoutez des articles pour créer le bon de commande</p>
+                            <p class="text-gray-400 text-sm mt-1">Ajoutez des articles pour créer le marché</p>
                         </div>
                     </div>
                     
@@ -435,9 +462,9 @@
                         </button>
                         <button type="submit"
                             class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-                            :disabled="bonCommandeForm.processing || bonCommandeForm.articles.length === 0">
-                            <span v-if="bonCommandeForm.processing">Création en cours...</span>
-                            <span v-else>Créer le bon de commande</span>
+                            :disabled="marcheForm.processing || marcheForm.articles.length === 0">
+                            <span v-if="marcheForm.processing">Création en cours...</span>
+                            <span v-else>Créer le marché</span>
                         </button>
                     </div>
                 </form>
@@ -449,7 +476,7 @@
     <div class="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between p-6 border-b">
             <h3 class="text-lg font-semibold">
-                Mettre à jour le statut - {{ selectedBonCommande?.reference }}
+                Mettre à jour le statut - {{ selectedMarche?.reference }}
             </h3>
             <button @click="closeAllForms" class="text-gray-400 hover:text-gray-600">
                 <XMarkIcon class="h-6 w-6" />
@@ -573,7 +600,7 @@
         
         <div v-if="statutForm.articles.length === 0" class="text-center py-8 bg-gray-50 rounded-lg">
             <DocumentTextIcon class="mx-auto h-12 w-12 text-gray-400" />
-            <p class="text-gray-500 mt-2">Aucun article dans ce bon de commande</p>
+            <p class="text-gray-500 mt-2">Aucun article dans ce marché</p>
         </div>
         
         <!-- Vos articles ici... -->
@@ -651,7 +678,7 @@
                         <div class="mt-2 text-sm text-red-700">
                             <p class="font-semibold">Attention : Cette action est irréversible !</p>
                             <ul class="list-disc list-inside mt-2 space-y-1">
-                                <li>Le bon de commande sera marqué comme annulé</li>
+                                <li>Le marché sera marqué comme annulé</li>
                                 <li>Le fournisseur attribué sera retiré</li>
                                 <li>Les prix saisis seront réinitialisés</li>
                                 <li>Cette action ne peut pas être annulée</li>
@@ -664,7 +691,7 @@
                     <label class="block text-sm font-medium text-gray-700">Raison de l'annulation *</label>
                     <textarea v-model="statutForm.raison" required rows="4"
                         class="mt-2 block w-full border border-gray-300 rounded-md shadow-sm p-3"
-                        placeholder="Veuillez expliquer en détail la raison de l'annulation de ce bon de commande..."></textarea>
+                        placeholder="Veuillez expliquer en détail la raison de l'annulation de ce marché..."></textarea>
                     <p class="text-xs text-gray-500 mt-1">Minimum 20 caractères</p>
                 </div>
 
@@ -672,7 +699,7 @@
                     <input v-model="confirmationAnnulation" type="checkbox" 
                         class="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
                     <label class="ml-2 block text-sm text-red-700 font-medium">
-                        Je confirme que je souhaite annuler ce bon de commande
+                        Je confirme que je souhaite annuler ce marché
                     </label>
                 </div>
             </div>
@@ -725,7 +752,7 @@ import CreateExportModal from './CreateExportModal.vue';
 
 // Props avec valeurs par défaut pour éviter les erreurs
 const props = defineProps({
-    bonCommandes: {
+    marches: {
         type: Object,
         default: () => ({ data: [], links: [] })
     },
@@ -761,13 +788,16 @@ const props = defineProps({
         type: Object,
         default: () => ({})
     },
+    categories: {
+        type: Array,
+    }
 });
 
 // États pour les modales
-const showBonCommandeForm = ref(false);
+const showMarcheForm = ref(false);
 const showUpdateStatutForm = ref(false);
 const showNewFournisseurForm = ref(false);
-const selectedBonCommande = ref(null);
+const selectedMarche = ref(null);
 const confirmationAnnulation = ref(false);
 
 // Toast
@@ -785,12 +815,13 @@ const filters = ref({
 });
 
 // Formulaires
-const bonCommandeForm = useForm({
+const marcheForm = useForm({
     reference: '',
     objet: '',
     description: '',
-    categorie_principale_id: '',
-    nature_prestation_id: '',
+    categorie_id: '',
+    date_debut: new Date().toISOString().split('T')[0],
+    date_fin: null,
     date_mise_ligne: new Date().toISOString().split('T')[0],
     date_limite_reception: '',
     pieces_jointes: [],
@@ -909,18 +940,18 @@ const showToast = (message, duration = 3000) => {
 };
 
 // Méthodes principales
-const openBonCommandeForm = () => {
-    showBonCommandeForm.value = true;
-    bonCommandeForm.reset();
+const openMarcheForm = () => {
+    showMarcheForm.value = true;
+    marcheForm.reset();
     
     const today = new Date();
-    bonCommandeForm.date_mise_ligne = today.toISOString().split('T')[0];
+    marcheForm.date_mise_ligne = today.toISOString().split('T')[0];
     
     const dateLimite = new Date(today);
     dateLimite.setDate(dateLimite.getDate() + 15);
-    bonCommandeForm.date_limite_reception = dateLimite.toISOString().split('T')[0];
+    marcheForm.date_limite_reception = dateLimite.toISOString().split('T')[0];
     
-    bonCommandeForm.articles = [];
+    marcheForm.articles = [];
 };
 
 // États pour les fournisseurs
@@ -936,21 +967,21 @@ const onFournisseurChange = () => {
 };
 
 // Mettez à jour la méthode openUpdateStatutForm
-const openUpdateStatutForm = (bonCommande) => {
-    selectedBonCommande.value = bonCommande;
+const openUpdateStatutForm = (marche) => {
+    selectedMarche.value = marche;
     showUpdateStatutForm.value = true;
-    showBonCommandeForm.value = false;
+    showMarcheForm.value = false;
     confirmationAnnulation.value = false;
     selectedFournisseur.value = null;
     
     // Initialiser le formulaire de statut
     statutForm.reset();
     statutForm.statut = 'attente_livraison';
-    statutForm.fournisseur_id = bonCommande.fournisseur_id || '';
+    statutForm.fournisseur_id = marche.fournisseur_id || '';
     statutForm.raison = '';
     
     // Initialiser les articles
-    statutForm.articles = (bonCommande.articles || []).map((articlePivot, index) => {
+    statutForm.articles = (marche.articles || []).map((articlePivot, index) => {
         return {
             id: articlePivot.id,
             article_id: articlePivot.article_id,
@@ -967,8 +998,8 @@ const openUpdateStatutForm = (bonCommande) => {
     });
     
     // Si un fournisseur est déjà attribué, charger ses informations
-    if (bonCommande.fournisseur_id) {
-        selectedFournisseur.value = props.fournisseurs.find(f => f.id == bonCommande.fournisseur_id);
+    if (marche.fournisseur_id) {
+        selectedFournisseur.value = props.fournisseurs.find(f => f.id == marche.fournisseur_id);
     }
     
     // Scroll vers le formulaire
@@ -978,12 +1009,12 @@ const openUpdateStatutForm = (bonCommande) => {
 };
 
 const closeAllForms = () => {
-    showBonCommandeForm.value = false;
+    showMarcheForm.value = false;
     showUpdateStatutForm.value = false;
     showNewFournisseurForm.value = false;
-    selectedBonCommande.value = null;
+    selectedMarche.value = null;
     confirmationAnnulation.value = false;
-    bonCommandeForm.reset();
+    marcheForm.reset();
     statutForm.reset();
     newFournisseurForm.reset();
 };
@@ -1001,7 +1032,7 @@ const resetFilters = () => {
 
 
 const addArticle = () => {
-    bonCommandeForm.articles.push({
+    marcheForm.articles.push({
         article_id: '',
         quantite_commandee: 1,
         taux_tva: 20,
@@ -1009,7 +1040,7 @@ const addArticle = () => {
 };
 
 const removeArticle = (index) => {
-    bonCommandeForm.articles.splice(index, 1);
+    marcheForm.articles.splice(index, 1);
 };
 
 const onCategorieChange = (event) => {
@@ -1018,8 +1049,8 @@ const onCategorieChange = (event) => {
     
     const articlesDeLaCategorie = props.articlesGroupes[categorieId] || [];
     articlesDeLaCategorie.forEach(article => {
-        if (!bonCommandeForm.articles.some(a => a.article_id === article.id)) {
-            bonCommandeForm.articles.push({
+        if (!marcheForm.articles.some(a => a.article_id === article.id)) {
+            marcheForm.articles.push({
                 article_id: article.id,
                 quantite_commandee: 1,
                 taux_tva: article.taux_tva || 20,
@@ -1031,9 +1062,9 @@ const onCategorieChange = (event) => {
 };
 
 const onArticleChange = (index) => {
-    const selectedArticle = getArticle(bonCommandeForm.articles[index].article_id);
+    const selectedArticle = getArticle(marcheForm.articles[index].article_id);
     if (selectedArticle && selectedArticle.taux_tva) {
-        bonCommandeForm.articles[index].taux_tva = selectedArticle.taux_tva;
+        marcheForm.articles[index].taux_tva = selectedArticle.taux_tva;
     }
 };
 
@@ -1102,27 +1133,27 @@ const calculateArticleMontants = (index) => {
     // Forcer la mise à jour du reactive
     statutForm.articles[index] = { ...articleForm };
 };
-const submitBonCommandeForm = () => {
-    bonCommandeForm.post(route('bon-commandes.store'), {
+const submitMarcheForm = () => {
+    marcheForm.post(route('bon-commandes.store'), {
         onSuccess: () => {
             closeAllForms();
-            showToast('Bon de commande créé avec succès', 3000);
+            showToast('Marché créé avec succès', 3000);
         },
         onError: (errors) => {
             console.error('Erreurs de validation:', errors);
-            showToast('Erreur lors de la création du bon de commande', 3000);
+            showToast('Erreur lors de la création du marché', 3000);
         }
     });
 };
 
 const submitUpdateStatut = () => {
-    if (!selectedBonCommande.value) {
-        console.error('Aucun bon de commande sélectionné');
+    if (!selectedMarche.value) {
+        console.error('Aucun marché sélectionné');
         return;
     }
     
     console.log('Début submitUpdateStatut', {
-        bonCommandeId: selectedBonCommande.value.id,
+        marcheId: selectedMarche.value.id,
         statut: statutForm.statut,
         raison: statutForm.raison,
         confirmationAnnulation: confirmationAnnulation.value
@@ -1140,7 +1171,7 @@ const submitUpdateStatut = () => {
         }
     }
 
-    statutForm.post(route('bon-commandes.statut', selectedBonCommande.value.id), {
+    statutForm.post(route('bon-commandes.statut', selectedMarche.value.id), {
         onSuccess: (response) => {
             console.log('Succès de la requête', response);
             closeAllForms();
@@ -1163,16 +1194,16 @@ const submitUpdateStatut = () => {
 };
 
 // Méthode pour afficher le montant TTC
-const getMontantTtcDisplay = (bonCommande) => {
-    const montant = bonCommande.total_ttc || 0;
+const getMontantTtcDisplay = (marche) => {
+    const montant = marche.total_ttc || 0;
     
     // Si le statut est "créé" ou "annulé", les prix ne sont pas encore saisis
-    if (bonCommande.statut === 'cree' || bonCommande.statut === 'annule') {
+    if (marche.statut === 'cree' || marche.statut === 'annule') {
         return 'Non défini';
     }
     
     // Si le montant est 0 mais que le statut devrait avoir des prix
-    if (montant === 0 && ['attente_livraison', 'livre_completement', 'livre_partiellement'].includes(bonCommande.statut)) {
+    if (montant === 0 && ['attente_livraison', 'livre_completement', 'livre_partiellement'].includes(marche.statut)) {
         return 'En attente';
     }
     
@@ -1181,14 +1212,14 @@ const getMontantTtcDisplay = (bonCommande) => {
 };
 
 // Méthode pour les classes CSS du montant TTC
-const getMontantTtcClass = (bonCommande) => {
-    const montant = bonCommande.total_ttc || 0;
+const getMontantTtcClass = (marche) => {
+    const montant = marche.total_ttc || 0;
     
-    if (bonCommande.statut === 'cree' || bonCommande.statut === 'annule') {
+    if (marche.statut === 'cree' || marche.statut === 'annule') {
         return 'text-gray-400';
     }
     
-    if (montant === 0 && ['attente_livraison', 'livre_completement', 'livre_partiellement'].includes(bonCommande.statut)) {
+    if (montant === 0 && ['attente_livraison', 'livre_completement', 'livre_partiellement'].includes(marche.statut)) {
         return 'text-yellow-600';
     }
     
@@ -1224,23 +1255,23 @@ const createFournisseur = async () => {
     }
 };
 
-const viewOrDownloadPdf = (bonCommande) => {
-    if (bonCommande.statut === 'attente_livraison') {
+const viewOrDownloadPdf = (marche) => {
+    if (marche.statut === 'attente_livraison') {
         // Voir le PDF dans un nouvel onglet
-        window.open(route('bon-commandes.pdf', bonCommande.id), '_blank');
+        window.open(route('bon-commandes.pdf', marche.id), '_blank');
     } else {
         // Télécharger le PDF
         const link = document.createElement('a');
-        link.href = route('bon-commandes.pdf', bonCommande.id);
-        link.download = `bon-commande-${bonCommande.reference}.pdf`;
+        link.href = route('bon-commandes.pdf', marche.id);
+        link.download = `bon-commande-${marche.reference}.pdf`;
         link.click();
     }
 };
 
 // AJOUTEZ ICI LA NOUVELLE MÉTHODE
-const downloadPdf = (bonCommande) => {
+const downloadPdf = (marche) => {
     // Utilisez la route correcte
-    const url = route('bon-commandes.pdf', { bonCommande: bonCommande.id });
+    const url = route('bon-commandes.pdf', { marche: marche.id });
     window.open(url, '_blank');
 };
 const getStatutLabel = (statut) => {
@@ -1308,12 +1339,12 @@ const handleFileUpload = (event) => {
         return true;
     });
     
-    bonCommandeForm.pieces_jointes = [...bonCommandeForm.pieces_jointes, ...validFiles];
+    marcheForm.pieces_jointes = [...marcheForm.pieces_jointes, ...validFiles];
     event.target.value = ''; // Reset l'input
 };
 
 const removeFile = (index) => {
-    bonCommandeForm.pieces_jointes.splice(index, 1);
+    marcheForm.pieces_jointes.splice(index, 1);
 };
 
 const formatFileSize = (bytes) => {
