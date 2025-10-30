@@ -20,6 +20,10 @@ class ShowBonCommandeResource extends JsonResource
             'id' => $this->id,
             'reference' => $this->reference,
             'date_mise_ligne' => $this->date_mise_ligne,
+            'date_debut' => $this->date_debut,
+            'date_fin' => $this->date_fin,
+            'annule_at' => $this->annule_at,
+            'reason_annulation' => $this->reason_annulation,
             'created_at' => $this->created_at,
             'date_limite_reception' => $this->date_limite_reception,
             'fournisseur' => [

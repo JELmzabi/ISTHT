@@ -80,10 +80,10 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie principale</label>
-                        <select v-model="filters.categorie_principale_id" class="w-full border border-gray-300 rounded-lg p-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
+                        <select v-model="filters.categorie_id" class="w-full border border-gray-300 rounded-lg p-2">
                             <option value="">Toutes les catégories</option>
-                            <option v-for="categorie in categoriesPrincipales" :key="categorie.id" :value="categorie.id">
+                            <option v-for="categorie in categories" :key="categorie.id" :value="categorie.id">
                                 {{ categorie.nom }}
                             </option>
                         </select>
@@ -137,7 +137,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ marche.categorie_principale?.nom || 'N/A' }}</div>
+                                    <div class="text-sm text-gray-900">{{ marche.categorie?.nom || 'N/A' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">{{ formatDate(marche.date_mise_ligne) }}</div>
@@ -154,8 +154,8 @@
     </div>
 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span :class="getStatutBadgeClass(marche.statut)" class="px-2 py-1 text-xs font-medium rounded-full">
-                                        {{ getStatutLabel(marche.statut) }}
+                                    <span :class="getBonCommandeStatutInfo(marche.statut).color" class="px-2 py-1 text-xs font-medium rounded-full">
+                                        {{ getBonCommandeStatutInfo(marche.statut).label }}
                                     </span>
                                 </td>
                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -392,61 +392,85 @@
                                 Les prix seront saisis lors de la mise à jour du statut
                             </div>
                             <div class="flex space-x-2">
-                                <select @change="onCategorieChange" class="border border-gray-300 rounded-md shadow-sm p-2">
+                                <!-- <select @change="onCategorieChange" class="border border-gray-300 rounded-md shadow-sm p-2">
                                     <option value="">Ajouter par catégorie...</option>
                                     <option v-for="(articles, categorieId) in articlesGroupes" :key="categorieId" 
                                             :value="categorieId">
                                         {{ getCategorieName(categorieId) }} ({{ articles?.length || 0 }} articles)
                                     </option>
-                                </select>
-                                <button type="button" @click="addArticle" class="bg-green-600 text-white px-3 py-2 rounded text-sm">
+                                </select> -->
+                                <button type="button" @click="addRow" class="bg-green-600 text-white px-3 py-2 rounded text-sm">
                                     + Article manuel
                                 </button>
                             </div>
                         </div>
 
-                        <div v-for="(article, index) in marcheForm.articles" :key="index" class="border rounded-lg p-4 mb-4">
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Article *</label>
-                                    <select v-model="article.article_id" required @change="onArticleChange(index)"
-                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                        <option value="">Sélectionnez...</option>
-                                        <option v-for="art in articles" :key="art.id" :value="art.id">
-                                            {{ art.reference }} - {{ art.designation }}
-                                        </option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Quantité *</label>
-                                    <input v-model="article.quantite_commandee" type="number" step="0.01" min="0.01" required
-                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">TVA *</label>
-                                    <select v-model="article.taux_tva" required
-                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                        <option v-for="taux in tauxTVA" :key="taux" :value="taux">
-                                            {{ getTvaLabel(taux) }}
-                                        </option>
-                                    </select>
-                                </div>
-                                <div class="flex items-end">
-                                    <button type="button" @click="removeArticle(index)" 
-                                        class="text-red-600 hover:text-red-800 text-sm">
-                                        Supprimer
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div v-if="article.article_id" class="mt-3 text-sm text-gray-600">
-                                <template v-if="getArticle(article.article_id)">
-                                    Unité: {{ getArticle(article.article_id).unite_mesure }} | 
-                                    Catégorie: {{ getArticle(article.article_id).categorie?.nom || 'N/A' }} |
-                                    Stock: {{ getArticle(article.article_id).quantite_stock || 0 }}
-                                </template>
-                            </div>
+                        <div
+                        v-for="(row, index) in marcheForm.articles"
+                        :key="index"
+                        class="relative mb-4 border p-4 rounded-lg bg-gray-50 flex gap-2"
+                        >
+                        <!-- Article Search Input -->
+                         <div class="relative">
+                            <label class="block text-sm font-medium mb-1">Article</label>
+                             <input
+                            type="text"
+                            v-model="row.search"
+                            placeholder="Rechercher un article..."
+                            @focus="row.dropdownOpen = true"
+                            @blur="closeIdle(index)"
+                            class="w-full border-gray-300 rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+
+                       
+                            <!-- Dropdown -->
+                            <ul
+                                v-if="row.dropdownOpen && filteredArticles(row.search).length"
+                                class="absolute w-full z-10 bg-white border border-gray-300 rounded-md mt-1 shadow-lg"
+                                style="max-height: 200px; overflow-y: auto;"
+                            >
+                                <li
+                                v-for="article in filteredArticles(row.search)"
+                                :key="article.id"
+                                @mousedown.prevent="onArticleSelect(index, article)"
+                                class="px-3 py-2 hover:bg-indigo-200 cursor-pointer"
+                                >
+                                {{ article.designation }}
+                                </li>
+                            </ul>
                         </div>
+                        <!-- Quantité -->
+                        <div class="">
+                            <label class="block text-sm font-medium mb-1">Quantité {{ row.unite_mesure ?`(${row.unite_mesure})`: '' }}</label>
+                            <input
+                            type="number"
+                            v-model.number="row.quantite_commandee"
+                            min="1"
+                            class="w-full border-gray-300 rounded-lg p-2"
+                            />
+                        </div>
+
+                        <!-- Taux TVA -->
+                        <div class="min-w-[160px]">
+                            <label class="block text-sm font-medium text-gray-700">TVA</label>
+                            <select v-model="row.taux_tva" required
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                <option v-for="taux in tauxTVA" :key="taux" :value="taux">
+                                    {{ getTvaLabel(taux) }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="text-white bg-red-500 text-sm px-3 py-2 rounded self-center ms-auto"
+                            @click="removeRow(index)"
+                        >
+                            Supprimer
+                        </button>
+                        </div>
+
+                        <Dump :data="marcheForm.data()" />
 
                         <div v-if="marcheForm.articles.length === 0" class="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
                             <DocumentTextIcon class="mx-auto h-12 w-12 text-gray-400" />
@@ -749,6 +773,8 @@ import { ModalLink } from '@inertiaui/modal-vue';
 
 import InputError from '@/Components/InputError.vue';
 import CreateExportModal from './CreateExportModal.vue';
+import Dump from '@/Components/Dump.vue';
+import { getBonCommandeStatutInfo } from '@/Utils/labels';
 
 // Props avec valeurs par défaut pour éviter les erreurs
 const props = defineProps({
@@ -1022,22 +1048,48 @@ const closeAllForms = () => {
 const resetFilters = () => {
     filters.value = {
         statut: '',
-        categorie_principale_id: '',
+        categorie_id: '',
         date_limite: '',
         reference: '',
     };
 };
 
 
+const filteredArticles = (search) => {
+  if (!search) return []
+  return props.articles.filter((a) =>
+    a.designation.toLowerCase().includes(search.toLowerCase())
+  )
+}
+
+// Select article
+function onArticleSelect(index, article) {
+  const row = marcheForm.articles[index]
+  row.article_id = article.id
+  row.search = article.designation
+  row.dropdownOpen = false
+  row.unite_mesure = article.unite_mesure
+}
 
 
-const addArticle = () => {
-    marcheForm.articles.push({
-        article_id: '',
-        quantite_commandee: 1,
-        taux_tva: 20,
-    });
-};
+
+function addRow() {
+  marcheForm.articles.push({
+    article_id: null,
+    search: '',
+    quantite_commandee: 1,
+    taux_tva: 0,
+    dropdownOpen: false,
+  })
+}
+
+function removeRow(index) {
+  marcheForm.articles.splice(index, 1)
+}
+
+function closeIdle(index) {
+  setTimeout(() => (marcheForm.articles[index].dropdownOpen = false), 150)
+}
 
 const removeArticle = (index) => {
     marcheForm.articles.splice(index, 1);
@@ -1066,6 +1118,9 @@ const onArticleChange = (index) => {
     if (selectedArticle && selectedArticle.taux_tva) {
         marcheForm.articles[index].taux_tva = selectedArticle.taux_tva;
     }
+
+    formRows.value[index].search = selectedArticle.designation
+    formRows.value[index].dropdownOpen = false
 };
 
 const onStatutChange = () => {
@@ -1134,7 +1189,13 @@ const calculateArticleMontants = (index) => {
     statutForm.articles[index] = { ...articleForm };
 };
 const submitMarcheForm = () => {
-    marcheForm.post(route('bon-commandes.store'), {
+    const payload = marcheForm.articles.map(({ article_id, quantite_commandee, taux_tva }) => ({
+        article_id,
+        quantite_commandee,
+        taux_tva,
+    }));
+
+    marcheForm.transform((data) => ({...data, articles: payload})).post(route('bon-commandes.store'), {
         onSuccess: () => {
             closeAllForms();
             showToast('Marché créé avec succès', 3000);
@@ -1274,27 +1335,6 @@ const downloadPdf = (marche) => {
     const url = route('bon-commandes.pdf', { marche: marche.id });
     window.open(url, '_blank');
 };
-const getStatutLabel = (statut) => {
-    const labels = {
-        cree: 'Créé',
-        attente_livraison: 'En attente livraison',
-        livre_completement: 'Livré complètement',
-        livre_partiellement: 'Livré partiellement',
-        annule: 'Annulé',
-    };
-    return labels[statut] || statut;
-};
-
-const getStatutBadgeClass = (statut) => {
-    const classes = {
-        cree: 'bg-blue-100 text-blue-800',
-        attente_livraison: 'bg-yellow-100 text-yellow-800',
-        livre_completement: 'bg-green-100 text-green-800',
-        livre_partiellement: 'bg-orange-100 text-orange-800',
-        annule: 'bg-red-100 text-red-800',
-    };
-    return classes[statut] || 'bg-gray-100 text-gray-800';
-};
 
 const formatDate = (date) => {
     if (!date) return '-';
@@ -1358,6 +1398,12 @@ const formatFileSize = (bytes) => {
 onMounted(() => {
     console.log('Component mounted');
 });
+
+
+const formRows = ref([]);
+
+
+
 </script>
 
 <style scoped>

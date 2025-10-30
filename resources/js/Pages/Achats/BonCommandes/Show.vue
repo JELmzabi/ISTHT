@@ -31,7 +31,7 @@
         <div>
             <p class="flex items-center">
                 <h1 class="text-2xl font-bold text-gray-900">Marché</h1>
-                <span class="ms-4 px-2 py-1 text-xs rounded-full" :class="getStatutBadgeClass(marche.statut)">{{ getStatutLabel(marche.statut)}}</span>
+                <span class="ms-4 px-2 py-1 text-xs rounded-full" :class="getBonCommandeStatutInfo(marche.statut).color">{{ getBonCommandeStatutInfo(marche.statut).label }}</span>
             </p>
           <p class="text-gray-600 mt-1">Référence: {{ marche.reference }}</p>
         </div>
@@ -45,6 +45,7 @@
     <!-- Informations fournisseur et dates -->
     <div class="px-6 py-4 border-b border-gray-200">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Fournisseur -->
         <div>
           <h3 class="text-lg font-semibold text-gray-900 mb-2">Fournisseur</h3>
           <div class="space-y-1">
@@ -52,14 +53,38 @@
             <p class="text-gray-700"><span class="font-medium">Contact:</span> {{ marche.fournisseur?.contact || 'N/A' }}</p>
           </div>
         </div>
+
+        <!-- Informations Bon de Commande -->
         <div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-2">Informations</h3>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Informations du Marché</h3>
           <div class="space-y-1">
-            <p class="text-gray-700"><span class="font-medium">Catégorie:</span> {{ marche.categorie }}</p>
-            <p class="text-gray-700"><span class="font-medium">Date de debut:</span> {{ formatDate(marche.date_debut) }}</p>
-            <p class="text-gray-700"><span class="font-medium">Date de fin:</span> {{ formatDate(marche.date_fin) }}</p>
-            <p class="text-gray-700"><span class="font-medium">Commande pour le:</span> {{ formatDate(marche.date_mise_ligne) }}</p>
-            <p class="text-gray-700"><span class="font-medium">Date limite réception:</span> {{ formatDate(marche.date_limite_reception) }}</p>
+            <p class="text-gray-700">
+              <span class="font-medium">Catégorie:</span> {{ marche.categorie }}
+            </p>
+            <p class="text-gray-700">
+              <span class="font-medium">Date de début:</span> {{ formatDate(marche.date_debut) }}
+            </p>
+            <p class="text-gray-700">
+              <span class="font-medium">Date de fin:</span> {{ formatDate(marche.date_fin) }}
+            </p>
+            <p class="text-gray-700">
+              <span class="font-medium">Commande pour le:</span> {{ formatDate(marche.date_mise_ligne) }}
+            </p>
+            <p class="text-gray-700">
+              <span class="font-medium">Date limite réception:</span> {{ formatDate(marche.date_limite_reception) }}
+            </p>
+            
+            <!-- Afficher infos d'annulation si annulé -->
+            <div v-if="marche.statut === 'annule'" class="mt-3 p-3 border border-red-200 rounded-lg bg-red-50">
+              <p class="text-sm text-red-700">
+                <span class="font-semibold">Date d’annulation:</span>
+                {{ formatDate(marche.annule_at) || 'Non spécifiée' }}
+              </p>
+              <p class="text-sm text-red-700 mt-1">
+                <span class="font-semibold">Raison:</span>
+                {{ marche.reason_annulation || 'Aucune raison fournie' }}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -140,13 +165,13 @@
       </div>
     </div>
     <div v-else class="bg-red-50 border border-red-200 rounded-md p-4">
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                        </svg>
-                        <h4 class="text-red-800 font-semibold">Ce Marché a été annulé ou vient d’être créé.</h4>
-                    </div>
-                </div>
+              <div class="flex items-center">
+                  <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                  </svg>
+                  <h4 class="text-red-800 font-semibold">Ce Marché a été annulé ou vient d’être créé.</h4>
+              </div>
+          </div>
     </div>
   </AuthenticatedLayout>
 </template>
@@ -156,6 +181,8 @@ import { computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { ArrowLeftIcon, DocumentArrowDownIcon } from '@heroicons/vue/24/outline';
+import { getBonCommandeStatutInfo } from '@/Utils/labels';
+import Dump from '@/Components/Dump.vue';
 
 // Props
 const props = defineProps({

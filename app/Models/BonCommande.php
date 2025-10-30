@@ -17,6 +17,7 @@ class BonCommande extends Model
         'nature_prestation_id', 'fournisseur_id', 'statut', 'categorie_id',
         'date_mise_ligne', 'date_limite_reception',
         'notes', 'created_by', 'pieces_jointes', 'date_debut', 'date_fin',
+        'reason_annulation', 'annule_at'
     ];
 
     protected $casts = [

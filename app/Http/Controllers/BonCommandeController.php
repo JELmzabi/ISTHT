@@ -35,8 +35,7 @@ class BonCommandeController extends Controller
 {
     // CORRECTION : Charger toutes les relations nécessaires pour les articles avec leurs détails
     $query = BonCommande::with([
-        'categoriePrincipale', 
-        'naturePrestation', 
+        'categorie',
         'fournisseur', 
         'articles.article.categorie',
         'articles.article.categoriePrincipale',
@@ -48,8 +47,8 @@ class BonCommandeController extends Controller
         $query->where('statut', $request->statut);
     }
 
-    if ($request->has('categorie_principale_id') && $request->categorie_principale_id) {
-        $query->where('categorie_principale_id', $request->categorie_principale_id);
+    if ($request->has('categorie_id') && $request->categorie_id) {
+        $query->where('categorie_id', $request->categorie_id);
     }
 
     if ($request->has('date_limite') && $request->date_limite) {
@@ -232,21 +231,21 @@ private function getStats()
                 ]);
             }
 
-            try {
-                HistoriqueStatutBc::create([
-                    'bon_commande_id' => $bonCommande->id,
-                    'ancien_statut' => 'nouveau',
-                    'nouveau_statut' => 'cree',
-                    'raison' => 'Création du bon de commande',
-                    'changed_by' => auth()->id(),
-                ]);
-            } catch (\Exception $e) {
-                Log::error('Erreur création historique:', ['error' => $e->getMessage()]);
-            }
+            // try {
+            //     HistoriqueStatutBc::create([
+            //         'bon_commande_id' => $bonCommande->id,
+            //         'ancien_statut' => 'nouveau',
+            //         'nouveau_statut' => 'cree',
+            //         'raison' => 'Création du bon de commande',
+            //         'changed_by' => auth()->id(),
+            //     ]);
+            // } catch (\Exception $e) {
+            //     Log::error('Erreur création historique:', ['error' => $e->getMessage()]);
+            // }
         });
 
         return redirect()->route('bon-commandes.index')
-            ->with('success', 'Bon de commande créé avec succès.');
+            ->with('success', 'Le Marché créé avec succès.');
     }
 
  public function updateStatut(Request $request, BonCommande $bonCommande)
@@ -262,11 +261,12 @@ private function getStats()
             'raison' => 'required|string|min:20',
         ]);
 
-        if (!$bonCommande->peutEtreAnnule()) {
+        if (!$bonCommande->statut == 'cree' || !$bonCommande->statut == 'attente_livraison') {
             return back()->withErrors([
                 'statut' => 'Impossible d\'annuler un bon de commande avec le statut "' . $bonCommande->statut_formate . '".'
             ]);
         }
+
     } else {
         // CORRECTION : Validation améliorée pour les prix
         $request->validate([
@@ -288,37 +288,38 @@ private function getStats()
 
         if ($request->statut === 'annule') {
             $bonCommande->update([
-                'statut' => 'annule',
-                'fournisseur_id' => null,
+                'statut' => BonCommande::STATUT_ANNULE,
+                'annule_at' => now(),
+                'reason_annulation' => $request->raison,
             ]);
-            
+                
             // CORRECTION : Réinitialiser les prix via la relation articles
-            foreach ($bonCommande->articles as $articlePivot) {
-                $articlePivot->update([
-                    'prix_unitaire_ht' => null,
-                    'montant_ht' => null,
-                    'montant_tva' => null,
-                    'montant_ttc' => null,
-                ]);
-            }
+            // foreach ($bonCommande->articles as $articlePivot) {
+            //     $articlePivot->update([
+            //         'prix_unitaire_ht' => null,
+            //         'montant_ht' => null,
+            //         'montant_tva' => null,
+            //         'montant_ttc' => null,
+            //     ]);
+            // }
         } else {
             // METTRE À JOUR LES PRIX
             $this->updateArticlesPrix($bonCommande, $request);
             
             $bonCommande->update([
-                'statut' => $request->statut,
+                'statut' => BonCommande::STATUT_ATTENTE_LIVRAISON,
                 'fournisseur_id' => $request->fournisseur_id,
             ]);
         }
 
         // CORRECTION : Créer l'historique avec raison
-        HistoriqueStatutBc::create([
-            'bon_commande_id' => $bonCommande->id,
-            'ancien_statut' => $ancienStatut,
-            'nouveau_statut' => $request->statut,
-            'raison' => $request->raison ?? ($request->statut === 'annule' ? 'Annulation du bon de commande' : 'Mise à jour du statut avec attribution fournisseur'),
-            'changed_by' => auth()->id(),
-        ]);
+        // HistoriqueStatutBc::create([
+        //     'bon_commande_id' => $bonCommande->id,
+        //     'ancien_statut' => $ancienStatut,
+        //     'nouveau_statut' => $request->statut,
+        //     'raison' => $request->raison ?? ($request->statut === 'annule' ? 'Annulation du bon de commande' : 'Mise à jour du statut avec attribution fournisseur'),
+        //     'changed_by' => auth()->id(),
+        // ]);
 
         DB::commit();
 
