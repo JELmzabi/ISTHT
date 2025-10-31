@@ -10,6 +10,7 @@ use App\Http\Controllers\BonCommandeController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\BonReceptionController;
 use App\Http\Controllers\CardexController;
+use App\Http\Controllers\ChefCommandeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\EntreeStockController;
@@ -225,6 +226,12 @@ Route::post('/entrees/{entreeStock}/annuler', [EntreeStockController::class, 'an
     Route::put('/sorties/{sortieStock}/approve', [SortieStockController::class, 'approve'])->name('sortie-stocks.approve');
     Route::put('/sorties/{sortieStock}/reject', [SortieStockController::class, 'reject'])->name('sortie-stocks.reject');
     Route::put('/sorties/{sortieStock}/livrer', [SortieStockController::class, 'livrer'])->name('sortie-stocks.livrer');
+
+    #### Chef Bon Commandes ####
+    Route::get('/chef-commandes', [ChefCommandeController::class, 'index'])->name('chef-commandes.index');
+    Route::get('/chef-commandes/create', [ChefCommandeController::class, 'create'])->name('chef-commandes.create');
+    Route::post('/chef-commandes', [ChefCommandeController::class, 'store'])->name('chef-commandes.store');
+    
     
     Route::get('/rapports', [RapportsController::class, 'index'])->name('rapports.index');
 
